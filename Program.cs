@@ -42,17 +42,13 @@ namespace SteamFriendsPatcher
         // original friends.css age
         public static DateTime friendscssage;
 
-        // object to lock when writing to console to maintain thread safety
+        // objects to lock to maintain thread safety
         private static readonly object MessageLock = new object();
-
-        // object to lock when starting scanner to maintain thread safety
         private static readonly object ScannerLock = new object();
-
-        // object to lock when checking for updates to maintain thread safety
         private static readonly object UpdateScannerLock = new object();
-
-        // object to lock when downloading friends.css to maintain thread safety
         private static readonly object GetFriendsCSSLock = new object();
+        private static readonly object ToggleScannerButtonLock = new object();
+        private static readonly object ToggleForceScannerButtonLock = new object();
 
         private static bool UpdateChecker()
         {
@@ -129,18 +125,16 @@ namespace SteamFriendsPatcher
             Print("Close and reopen your Steam friends window to see changes.", "Success");
         }
 
-        public static void FindCacheFile(bool startupRun = false)
+        public static void FindCacheFile(bool forceUpdate = false)
         {
             bool preScannerStatus = scannerActive;
             scannerActive = false;
-            if (startupRun)
-            {
-                ToggleForceScanButtonEnabled(false);
-                ToggleScanButtonEnabled(false);
-            }
+            ToggleForceScanButtonEnabled(false);
+            ToggleScanButtonEnabled(false);
+
             string cachepath = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Steam\\htmlcache\\Cache\\");
             Print("Force scan started.");
-            GetLatestFriendsCSS();
+            GetLatestFriendsCSS(forceUpdate);
             Print("Finding list of possible cache files...");
             if (!Directory.Exists(cachepath))
             {
@@ -208,7 +202,7 @@ namespace SteamFriendsPatcher
             ToggleScanButtonEnabled(true);
             if (preScannerStatus)
             {
-                StartScannerTask();
+                StartCacheScannerTaskAsync();
             }
             return;
         }
@@ -346,7 +340,7 @@ namespace SteamFriendsPatcher
             }
         }
 
-        private static void StartScanner(bool firstRun = false)
+        private static void StartCacheScanner(bool firstRun = false)
         {
             lock (ScannerLock)
             {
@@ -363,6 +357,8 @@ namespace SteamFriendsPatcher
 
                 scannerActive = true;
 
+                StartCrashScannerTaskAsync();
+
                 using (FileSystemWatcher watcher = new FileSystemWatcher())
                 {
                     watcher.Path = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Steam\\htmlcache\\Cache\\");
@@ -370,7 +366,7 @@ namespace SteamFriendsPatcher
                                          | NotifyFilters.LastWrite
                                          | NotifyFilters.FileName;
                     watcher.Filter = "f_*";
-                    watcher.Created += new FileSystemEventHandler(Watcher_Created);
+                    watcher.Created += new FileSystemEventHandler(CacheWatcher_Created);
 
                     watcher.EnableRaisingEvents = true;
 
@@ -387,7 +383,7 @@ namespace SteamFriendsPatcher
                     ToggleForceScanButtonEnabled(false);
 
                     watcher.EnableRaisingEvents = false;
-                    watcher.Created -= new FileSystemEventHandler(Watcher_Created);
+                    watcher.Created -= new FileSystemEventHandler(CacheWatcher_Created);
                     watcher.Dispose();
 
                     Print("Watcher stopped.");
@@ -398,7 +394,7 @@ namespace SteamFriendsPatcher
             return;
         }
 
-        private static void Watcher_Created(object sender, FileSystemEventArgs e)
+        private static void CacheWatcher_Created(object sender, FileSystemEventArgs e)
         {
             Print($"New file found: {e.Name}", "Debug");
             byte[] cachefile, decompressedcachefile;
@@ -413,10 +409,11 @@ namespace SteamFriendsPatcher
             }
             catch
             {
-                Print($"Error opening file {e.Name}, retrying.", "Debug");
+                Task.Delay(2000).Wait();
                 if (File.Exists(e.FullPath))
                 {
-                    Watcher_Created(sender, e);
+                    Print($"Error opening file {e.Name}, retrying.", "Debug");
+                    CacheWatcher_Created(sender, e);
                 }
                 return;
             }
@@ -442,18 +439,57 @@ namespace SteamFriendsPatcher
             return;
         }
 
-        public static void StartCheckForUpdateTask()
+        private static void StartCrashScanner()
         {
-            Task checkForUpdate = new Task(() => { UpdateChecker(); });
-            checkForUpdate.Start();
-            return;
+            using (FileSystemWatcher watcher = new FileSystemWatcher())
+            {
+                watcher.Path = steamDir;
+                watcher.NotifyFilter = NotifyFilters.LastAccess
+                                     | NotifyFilters.LastWrite
+                                     | NotifyFilters.FileName;
+                watcher.Filter = ".crash";
+                watcher.Created += new FileSystemEventHandler(CrashWatcher_Event);
+                watcher.Changed += new FileSystemEventHandler(CrashWatcher_Event);
+
+                watcher.EnableRaisingEvents = true;
+
+                Print("Crash scanner started.", "Debug");
+
+                while (scannerActive) ;
+
+                watcher.EnableRaisingEvents = false;
+                watcher.Created -= new FileSystemEventHandler(CrashWatcher_Event);
+                watcher.Changed -= new FileSystemEventHandler(CrashWatcher_Event);
+                watcher.Dispose();
+
+                Print("Crash scanner stopped.", "Debug");
+            }
         }
 
-        public static void StartScannerTask(bool firstStart = false)
+        private static void CrashWatcher_Event(object sender, FileSystemEventArgs e)
         {
-            Task startScanner = new Task(() => { StartScanner(firstStart); });
-            startScanner.Start();
-            return;
+            Print("Steam start detected.");
+            GetLatestFriendsCSS(true);
+        }
+
+        public static async void StartCrashScannerTaskAsync()
+        {
+            await Task.Run(() => StartCrashScanner());
+        }
+
+        public static async void StartCheckForUpdateTaskAsync()
+        {
+            await Task.Run(() => UpdateChecker());
+        }
+
+        public static async void StartCacheScannerTaskAsync()
+        {
+            await Task.Run(() => StartCacheScanner());
+        }
+
+        public static async void StartForceScanTaskAsync(bool forceUpdate = false)
+        {
+            await Task.Run(() => FindCacheFile(forceUpdate));
         }
 
         internal static byte[] Decompress(byte[] gzip)
@@ -498,12 +534,33 @@ namespace SteamFriendsPatcher
 
         private static void ToggleScanButtonEnabled(bool status, string text = null)
         {
-            MainWindow.scanButton.Dispatcher.Invoke(() => MainWindow.scanButton.Content = text ?? MainWindow.scanButton.Content);
-            MainWindow.scanButton.Dispatcher.Invoke(() => MainWindow.scanButton.IsEnabled = status);
+            lock (ToggleScannerButtonLock)
+            {
+                //if (!MainWindow.scanButton.Dispatcher.CheckAccess())
+                //{
+                    MainWindow.scanButton.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButton.Content = text ?? MainWindow.scanButton.Content; });
+                    MainWindow.scanButton.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButton.IsEnabled = status; });
+                //}
+                //else
+                //{
+                //    MainWindow.scanButton.Content = text ?? MainWindow.scanButton.Content;
+                //    MainWindow.scanButton.IsEnabled = status;
+                //}
+            }
         }
         private static void ToggleForceScanButtonEnabled(bool status)
         {
-            MainWindow.forceScanButton.Dispatcher.Invoke(() => MainWindow.forceScanButton.IsEnabled = status);
+            lock (ToggleForceScannerButtonLock)
+            {
+                //if (!MainWindow.scanButton.Dispatcher.CheckAccess())
+                //{
+                    MainWindow.forceScanButton.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.forceScanButton.IsEnabled = status; });
+                //}
+                //else
+                //{
+                //    MainWindow.forceScanButton.IsEnabled = status;
+                //}
+            }
         }
 
         public static void Print(string message = null, string messagetype = "Info", bool newline = true)
@@ -517,8 +574,7 @@ namespace SteamFriendsPatcher
             }
             lock (MessageLock)
             {
-                MainWindow.outputRTB.Dispatcher.BeginInvoke(new Action(() =>
-                {
+                MainWindow.outputRTB.Dispatcher.Invoke((MethodInvoker)delegate {
                     TextRange tr;
                     // Date & Time
                     tr = new TextRange(MainWindow.outputRTB.Document.ContentEnd, MainWindow.outputRTB.Document.ContentEnd)
@@ -564,7 +620,7 @@ namespace SteamFriendsPatcher
                     MainWindow.outputRTB.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#ffffff"));
 
                     MainWindow.outputRTB.ScrollToEnd();
-                }));
+                });
             }
         }
 

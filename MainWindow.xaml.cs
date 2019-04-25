@@ -39,20 +39,6 @@ namespace SteamFriendsPatcher
             forceScanButton = this.forceCheckButton;
             outputter = new TextBoxOutputter(output);
             Console.SetOut(outputter);
-            if (Properties.Settings.Default.saveLastWindowSize)
-            {
-                mainWindow.Width = Properties.Settings.Default.windowWidth;
-                mainWindow.Height = Properties.Settings.Default.windowHeight;
-            }
-
-            if (Properties.Settings.Default.startMinimized)
-            {
-                mainWindow.WindowState = WindowState.Minimized;
-                if (Properties.Settings.Default.minimizeToTray)
-                {
-                    mainWindow.Hide();
-                }
-            }
             Task task = new Task(() => { setupTask(); });
             task.Start();
             setupTrayIcon();
@@ -62,7 +48,7 @@ namespace SteamFriendsPatcher
         {
             if (Properties.Settings.Default.checkForUpdates)
             {
-                Program.StartCheckForUpdateTask();
+                Program.StartCheckForUpdateTaskAsync();
             }
 
             if (Properties.Settings.Default.forceScanOnStartup)
@@ -72,7 +58,7 @@ namespace SteamFriendsPatcher
 
             if (Properties.Settings.Default.autoScanOnStartup)
             {
-                Program.StartScannerTask(true);
+                Program.StartCacheScannerTaskAsync();
             }
         }
 
@@ -143,9 +129,7 @@ namespace SteamFriendsPatcher
         {
             if (!Program.scannerActive)
             {
-                scanButton.IsEnabled = false;
-                forceCheckButton.IsEnabled = false;
-                Program.StartScannerTask();
+                Program.StartCacheScannerTaskAsync();
             }
             else
             {
@@ -155,17 +139,7 @@ namespace SteamFriendsPatcher
 
         private void ForceCheckButton_Click(object sender, RoutedEventArgs e)
         {
-            forceCheckButton.IsEnabled = false;
-            scanButton.IsEnabled = false;
-            Task task = new Task(() => { TriggerForceCheck(); });
-            task.Start();
-            return;
-        }
-
-        private static void TriggerForceCheck()
-        {
-            Program.GetLatestFriendsCSS(true);
-            Program.FindCacheFile();
+            Program.StartForceScanTaskAsync(true);
         }
 
         private void Main_SizeChanged(object sender, SizeChangedEventArgs e)

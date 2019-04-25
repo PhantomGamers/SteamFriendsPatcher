@@ -28,6 +28,22 @@ namespace SteamFriendsPatcher
             else
             {
                 new MainWindow();
+
+                if (SteamFriendsPatcher.Properties.Settings.Default.saveLastWindowSize)
+                {
+                    MainWindow.Width = SteamFriendsPatcher.Properties.Settings.Default.windowWidth;
+                    MainWindow.Height = SteamFriendsPatcher.Properties.Settings.Default.windowHeight;
+                }
+
+                if (SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
+                {
+                    MainWindow.WindowState = WindowState.Minimized;
+                    if (SteamFriendsPatcher.Properties.Settings.Default.minimizeToTray)
+                    {
+                        return;
+                    }
+                }
+
                 MainWindow.Show();
             }
         }
