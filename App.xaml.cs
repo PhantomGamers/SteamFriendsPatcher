@@ -29,6 +29,9 @@ namespace SteamFriendsPatcher
             {
                 new MainWindow();
 
+                Version ver = Assembly.GetEntryAssembly().GetName().Version;
+                MainWindow.Title = $"Steam Friends Patcher v{ver.Major}.{ver.Minor}{(ver.Build > 0 ? ("." + ver.Build) : string.Empty)}";
+
                 if (SteamFriendsPatcher.Properties.Settings.Default.saveLastWindowSize)
                 {
                     MainWindow.Width = SteamFriendsPatcher.Properties.Settings.Default.windowWidth;
@@ -43,7 +46,6 @@ namespace SteamFriendsPatcher
                         return;
                     }
                 }
-
                 MainWindow.Show();
             }
         }

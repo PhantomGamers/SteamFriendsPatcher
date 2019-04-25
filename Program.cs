@@ -52,6 +52,7 @@ namespace SteamFriendsPatcher
 
         private static bool UpdateChecker()
         {
+            return false;
             lock (UpdateScannerLock)
             {
                 Print("Checking for updates...");
@@ -377,7 +378,7 @@ namespace SteamFriendsPatcher
                     ToggleScanButtonEnabled(true);
                     ToggleForceScanButtonEnabled(true);
 
-                    while (scannerActive) ;
+                    while (scannerActive) Task.Delay(500).Wait();
 
                     ToggleScanButtonEnabled(false);
                     ToggleForceScanButtonEnabled(false);
@@ -455,7 +456,7 @@ namespace SteamFriendsPatcher
 
                 Print("Crash scanner started.", "Debug");
 
-                while (scannerActive) ;
+                while (scannerActive) Task.Delay(500).Wait();
 
                 watcher.EnableRaisingEvents = false;
                 watcher.Created -= new FileSystemEventHandler(CrashWatcher_Event);
