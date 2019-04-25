@@ -129,12 +129,15 @@ namespace SteamFriendsPatcher
             Print("Close and reopen your Steam friends window to see changes.", "Success");
         }
 
-        public static void FindCacheFile()
+        public static void FindCacheFile(bool startupRun = false)
         {
             bool preScannerStatus = scannerActive;
             scannerActive = false;
-            ToggleForceScanButtonEnabledAsync(false);
-            ToggleScanButtonEnabledAsync(false);
+            if (startupRun)
+            {
+                ToggleForceScanButtonEnabled(false);
+                ToggleScanButtonEnabled(false);
+            }
             string cachepath = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Steam\\htmlcache\\Cache\\");
             Print("Force scan started.");
             GetLatestFriendsCSS();
@@ -201,8 +204,8 @@ namespace SteamFriendsPatcher
             }
 
         ResetButtons:
-            ToggleForceScanButtonEnabledAsync(true);
-            ToggleScanButtonEnabledAsync(true);
+            ToggleForceScanButtonEnabled(true);
+            ToggleScanButtonEnabled(true);
             if (preScannerStatus)
             {
                 StartScannerTask();
@@ -343,7 +346,7 @@ namespace SteamFriendsPatcher
             }
         }
 
-        private static void StartScanner()
+        private static void StartScanner(bool firstRun = false)
         {
             lock (ScannerLock)
             {
@@ -352,7 +355,11 @@ namespace SteamFriendsPatcher
                     return;
                 }
 
-                ToggleScanButtonEnabledAsync(false, "Stop Scanning");
+                if (!firstRun)
+                {
+                    ToggleScanButtonEnabled(false, "Stop Scanning");
+                    ToggleForceScanButtonEnabled(false);
+                }
 
                 scannerActive = true;
 
@@ -369,20 +376,23 @@ namespace SteamFriendsPatcher
 
                     Print("Watcher started.");
 
-                    ToggleScanButtonEnabledAsync(true);
-
                     GetLatestFriendsCSS();
+
+                    ToggleScanButtonEnabled(true);
+                    ToggleForceScanButtonEnabled(true);
 
                     while (scannerActive) ;
 
-                    ToggleScanButtonEnabledAsync(false);
+                    ToggleScanButtonEnabled(false);
+                    ToggleForceScanButtonEnabled(false);
 
                     watcher.EnableRaisingEvents = false;
                     watcher.Created -= new FileSystemEventHandler(Watcher_Created);
                     watcher.Dispose();
 
                     Print("Watcher stopped.");
-                    ToggleScanButtonEnabledAsync(true, "Start Scanning");
+                    ToggleScanButtonEnabled(true, "Start Scanning");
+                    ToggleForceScanButtonEnabled(true);
                 }
             }
             return;
@@ -439,9 +449,9 @@ namespace SteamFriendsPatcher
             return;
         }
 
-        public static void StartScannerTask()
+        public static void StartScannerTask(bool firstStart = false)
         {
-            Task startScanner = new Task(() => { StartScanner(); });
+            Task startScanner = new Task(() => { StartScanner(firstStart); });
             startScanner.Start();
             return;
         }
@@ -486,14 +496,14 @@ namespace SteamFriendsPatcher
             return b1.Length == b2.Length && Memcmp(b1, b2, b1.Length) == 0;
         }
 
-        private static async void ToggleScanButtonEnabledAsync(bool status, string text = null)
+        private static void ToggleScanButtonEnabled(bool status, string text = null)
         {
-            await MainWindow.scanButton.Dispatcher.InvokeAsync(() => MainWindow.scanButton.Content = text ?? MainWindow.scanButton.Content);
-            await MainWindow.scanButton.Dispatcher.InvokeAsync(() => MainWindow.scanButton.IsEnabled = status);
+            MainWindow.scanButton.Dispatcher.Invoke(() => MainWindow.scanButton.Content = text ?? MainWindow.scanButton.Content);
+            MainWindow.scanButton.Dispatcher.Invoke(() => MainWindow.scanButton.IsEnabled = status);
         }
-        private static async void ToggleForceScanButtonEnabledAsync(bool status)
+        private static void ToggleForceScanButtonEnabled(bool status)
         {
-            await MainWindow.forceScanButton.Dispatcher.InvokeAsync(() => MainWindow.forceScanButton.IsEnabled = status);
+            MainWindow.forceScanButton.Dispatcher.Invoke(() => MainWindow.forceScanButton.IsEnabled = status);
         }
 
         public static void Print(string message = null, string messagetype = "Info", bool newline = true)

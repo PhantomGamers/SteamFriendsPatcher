@@ -67,12 +67,12 @@ namespace SteamFriendsPatcher
 
             if (Properties.Settings.Default.forceScanOnStartup)
             {
-                Program.FindCacheFile();
+                Program.FindCacheFile(true);
             }
 
             if (Properties.Settings.Default.autoScanOnStartup)
             {
-                Program.StartScannerTask();
+                Program.StartScannerTask(true);
             }
         }
 
@@ -143,6 +143,8 @@ namespace SteamFriendsPatcher
         {
             if (!Program.scannerActive)
             {
+                scanButton.IsEnabled = false;
+                forceCheckButton.IsEnabled = false;
                 Program.StartScannerTask();
             }
             else
@@ -153,8 +155,11 @@ namespace SteamFriendsPatcher
 
         private void ForceCheckButton_Click(object sender, RoutedEventArgs e)
         {
+            forceCheckButton.IsEnabled = false;
+            scanButton.IsEnabled = false;
             Task task = new Task(() => { TriggerForceCheck(); });
             task.Start();
+            return;
         }
 
         private static void TriggerForceCheck()
