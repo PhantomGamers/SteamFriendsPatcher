@@ -19,8 +19,6 @@ namespace SteamFriendsPatcher
 {
     class Program
     {
-        public static bool scannerActive = false;
-
         // location of steam directory
         private static string steamDir = FindSteamDir();
 
@@ -42,6 +40,13 @@ namespace SteamFriendsPatcher
         // original friends.css age
         public static DateTime friendscssage;
 
+        // Cache FileSystemWatcher
+        public static FileSystemWatcher cacheWatcher;
+        // Crash FileSystemWatcher
+        public static FileSystemWatcher crashWatcher;
+        public static bool scannerExists = false;
+       
+
         // objects to lock to maintain thread safety
         private static readonly object MessageLock = new object();
         private static readonly object ScannerLock = new object();
@@ -50,7 +55,7 @@ namespace SteamFriendsPatcher
         private static readonly object ToggleScannerButtonLock = new object();
         private static readonly object ToggleForceScannerButtonLock = new object();
 
-        private static bool UpdateChecker()
+        public static bool UpdateChecker()
         {
             return false;
             lock (UpdateScannerLock)
@@ -128,8 +133,8 @@ namespace SteamFriendsPatcher
 
         public static void FindCacheFile(bool forceUpdate = false)
         {
-            bool preScannerStatus = scannerActive;
-            scannerActive = false;
+            bool preScannerStatus = scannerExists;
+            ToggleCacheScanner(false);
             ToggleForceScanButtonEnabled(false);
             ToggleScanButtonEnabled(false);
 
@@ -201,10 +206,7 @@ namespace SteamFriendsPatcher
         ResetButtons:
             ToggleForceScanButtonEnabled(true);
             ToggleScanButtonEnabled(true);
-            if (preScannerStatus)
-            {
-                StartCacheScannerTaskAsync();
-            }
+            if (preScannerStatus) { ToggleCacheScanner(true); }
             return;
         }
 
@@ -341,24 +343,30 @@ namespace SteamFriendsPatcher
             }
         }
 
-        private static void StartCacheScanner(bool firstRun = false)
+        public static void ToggleCacheScanner(bool isEnabled)
         {
             lock (ScannerLock)
             {
-                if (scannerActive)
+                if(scannerExists)
+                {
+                    cacheWatcher.EnableRaisingEvents = isEnabled;
+                    crashWatcher.EnableRaisingEvents = isEnabled;
+                    string buttonText = isEnabled ? "Stop Scanning" : "Start Scanning";
+                    ToggleScanButtonEnabled(true, buttonText);
+                    Print("Cache Watcher " + (isEnabled ? "Started" : "Stopped") + ".");
+                    scannerExists = isEnabled;
+                    return;
+                }
+                else if(!isEnabled)
                 {
                     return;
                 }
 
-                if (!firstRun)
-                {
-                    ToggleScanButtonEnabled(false, "Stop Scanning");
-                    ToggleForceScanButtonEnabled(false);
-                }
+                ToggleScanButtonEnabled(false, "Stop Scanning");
+                ToggleForceScanButtonEnabled(false);
 
-                scannerActive = true;
-
-                StartCrashScannerTaskAsync();
+                
+                StartCrashScanner();
 
                 using (FileSystemWatcher watcher = new FileSystemWatcher())
                 {
@@ -368,27 +376,12 @@ namespace SteamFriendsPatcher
                                          | NotifyFilters.FileName;
                     watcher.Filter = "f_*";
                     watcher.Created += new FileSystemEventHandler(CacheWatcher_Created);
-
-                    watcher.EnableRaisingEvents = true;
-
-                    Print("Watcher started.");
-
-                    GetLatestFriendsCSS();
+                    watcher.EnableRaisingEvents = isEnabled;
+                    cacheWatcher = watcher;
+                    scannerExists = true;
+                    Print("Cache Watcher Started.");
 
                     ToggleScanButtonEnabled(true);
-                    ToggleForceScanButtonEnabled(true);
-
-                    while (scannerActive) Task.Delay(500).Wait();
-
-                    ToggleScanButtonEnabled(false);
-                    ToggleForceScanButtonEnabled(false);
-
-                    watcher.EnableRaisingEvents = false;
-                    watcher.Created -= new FileSystemEventHandler(CacheWatcher_Created);
-                    watcher.Dispose();
-
-                    Print("Watcher stopped.");
-                    ToggleScanButtonEnabled(true, "Start Scanning");
                     ToggleForceScanButtonEnabled(true);
                 }
             }
@@ -454,43 +447,16 @@ namespace SteamFriendsPatcher
 
                 watcher.EnableRaisingEvents = true;
 
+                crashWatcher = watcher;
+
                 Print("Crash scanner started.", "Debug");
-
-                while (scannerActive) Task.Delay(500).Wait();
-
-                watcher.EnableRaisingEvents = false;
-                watcher.Created -= new FileSystemEventHandler(CrashWatcher_Event);
-                watcher.Changed -= new FileSystemEventHandler(CrashWatcher_Event);
-                watcher.Dispose();
-
-                Print("Crash scanner stopped.", "Debug");
             }
         }
 
         private static void CrashWatcher_Event(object sender, FileSystemEventArgs e)
         {
-            Print("Steam start detected.");
-            GetLatestFriendsCSS(true);
-        }
-
-        public static async void StartCrashScannerTaskAsync()
-        {
-            await Task.Run(() => StartCrashScanner());
-        }
-
-        public static async void StartCheckForUpdateTaskAsync()
-        {
-            await Task.Run(() => UpdateChecker());
-        }
-
-        public static async void StartCacheScannerTaskAsync()
-        {
-            await Task.Run(() => StartCacheScanner());
-        }
-
-        public static async void StartForceScanTaskAsync(bool forceUpdate = false)
-        {
-            await Task.Run(() => FindCacheFile(forceUpdate));
+            Print("Steam start detected.", "Debug");
+            GetLatestFriendsCSS();
         }
 
         internal static byte[] Decompress(byte[] gzip)

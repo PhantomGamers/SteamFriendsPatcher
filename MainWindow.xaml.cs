@@ -39,8 +39,7 @@ namespace SteamFriendsPatcher
             forceScanButton = this.forceCheckButton;
             outputter = new TextBoxOutputter(output);
             Console.SetOut(outputter);
-            Task task = new Task(() => { setupTask(); });
-            task.Start();
+            Task.Run(() => setupTask());
             setupTrayIcon();
         }
 
@@ -48,35 +47,25 @@ namespace SteamFriendsPatcher
         {
             if (Properties.Settings.Default.checkForUpdates)
             {
-                Program.StartCheckForUpdateTaskAsync();
+                Task.Run(() => Program.UpdateChecker());
             }
 
             if (Properties.Settings.Default.forceScanOnStartup)
             {
-                Program.FindCacheFile(true);
+                Program.FindCacheFile();
             }
 
             if (Properties.Settings.Default.autoScanOnStartup)
             {
-                Program.StartCacheScannerTaskAsync();
+                Program.ToggleCacheScanner(true);
             }
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            SettingsWindow settingsWindow = SettingsWindow.GetSettingsWindow();
-            if(settingsWindow == null)
-            {
-                settingsWindow = new SettingsWindow
-                {
-                    Owner = this
-                };
-                settingsWindow.Show();
-            }
-            else
-            {
-                settingsWindow.Activate();
-            }
+            SettingsWindow settings = new SettingsWindow();
+            settings.Owner = this;
+            settings.ShowDialog();
         }
 
         private void setupTrayIcon()
@@ -127,19 +116,12 @@ namespace SteamFriendsPatcher
 
         private void ToggleScanButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!Program.scannerActive)
-            {
-                Program.StartCacheScannerTaskAsync();
-            }
-            else
-            {
-                Program.scannerActive = false;
-            }
+            Program.ToggleCacheScanner(!Program.scannerExists);
         }
 
-        private void ForceCheckButton_Click(object sender, RoutedEventArgs e)
+        private async void ForceCheckButton_Click(object sender, RoutedEventArgs e)
         {
-            Program.StartForceScanTaskAsync(true);
+            await Task.Run(() => Program.FindCacheFile(true));
         }
 
         private void Main_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -163,7 +145,7 @@ namespace SteamFriendsPatcher
         private void Main_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             notifyIcon.Visible = false;
-            Program.scannerActive = false;
+            Program.ToggleCacheScanner(false);
         }
     }
 }
