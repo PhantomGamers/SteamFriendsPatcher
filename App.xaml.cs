@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -28,9 +29,8 @@ namespace SteamFriendsPatcher
             else
             {
                 new MainWindow();
-
-                Version ver = Assembly.GetEntryAssembly().GetName().Version;
-                MainWindow.Title = $"Steam Friends Patcher v{ver.Major}.{ver.Minor}{(ver.Build > 0 ? ("." + ver.Build) : string.Empty)}";
+                string ver = ThisAssembly.AssemblyInformationalVersion;
+                MainWindow.Title += $"v{ver.Substring(0, ver.Length - 11)}";
 
                 if (SteamFriendsPatcher.Properties.Settings.Default.saveLastWindowSize)
                 {
