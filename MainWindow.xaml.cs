@@ -68,6 +68,13 @@ namespace SteamFriendsPatcher
             settings.ShowDialog();
         }
 
+        private void AboutButton_Click(object sender, RoutedEventArgs e)
+        {
+            AboutWindow about = new AboutWindow();
+            about.Owner = this;
+            about.ShowDialog();
+        }
+
         private void setupTrayIcon()
         {
             var contextMenu = new System.Windows.Forms.ContextMenu();

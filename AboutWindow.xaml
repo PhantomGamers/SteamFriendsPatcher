@@ -1,0 +1,33 @@
+﻿<Window x:Class="SteamFriendsPatcher.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SteamFriendsPatcher"
+        mc:Ignorable="d"
+        Title="Steam Friends Patcher - About" Background="#FF1E1E1F" Foreground="White" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" WindowStyle="ToolWindow">
+    <Grid Margin="10">
+        <Label x:Name="programName" Content="Steam Friends Patcher " HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18"/>
+        <Label x:Name="authorName" Content="Made by PhantomGamers" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14"/>
+        <Label x:Name="label" Content="Github: " HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <TextBlock HorizontalAlignment="Left" Margin="70,85,0,0" VerticalAlignment="Top">           
+            <Hyperlink NavigateUri="https://github.com/PhantomGamers/SteamFriendsPatcher" RequestNavigate="Hyperlink_RequestNavigate">
+                https://github.com/PhantomGamers/SteamFriendsPatcher
+            </Hyperlink>
+        </TextBlock>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="13,111,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="-0.231,0.057">
+            This utility is designed to allow you to apply themes to the new Steam friends UI.<LineBreak></LineBreak>
+            To use manually, simply click "Force Check," by default this will run when you start the program.<LineBreak></LineBreak>
+            You will be required to do this everytime Valve pushes a new version of the friends.css file used by Steam.<LineBreak></LineBreak>
+            To avoid this, use the "Start Scanner" option and leave the program running.<LineBreak></LineBreak>
+            With the scanner option, whenever a new version of the friends.css is pushed it will automatically be patched.<LineBreak></LineBreak><LineBreak></LineBreak>
+            Recommended options:<LineBreak></LineBreak>
+            * Run On Startup<LineBreak></LineBreak>
+            * Start Minimized<LineBreak></LineBreak>
+            * Minimize To Tray<LineBreak></LineBreak>
+            * Check For Updates<LineBreak></LineBreak>
+            * Auto Scan On Startup<LineBreak></LineBreak>
+        </TextBlock>
+
+    </Grid>
+</Window>

@@ -8,7 +8,7 @@
         Closing="Main_Closing"
         SizeChanged="Main_SizeChanged"
         StateChanged="Main_StateChanged"
-        Title="Steam Friends Patcher " Background="#FF1E1E1F" Foreground="White" Height="300" Width="800" MinWidth="800" MinHeight="300" HorizontalAlignment="Left" VerticalAlignment="Bottom" Icon="steam_512_0dR_icon.ico" WindowStartupLocation="CenterScreen">
+        Title="Steam Friends Patcher " Background="#FF1E1E1F" Foreground="White" MinWidth="500" MinHeight="300" HorizontalAlignment="Left" VerticalAlignment="Bottom" Icon="steam_512_0dR_icon.ico" WindowStartupLocation="CenterScreen" Width="768" Height="535">
     <Grid>
         <RichTextBox x:Name="output" Margin="10,10,10,50" Background="#FF3D3D3E" Foreground="White" BorderBrush="#FF2E2E2F" SelectionBrush="#FF1E1E1F" BorderThickness="2" IsReadOnly="True" Padding="0" Block.LineHeight="1.0" Style="{DynamicResource RichTextBoxNoFocusBorder}" FontFamily="Fira Code" >
             <RichTextBox.Resources>
@@ -142,6 +142,7 @@
         -->
         <Button x:Name="toggleScanButton" Content="Start Scanning" Margin="10,0,0,10" Background="#FF3D3D3E" Foreground="White" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="ToggleScanButton_Click" Padding="10,1"/>
         <Button x:Name="settingsButton" Content="&#xE115;" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="32" FontFamily="Segoe UI Symbol" Background="#00DDDDDD" Foreground="White" Height="32" FontSize="24" BorderThickness="0" Margin="0,0,10,10" Click="SettingsButton_Click"/>
+        <Button x:Name="aboutButton" Content="&#xE11B;" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="32" FontFamily="Segoe UI Symbol" Background="#00DDDDDD" Foreground="White" Height="32" FontSize="24" BorderThickness="0" Margin="0,0,50,10" Click="AboutButton_Click"/>
         <Button x:Name="forceCheckButton" Content="Force Check" HorizontalAlignment="Left" Margin="155,0,0,10" VerticalAlignment="Bottom" Background="#FF3D3D3E" Foreground="White" FontSize="18" Padding="10,1" Click="ForceCheckButton_Click"/>
     </Grid>
 </Window>

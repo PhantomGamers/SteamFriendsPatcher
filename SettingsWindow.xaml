@@ -6,7 +6,7 @@
         xmlns:p="clr-namespace:SteamFriendsPatcher.Properties"
         xmlns:local="clr-namespace:SteamFriendsPatcher"
         mc:Ignorable="d"
-        Title="Steam Friends Patcher - Settings" Height="300" Width="300" Background="#FF1E1E1F" Foreground="White" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" Icon="steam_512_0dR_icon.ico">
+        Title="Steam Friends Patcher - Settings" Background="#FF1E1E1F" Foreground="White" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" Icon="steam_512_0dR_icon.ico" Margin="0" SizeToContent="WidthAndHeight" Padding="0" MinWidth="400" MinHeight="400">
     <Grid Margin="10">
 
         <Grid.RowDefinitions>
@@ -19,13 +19,13 @@
             <RowDefinition Height = "*" />
             <RowDefinition Height = "*" />
         </Grid.RowDefinitions>
-        <CheckBox x:Name="runOnStartup" Content="Run On Startup" Foreground="White" Checked="RunOnStartup_Changed" Unchecked="RunOnStartup_Changed" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <CheckBox x:Name="startMinimized" Content="Start Minimized" Foreground="White" Checked="StartMinimized_Changed" Unchecked="StartMinimized_Changed" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="1"/>
-        <CheckBox x:Name="minimizeToTray" Content="Minimize To Tray" Foreground="White" Checked="MinimizeToTray_Changed" Unchecked="MinimizeToTray_Changed" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="2"/>
-        <CheckBox x:Name="checkForUpdates" Content="Check For Updates" Foreground="White" Checked="CheckForUpdates_Changed" Unchecked="CheckForUpdates_Changed" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="3"/>
-        <CheckBox x:Name="autoScanOnStartup" Content="Auto Scan On Startup" Foreground="White" Checked="AutoScanOnStartup_Changed" Unchecked="AutoScanOnStartup_Changed" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="4"/>
-        <CheckBox x:Name="forceScanOnStartup" Content="Force Scan On Startup" Foreground="White" Checked="ForceScanOnStartup_Changed" Unchecked="ForceScanOnStartup_Changed" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Top"/>
-        <CheckBox x:Name="saveLastWindowSize" Content="Save Last Window Size" Foreground="White" Checked="SaveLastWindowSize_Changed" Unchecked="SaveLastWindowSize_Changed" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="6"/>
-        <Button x:Name="resetToDefaults" Content="Reset To Defaults" HorizontalAlignment="Center" Grid.Row="7" VerticalAlignment="Center" Width="auto" Height="auto" HorizontalContentAlignment="Left" FontSize="18" Foreground="White" Background="#FF3D3D3E" Click="ResetToDefaults_Click"/>
+        <CheckBox x:Name="runOnStartup" Content="Run On Startup" Foreground="White" Checked="RunOnStartup_Changed" Unchecked="RunOnStartup_Changed" FontSize="14" Padding="4,-1,0,0" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <CheckBox x:Name="startMinimized" Content="Start Minimized" Foreground="White" Checked="StartMinimized_Changed" Unchecked="StartMinimized_Changed" Grid.Row="1" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <CheckBox x:Name="minimizeToTray" Content="Minimize To Tray" Foreground="White" Checked="MinimizeToTray_Changed" Unchecked="MinimizeToTray_Changed" Grid.Row="2" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <CheckBox x:Name="checkForUpdates" Content="Check For Updates" Foreground="White" Checked="CheckForUpdates_Changed" Unchecked="CheckForUpdates_Changed" Grid.Row="3" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <CheckBox x:Name="autoScanOnStartup" Content="Auto Scan On Startup" Foreground="White" Checked="AutoScanOnStartup_Changed" Unchecked="AutoScanOnStartup_Changed" Grid.Row="4" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <CheckBox x:Name="forceScanOnStartup" Content="Force Scan On Startup" Foreground="White" Checked="ForceScanOnStartup_Changed" Unchecked="ForceScanOnStartup_Changed" Grid.Row="5" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <CheckBox x:Name="saveLastWindowSize" Content="Save Last Window Size" Foreground="White" Checked="SaveLastWindowSize_Changed" Unchecked="SaveLastWindowSize_Changed" Grid.Row="6" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Button x:Name="resetToDefaults" Content="Reset To Defaults" Grid.Row="7" Width="auto" Height="auto" HorizontalContentAlignment="Left" Foreground="White" Background="#FF3D3D3E" Click="ResetToDefaults_Click" Margin="0" HorizontalAlignment="Center" FontSize="14"/>
     </Grid>
 </Window>
