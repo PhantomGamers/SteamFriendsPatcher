@@ -444,6 +444,7 @@ namespace SteamFriendsPatcher
                 };
                 cacheWatcher.Created += new FileSystemEventHandler(CacheWatcher_Created);
                 cacheWatcher.Changed += new FileSystemEventHandler(CacheWatcher_Created);
+                GetLatestFriendsCSS();
                 cacheWatcher.EnableRaisingEvents = true;
                 scannerExists = true;
                 Print("Cache Watcher Started.");
