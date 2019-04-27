@@ -76,7 +76,6 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Resource Include="resources\Font Awesome 5 Free-Regular-400.otf" />
     <Resource Include="resources\Font Awesome 5 Free-Solid-900.otf" />
   </ItemGroup>
   <ItemGroup>
