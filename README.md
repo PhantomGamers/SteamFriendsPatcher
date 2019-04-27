@@ -31,3 +31,4 @@ With these options configured, the program should be as easy as setup and forget
 * [@henrikx for Steam directory detection code.](https://github.com/henrikx/metroskininstaller)
 * [Sam Allen of Dot Net Perls for GZIP compression, decompression, and detection code.](https://www.dotnetperls.com/decompress)
 * [Bob Learned of Experts Exchange for FindWindowLike code.](https://www.experts-exchange.com/questions/21611201/I-need-FindWindowLike-for-C.html)
+* [@maxhauser for semver](https://github.com/maxhauser/semver)
