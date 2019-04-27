@@ -4,5 +4,12 @@
              xmlns:local="clr-namespace:SteamFriendsPatcher"
              ShutdownMode="OnLastWindowClose">
     <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary x:Name="IconsDictionary"
+
+            Source="/SteamFriendsPatcher;component/Icons.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
