@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Media;
+using Semver;
 
 namespace SteamFriendsPatcher
 {
@@ -70,15 +71,20 @@ namespace SteamFriendsPatcher
                     WebClient wc = new WebClient();
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
                     wc.Headers.Add("user-agent", Assembly.GetExecutingAssembly().FullName);
-
                     string latestver = wc.DownloadString("https://api.github.com/repos/phantomgamers/steamfriendspatcher/releases/latest");
                     string verregex = "(?<=\"tag_name\":\")(.*?)(?=\")";
                     string latestvervalue = Regex.Match(latestver, verregex).Value;
                     if (!string.IsNullOrEmpty(latestvervalue))
                     {
-                        Version localver = new Version(ThisAssembly.AssemblyInformationalVersion);
-                        Version remotever = new Version(latestvervalue);
-                        if (remotever > localver)
+                        string assemblyVer = ThisAssembly.AssemblyInformationalVersion;
+                        assemblyVer = assemblyVer.Substring(0, assemblyVer.IndexOf('+') > -1 ? assemblyVer.IndexOf('+') : assemblyVer.Length);
+                        if (!SemVersion.TryParse(assemblyVer, out SemVersion localVer) ||
+                            !SemVersion.TryParse(latestvervalue, out SemVersion remoteVer))
+                        {
+                            Print("Update check failed, failed to parse version string.", "Error");
+                            return false;
+                        }
+                        if (remoteVer > localVer)
                         {
                             if (System.Windows.Forms.MessageBox.Show("Update available. Download now?", "Steam Friends Patcher - Update Available", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
                             {
