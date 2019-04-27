@@ -25,7 +25,7 @@ namespace SteamFriendsPatcher
             {
                 new MainWindow();
                 string ver = ThisAssembly.AssemblyInformationalVersion;
-                MainWindow.Title += $"v{ver.Substring(0, ver.Length - 11)}";
+                MainWindow.Title += $"v{ver.Substring(0, ver.IndexOf('+') > -1 ? ver.IndexOf('+') : ver.Length)}";
 
                 if (SteamFriendsPatcher.Properties.Settings.Default.saveLastWindowSize)
                 {
