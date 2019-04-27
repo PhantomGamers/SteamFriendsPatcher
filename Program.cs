@@ -617,6 +617,7 @@ namespace SteamFriendsPatcher
             {
                 MainWindow.scanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButtonRef.Content = text ?? MainWindow.scanButtonRef.Content; });
                 MainWindow.scanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButtonRef.IsEnabled = status; });
+                MainWindow.scanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButtonRef.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
             }
         }
 
@@ -625,6 +626,7 @@ namespace SteamFriendsPatcher
             lock (ToggleForceScannerButtonLock)
             {
                 MainWindow.forceScanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.forceScanButtonRef.IsEnabled = status; });
+                MainWindow.forceScanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.forceScanButtonRef.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
             }
         }
 
@@ -633,6 +635,7 @@ namespace SteamFriendsPatcher
             lock (ToggleForceScannerButtonLock)
             {
                 MainWindow.clearCacheButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.clearCacheButtonRef.IsEnabled = status; });
+                MainWindow.clearCacheButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.clearCacheButtonRef.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
             }
         }
 
