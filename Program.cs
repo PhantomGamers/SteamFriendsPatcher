@@ -22,6 +22,9 @@ namespace SteamFriendsPatcher
         // location of steam directory
         private static string steamDir = FindSteamDir();
 
+        // location of Steam's CEF Cache
+        private static string steamCacheDir = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Steam\\htmlcache\\Cache\\");
+
         // current language set on steam
         private static string steamLang = FindSteamLang();
 
@@ -37,15 +40,18 @@ namespace SteamFriendsPatcher
         // original friends.css
         public static byte[] friendscss;
 
+        // patched friends.css
+        public static byte[] friendscsspatched;
+
         // original friends.css age
         public static DateTime friendscssage;
 
-        // Cache FileSystemWatcher
+        // FileSystemWatchers
         public static FileSystemWatcher cacheWatcher;
-        // Crash FileSystemWatcher
         public static FileSystemWatcher crashWatcher;
+        public static FileStream cacheLock;
         public static bool scannerExists = false;
-       
+
 
         // objects to lock to maintain thread safety
         private static readonly object MessageLock = new object();
@@ -57,7 +63,6 @@ namespace SteamFriendsPatcher
 
         public static bool UpdateChecker()
         {
-            return false;
             lock (UpdateScannerLock)
             {
                 Print("Checking for updates...");
@@ -67,18 +72,18 @@ namespace SteamFriendsPatcher
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
                     wc.Headers.Add("user-agent", Assembly.GetExecutingAssembly().FullName);
 
-                    string latestver = wc.DownloadString("https://api.github.com/repos/phantomgamers/enablenewsteamfriendsskin/releases/latest");
+                    string latestver = wc.DownloadString("https://api.github.com/repos/phantomgamers/steamfriendspatcher/releases/latest");
                     string verregex = "(?<=\"tag_name\":\")(.*?)(?=\")";
                     string latestvervalue = Regex.Match(latestver, verregex).Value;
                     if (!string.IsNullOrEmpty(latestvervalue))
                     {
-                        Version localver = Assembly.GetExecutingAssembly().GetName().Version;
+                        Version localver = new Version(ThisAssembly.AssemblyInformationalVersion);
                         Version remotever = new Version(latestvervalue);
                         if (remotever > localver)
                         {
                             if (System.Windows.Forms.MessageBox.Show("Update available. Download now?", "Steam Friends Patcher - Update Available", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
                             {
-                                Process.Start("https://github.com/PhantomGamers/EnableNewSteamFriendsSkin/releases/latest");
+                                Process.Start("https://github.com/PhantomGamers/SteamFriendsPatcher/releases/latest");
                             }
 
                             return true;
@@ -95,7 +100,7 @@ namespace SteamFriendsPatcher
                 catch (WebException we)
                 {
                     Print("Failed to check for updates.", "Error");
-                    Print($"WebException: {we}");
+                    Print(we.ToString(), "Error");
                 }
                 return false;
             }
@@ -137,18 +142,18 @@ namespace SteamFriendsPatcher
             ToggleCacheScanner(false);
             ToggleForceScanButtonEnabled(false);
             ToggleScanButtonEnabled(false);
+            ToggleClearCacheButtonEnabled(false);
 
-            string cachepath = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Steam\\htmlcache\\Cache\\");
             Print("Force scan started.");
             GetLatestFriendsCSS(forceUpdate);
             Print("Finding list of possible cache files...");
-            if (!Directory.Exists(cachepath))
+            if (!Directory.Exists(steamCacheDir))
             {
                 Print("Cache folder does not exist.", "error");
                 Print("Please confirm that Steam is running and that the friends list is open and try again.", "error");
                 goto ResetButtons;
             }
-            var validFiles = new DirectoryInfo(cachepath).EnumerateFiles("f_*", SearchOption.TopDirectoryOnly)
+            var validFiles = new DirectoryInfo(steamCacheDir).EnumerateFiles("f_*", SearchOption.TopDirectoryOnly)
                 .Where(f => f.Length <= friendscss.Length)
                 .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => f.FullName)
@@ -162,6 +167,7 @@ namespace SteamFriendsPatcher
             Print($"Found {validFiles.Count} possible cache files.");
 
             string friendscachefile = null;
+            bool patchedFileFound = false;
 
             Print("Checking cache files for match...");
             Parallel.ForEach(validFiles, (s, state) =>
@@ -194,18 +200,30 @@ namespace SteamFriendsPatcher
                         PatchCacheFile(s, decompressedcachefile);
                         return;
                     }
+                    else if (decompressedcachefile.Length == friendscsspatched.Length && ByteArrayCompare(decompressedcachefile, friendscsspatched))
+                    {
+                        patchedFileFound = true;
+                    }
                 }
             });
 
             if (string.IsNullOrEmpty(friendscachefile))
             {
-                Print("Friends.css location not found. Cache file does not exist or is already patched.", "Error");
+                if (!patchedFileFound)
+                {
+                    Print("Cache file does not exist or is outdated.", "Warning");
+                }
+                else
+                {
+                    Print("Cache file is already patched.");
+                }
                 goto ResetButtons;
             }
 
         ResetButtons:
             ToggleForceScanButtonEnabled(true);
             ToggleScanButtonEnabled(true);
+            ToggleClearCacheButtonEnabled(true);
             if (preScannerStatus) { ToggleCacheScanner(true); }
             return;
         }
@@ -253,6 +271,7 @@ namespace SteamFriendsPatcher
                         if (fc.Length > 0)
                         {
                             friendscss = fc;
+                            friendscsspatched = PrependFile(fc);
                             friendscssage = DateTime.Now;
                             Print("Successfully downloaded latest friends.css", "Success");
                             return true;
@@ -267,8 +286,9 @@ namespace SteamFriendsPatcher
                         if (fc.Length > 0)
                         {
                             friendscss = fc;
-                            Print("Successfully downloaded latest friends.css.", "Success");
+                            friendscsspatched = PrependFile(fc);
                             friendscssage = DateTime.Now;
+                            Print("Successfully downloaded latest friends.css.", "Success");
                             return true;
                         }
                         Print("Failed to download friends.css.", "Error");
@@ -278,7 +298,7 @@ namespace SteamFriendsPatcher
                 catch (WebException we)
                 {
                     Print("Failed to download friends.css.", "Error");
-                    Print($"WebException: {we}");
+                    Print(we.ToString(), "Error");
                     return false;
                 }
             }
@@ -347,7 +367,17 @@ namespace SteamFriendsPatcher
         {
             lock (ScannerLock)
             {
-                if(scannerExists)
+                DirectoryInfo cacheDir;
+                if (!Directory.Exists(steamCacheDir))
+                {
+                    cacheDir = Directory.CreateDirectory(steamCacheDir);
+                }
+                else
+                {
+                    cacheDir = new DirectoryInfo(steamCacheDir);
+                }
+
+                if (scannerExists)
                 {
                     cacheWatcher.EnableRaisingEvents = isEnabled;
                     crashWatcher.EnableRaisingEvents = isEnabled;
@@ -355,35 +385,47 @@ namespace SteamFriendsPatcher
                     ToggleScanButtonEnabled(true, buttonText);
                     Print("Cache Watcher " + (isEnabled ? "Started" : "Stopped") + ".");
                     scannerExists = isEnabled;
+                    if (!isEnabled)
+                    {
+                        cacheLock.Dispose();
+                        if (File.Exists(Path.Combine(steamCacheDir, "tmp.lock")))
+                        {
+                            File.Delete(Path.Combine(steamCacheDir, "tmp.lock"));
+                        }
+                    }
                     return;
                 }
-                else if(!isEnabled)
+                else if (!isEnabled)
                 {
                     return;
                 }
 
+                while (!cacheDir.Exists) Task.Delay(20).Wait();
+                cacheLock = new FileStream(Path.Combine(steamCacheDir, "tmp.lock"), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                 ToggleScanButtonEnabled(false, "Stop Scanning");
                 ToggleForceScanButtonEnabled(false);
+                ToggleClearCacheButtonEnabled(false);
 
-                
+
                 StartCrashScanner();
 
-                using (FileSystemWatcher watcher = new FileSystemWatcher())
+                cacheWatcher = new FileSystemWatcher
                 {
-                    watcher.Path = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Steam\\htmlcache\\Cache\\");
-                    watcher.NotifyFilter = NotifyFilters.LastAccess
-                                         | NotifyFilters.LastWrite
-                                         | NotifyFilters.FileName;
-                    watcher.Filter = "f_*";
-                    watcher.Created += new FileSystemEventHandler(CacheWatcher_Created);
-                    watcher.EnableRaisingEvents = isEnabled;
-                    cacheWatcher = watcher;
-                    scannerExists = true;
-                    Print("Cache Watcher Started.");
+                    Path = steamCacheDir,
+                    NotifyFilter = NotifyFilters.LastAccess
+                                 | NotifyFilters.LastWrite
+                                 | NotifyFilters.FileName,
+                    Filter = "f_*"
+                };
+                cacheWatcher.Created += new FileSystemEventHandler(CacheWatcher_Created);
+                cacheWatcher.Changed += new FileSystemEventHandler(CacheWatcher_Created);
+                cacheWatcher.EnableRaisingEvents = true;
+                scannerExists = true;
+                Print("Cache Watcher Started.");
 
-                    ToggleScanButtonEnabled(true);
-                    ToggleForceScanButtonEnabled(true);
-                }
+                ToggleScanButtonEnabled(true);
+                ToggleForceScanButtonEnabled(true);
+                ToggleClearCacheButtonEnabled(true);
             }
             return;
         }
@@ -435,28 +477,93 @@ namespace SteamFriendsPatcher
 
         private static void StartCrashScanner()
         {
-            using (FileSystemWatcher watcher = new FileSystemWatcher())
+            if (!Directory.Exists(steamDir))
             {
-                watcher.Path = steamDir;
-                watcher.NotifyFilter = NotifyFilters.LastAccess
-                                     | NotifyFilters.LastWrite
-                                     | NotifyFilters.FileName;
-                watcher.Filter = ".crash";
-                watcher.Created += new FileSystemEventHandler(CrashWatcher_Event);
-                watcher.Changed += new FileSystemEventHandler(CrashWatcher_Event);
-
-                watcher.EnableRaisingEvents = true;
-
-                crashWatcher = watcher;
-
-                Print("Crash scanner started.", "Debug");
+                Print("Steam directory not found.", "Warning");
+                return;
             }
+
+            crashWatcher = new FileSystemWatcher
+            {
+                Path = steamDir,
+                NotifyFilter = NotifyFilters.LastAccess
+                             | NotifyFilters.LastWrite
+                             | NotifyFilters.FileName,
+                Filter = ".crash"
+            };
+            crashWatcher.Created += new FileSystemEventHandler(CrashWatcher_Event);
+            crashWatcher.Changed += new FileSystemEventHandler(CrashWatcher_Event);
+
+            crashWatcher.EnableRaisingEvents = true;
+
+            Print("Crash scanner started.", "Debug");
         }
 
         private static void CrashWatcher_Event(object sender, FileSystemEventArgs e)
         {
             Print("Steam start detected.", "Debug");
             GetLatestFriendsCSS();
+        }
+
+        public static void ClearSteamCache()
+        {
+            if (!Directory.Exists(steamCacheDir))
+            {
+                Print("Cache folder does not exist.", "Warning");
+                return;
+            }
+            bool preScannerStatus = scannerExists;
+            bool preSteamStatus = Process.GetProcessesByName("Steam").Length > 0;
+            if (preSteamStatus)
+            {
+                if (System.Windows.Forms.MessageBox.Show("Steam will need to be restarted to clear cache. Restart automatically?", "Steam Friends Patcher", System.Windows.Forms.MessageBoxButtons.YesNo) != System.Windows.Forms.DialogResult.Yes)
+                {
+                    return;
+                }
+                Print("Shutting down Steam...");
+                Process.Start(steamDir + "\\Steam.exe", "-shutdown");
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                while (Process.GetProcessesByName("Steam").Length > 0 && stopwatch.Elapsed.Seconds < 10)
+                {
+                    Task.Delay(20).Wait();
+                }
+
+                stopwatch.Stop();
+                if (Process.GetProcessesByName("Steam").Length > 0)
+                {
+                    Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.", "error");
+                    goto ResetButtons;
+                }
+            }
+
+            ToggleCacheScanner(false);
+            ToggleForceScanButtonEnabled(false);
+            ToggleScanButtonEnabled(false);
+            ToggleClearCacheButtonEnabled(false);
+
+            Print("Deleting cache files...");
+            try
+            {
+                Directory.Delete(steamCacheDir, true);
+            }
+            catch (IOException ioe)
+            {
+                Print("Some cache files in use, cannot delete.", "Error");
+                Print(ioe.ToString(), "Error");
+            }
+
+            ToggleCacheScanner(preScannerStatus);
+            if (preSteamStatus)
+            {
+                Print("Restarting Steam...");
+                Process.Start(steamDir + "\\Steam.exe");
+            }
+
+        ResetButtons:
+            ToggleForceScanButtonEnabled(true);
+            ToggleScanButtonEnabled(true);
+            ToggleClearCacheButtonEnabled(true);
+            return;
         }
 
         internal static byte[] Decompress(byte[] gzip)
@@ -503,30 +610,23 @@ namespace SteamFriendsPatcher
         {
             lock (ToggleScannerButtonLock)
             {
-                //if (!MainWindow.scanButton.Dispatcher.CheckAccess())
-                //{
-                    MainWindow.scanButton.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButton.Content = text ?? MainWindow.scanButton.Content; });
-                    MainWindow.scanButton.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButton.IsEnabled = status; });
-                //}
-                //else
-                //{
-                //    MainWindow.scanButton.Content = text ?? MainWindow.scanButton.Content;
-                //    MainWindow.scanButton.IsEnabled = status;
-                //}
+                MainWindow.scanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButtonRef.Content = text ?? MainWindow.scanButtonRef.Content; });
+                MainWindow.scanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButtonRef.IsEnabled = status; });
             }
         }
         private static void ToggleForceScanButtonEnabled(bool status)
         {
             lock (ToggleForceScannerButtonLock)
             {
-                //if (!MainWindow.scanButton.Dispatcher.CheckAccess())
-                //{
-                    MainWindow.forceScanButton.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.forceScanButton.IsEnabled = status; });
-                //}
-                //else
-                //{
-                //    MainWindow.forceScanButton.IsEnabled = status;
-                //}
+                MainWindow.forceScanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.forceScanButtonRef.IsEnabled = status; });
+            }
+        }
+
+        private static void ToggleClearCacheButtonEnabled(bool status)
+        {
+            lock (ToggleForceScannerButtonLock)
+            {
+                MainWindow.clearCacheButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.clearCacheButtonRef.IsEnabled = status; });
             }
         }
 
@@ -541,10 +641,11 @@ namespace SteamFriendsPatcher
             }
             lock (MessageLock)
             {
-                MainWindow.outputRTB.Dispatcher.Invoke((MethodInvoker)delegate {
+                MainWindow.outputRef.Dispatcher.Invoke((MethodInvoker)delegate
+                {
                     TextRange tr;
                     // Date & Time
-                    tr = new TextRange(MainWindow.outputRTB.Document.ContentEnd, MainWindow.outputRTB.Document.ContentEnd)
+                    tr = new TextRange(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd)
                     {
                         Text = $"[{DateTime.Now}] "
                     };
@@ -554,39 +655,33 @@ namespace SteamFriendsPatcher
                     switch (messagetype)
                     {
                         case "Error":
-                            MainWindow.outputRTB.Selection.Select(MainWindow.outputRTB.Document.ContentEnd, MainWindow.outputRTB.Document.ContentEnd);
-                            MainWindow.outputRTB.Selection.Text = "[ERROR] ";
-                            MainWindow.outputRTB.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#e51400"));
-                            /*
-                            tr = new TextRange(MainWindow.outputRTB.Document.ContentEnd, MainWindow.outputRTB.Document.ContentEnd)
-                            {
-                                Text = "[ERROR] "
-                            };
-                            tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#e51400"));
-                            */break;
+                            MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
+                            MainWindow.outputRef.Selection.Text = "[ERROR] ";
+                            MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#e51400"));
+                            break;
                         case "Warning":
-                            MainWindow.outputRTB.Selection.Select(MainWindow.outputRTB.Document.ContentEnd, MainWindow.outputRTB.Document.ContentEnd);
-                            MainWindow.outputRTB.Selection.Text = "[WARNING] ";
-                            MainWindow.outputRTB.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#f0a30a"));
+                            MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
+                            MainWindow.outputRef.Selection.Text = "[WARNING] ";
+                            MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#f0a30a"));
                             break;
                         case "Success":
-                            MainWindow.outputRTB.Selection.Select(MainWindow.outputRTB.Document.ContentEnd, MainWindow.outputRTB.Document.ContentEnd);
-                            MainWindow.outputRTB.Selection.Text = "[SUCCESS] ";
-                            MainWindow.outputRTB.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#60a917"));
+                            MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
+                            MainWindow.outputRef.Selection.Text = "[SUCCESS] ";
+                            MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#60a917"));
                             break;
                         default:
-                            MainWindow.outputRTB.Selection.Select(MainWindow.outputRTB.Document.ContentEnd, MainWindow.outputRTB.Document.ContentEnd);
-                            MainWindow.outputRTB.Selection.Text = "[INFO] ";
-                            MainWindow.outputRTB.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
+                            MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
+                            MainWindow.outputRef.Selection.Text = "[INFO] ";
+                            MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
                             break;
                     }
 
                     // Message
-                    MainWindow.outputRTB.Selection.Select(MainWindow.outputRTB.Document.ContentEnd, MainWindow.outputRTB.Document.ContentEnd);
-                    MainWindow.outputRTB.Selection.Text = message + (newline ? "\n" : string.Empty);
-                    MainWindow.outputRTB.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#ffffff"));
+                    MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
+                    MainWindow.outputRef.Selection.Text = message + (newline ? "\n" : string.Empty);
+                    MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#ffffff"));
 
-                    MainWindow.outputRTB.ScrollToEnd();
+                    MainWindow.outputRef.ScrollToEnd();
                 });
             }
         }

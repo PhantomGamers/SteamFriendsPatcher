@@ -23,27 +23,26 @@ namespace SteamFriendsPatcher
     /// </summary>
     public partial class MainWindow : Window
     {
-        TextBoxOutputter outputter;
         private System.Windows.Forms.NotifyIcon notifyIcon;
-        public static RichTextBox outputRTB;
-        public static Button scanButton;
-        public static Button forceScanButton;
+        public static RichTextBox outputRef;
+        public static Button scanButtonRef;
+        public static Button forceScanButtonRef;
+        public static Button clearCacheButtonRef;
         public static MainWindow mainWindow;
 
         public MainWindow()
         {
             InitializeComponent();
             mainWindow = this;
-            outputRTB = this.output;
-            scanButton = this.toggleScanButton;
-            forceScanButton = this.forceCheckButton;
-            outputter = new TextBoxOutputter(output);
-            Console.SetOut(outputter);
-            Task.Run(() => setupTask());
+            outputRef = this.output;
+            scanButtonRef = this.toggleScanButton;
+            forceScanButtonRef = this.forceCheckButton;
+            clearCacheButtonRef = this.clearCacheButton;
+            //Task.Run(() => setupTask());
             setupTrayIcon();
         }
 
-        private static void setupTask()
+        public static void SetupTask()
         {
             if (Properties.Settings.Default.checkForUpdates)
             {
@@ -153,6 +152,11 @@ namespace SteamFriendsPatcher
         {
             notifyIcon.Visible = false;
             Program.ToggleCacheScanner(false);
+        }
+
+        private async void ClearCacheButton_Click(object sender, RoutedEventArgs e)
+        {
+            await Task.Run(() => Program.ClearSteamCache());
         }
     }
 }

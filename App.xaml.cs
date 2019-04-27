@@ -47,6 +47,7 @@ namespace SteamFriendsPatcher
                     }
                 }
                 MainWindow.Show();
+                Task.Run(() => SteamFriendsPatcher.MainWindow.SetupTask());
             }
         }
     }

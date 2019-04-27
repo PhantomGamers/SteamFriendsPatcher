@@ -24,7 +24,7 @@
       <Value Profile="(Default)">800</Value>
     </Setting>
     <Setting Name="windowHeight" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">300</Value>
+      <Value Profile="(Default)">535</Value>
     </Setting>
     <Setting Name="minimizeToTray" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
