@@ -376,6 +376,7 @@ namespace SteamFriendsPatcher
                 if (!Directory.Exists(steamCacheDir))
                 {
                     cacheDir = Directory.CreateDirectory(steamCacheDir);
+                    cacheDir.Refresh();
                 }
                 else
                 {
@@ -405,8 +406,28 @@ namespace SteamFriendsPatcher
                     return;
                 }
 
-                while (!cacheDir.Exists) Task.Delay(20).Wait();
-                cacheLock = new FileStream(Path.Combine(steamCacheDir, "tmp.lock"), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                for (int i = 0; i < 10; i++)
+                {
+                    try
+                    {
+                        cacheLock = new FileStream(Path.Combine(steamCacheDir, "tmp.lock"), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                    }
+                    catch (Exception)
+                    {
+                        Print("Windows is dumb.", "Debug");
+                        Print(cacheDir.Exists.ToString(), "Debug");
+                        Task.Delay(1000).Wait();
+                        continue;
+                    }
+                    break;
+                }
+
+                if (!File.Exists(Path.Combine(steamCacheDir, "tmp.lock")))
+                {
+                    Print("Could not lock Cache. Scanner can not be started.", "Error");
+                    return;
+                }
+
                 ToggleScanButtonEnabled(false, "Stop Scanning");
                 ToggleForceScanButtonEnabled(false);
                 ToggleClearCacheButtonEnabled(false);
@@ -431,6 +452,7 @@ namespace SteamFriendsPatcher
                 ToggleForceScanButtonEnabled(true);
                 ToggleClearCacheButtonEnabled(true);
             }
+
             return;
         }
 
@@ -555,9 +577,9 @@ namespace SteamFriendsPatcher
                 Print("Some cache files in use, cannot delete.", "Error");
                 Print(ioe.ToString(), "Error");
             }
-            catch (Exception all)
+            finally
             {
-                Print(all.ToString());
+                Print("Cache files deleted.");
             }
 
             ToggleCacheScanner(preScannerStatus);
@@ -565,6 +587,18 @@ namespace SteamFriendsPatcher
             {
                 Print("Restarting Steam...");
                 Process.Start(steamDir + "\\Steam.exe");
+                for (int i = 0; i < 10; i++)
+                {
+                    if (Process.GetProcessesByName("Steam").Length > 0)
+                    {
+                        Print("Steam started.");
+                        break;
+                    }
+                    if (i == 9)
+                    {
+                        Print("Failed to start Steam.", "Error");
+                    }
+                }
             }
 
         ResetButtons:
