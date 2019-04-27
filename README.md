@@ -2,6 +2,10 @@
 This utility is designed to allow you to apply themes to the new Steam friends UI.  
 
 # Instructions
+Download & extract the latest zip file under Releases and run SteamFriendsPatcher.exe!  
+Make sure the .config file included in the zip is in the same folder as the executable.  
+  
+  
 To use manually, simply click "Force Check," by default this will run when you start the program.  
 You will be required to do this everytime Valve pushes a new version of the friends.css file used by Steam.  
 To avoid this, use the "Start Scanner" option and leave the program running.  
