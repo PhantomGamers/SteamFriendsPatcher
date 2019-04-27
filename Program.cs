@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -13,11 +12,10 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace SteamFriendsPatcher
 {
-    class Program
+    internal class Program
     {
         // location of steam directory
         private static string steamDir = FindSteamDir();
@@ -48,13 +46,14 @@ namespace SteamFriendsPatcher
 
         // FileSystemWatchers
         public static FileSystemWatcher cacheWatcher;
+
         public static FileSystemWatcher crashWatcher;
         public static FileStream cacheLock;
         public static bool scannerExists = false;
 
-
         // objects to lock to maintain thread safety
         private static readonly object MessageLock = new object();
+
         private static readonly object ScannerLock = new object();
         private static readonly object UpdateScannerLock = new object();
         private static readonly object GetFriendsCSSLock = new object();
@@ -406,7 +405,6 @@ namespace SteamFriendsPatcher
                 ToggleForceScanButtonEnabled(false);
                 ToggleClearCacheButtonEnabled(false);
 
-
                 StartCrashScanner();
 
                 cacheWatcher = new FileSystemWatcher
@@ -592,6 +590,7 @@ namespace SteamFriendsPatcher
                 }
             }
         }
+
         internal static bool IsGZipHeader(byte[] arr)
         {
             return arr.Length >= 2 &&
@@ -614,6 +613,7 @@ namespace SteamFriendsPatcher
                 MainWindow.scanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButtonRef.IsEnabled = status; });
             }
         }
+
         private static void ToggleForceScanButtonEnabled(bool status)
         {
             lock (ToggleForceScannerButtonLock)
@@ -659,16 +659,19 @@ namespace SteamFriendsPatcher
                             MainWindow.outputRef.Selection.Text = "[ERROR] ";
                             MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#e51400"));
                             break;
+
                         case "Warning":
                             MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
                             MainWindow.outputRef.Selection.Text = "[WARNING] ";
                             MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#f0a30a"));
                             break;
+
                         case "Success":
                             MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
                             MainWindow.outputRef.Selection.Text = "[SUCCESS] ";
                             MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#60a917"));
                             break;
+
                         default:
                             MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
                             MainWindow.outputRef.Selection.Text = "[INFO] ";

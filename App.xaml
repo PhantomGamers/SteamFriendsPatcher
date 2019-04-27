@@ -4,6 +4,5 @@
              xmlns:local="clr-namespace:SteamFriendsPatcher"
              ShutdownMode="OnLastWindowClose">
     <Application.Resources>
-         
     </Application.Resources>
 </Application>

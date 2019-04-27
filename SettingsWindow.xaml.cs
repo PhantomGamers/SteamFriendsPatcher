@@ -1,18 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace SteamFriendsPatcher
 {
@@ -23,7 +12,9 @@ namespace SteamFriendsPatcher
     {
         // current settings window
         private static SettingsWindow settingsWindow = null;
+
         private static bool firstLoad = false;
+
         private readonly string startupLink = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                                     @"Microsoft\Windows\Start Menu\Programs\Startup",
                                                     Assembly.GetExecutingAssembly().GetName().Name + ".url");
@@ -49,6 +40,7 @@ namespace SteamFriendsPatcher
         {
             return settingsWindow;
         }
+
         private void RunOnStartup_Changed(object sender, RoutedEventArgs e)
         {
             if (firstLoad)

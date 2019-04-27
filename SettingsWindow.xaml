@@ -19,13 +19,13 @@
             <RowDefinition Height = "*" />
             <RowDefinition Height = "*" />
         </Grid.RowDefinitions>
-        <CheckBox x:Name="runOnStartup" Content="Run On Startup" Foreground="White" Checked="RunOnStartup_Changed" Unchecked="RunOnStartup_Changed" FontSize="14" Padding="4,-1,0,0" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <CheckBox x:Name="startMinimized" Content="Start Minimized" Foreground="White" Checked="StartMinimized_Changed" Unchecked="StartMinimized_Changed" Grid.Row="1" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <CheckBox x:Name="minimizeToTray" Content="Minimize To Tray" Foreground="White" Checked="MinimizeToTray_Changed" Unchecked="MinimizeToTray_Changed" Grid.Row="2" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <CheckBox x:Name="checkForUpdates" Content="Check For Updates" Foreground="White" Checked="CheckForUpdates_Changed" Unchecked="CheckForUpdates_Changed" Grid.Row="3" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <CheckBox x:Name="autoScanOnStartup" Content="Auto Scan On Startup" Foreground="White" Checked="AutoScanOnStartup_Changed" Unchecked="AutoScanOnStartup_Changed" Grid.Row="4" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <CheckBox x:Name="forceScanOnStartup" Content="Force Scan On Startup" Foreground="White" Checked="ForceScanOnStartup_Changed" Unchecked="ForceScanOnStartup_Changed" Grid.Row="5" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <CheckBox x:Name="saveLastWindowSize" Content="Save Last Window Size" Foreground="White" Checked="SaveLastWindowSize_Changed" Unchecked="SaveLastWindowSize_Changed" Grid.Row="6" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <Button x:Name="resetToDefaults" Content="Reset To Defaults" Grid.Row="7" Width="auto" Height="auto" HorizontalContentAlignment="Left" Foreground="White" Background="#FF3D3D3E" Click="ResetToDefaults_Click" Margin="0" HorizontalAlignment="Center" FontSize="14"/>
+        <CheckBox x:Name="runOnStartup" Content="Run On Startup" Foreground="White" Checked="RunOnStartup_Changed" Unchecked="RunOnStartup_Changed" FontSize="14" Padding="4,-1,0,0" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <CheckBox x:Name="startMinimized" Content="Start Minimized" Foreground="White" Checked="StartMinimized_Changed" Unchecked="StartMinimized_Changed" Grid.Row="1" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <CheckBox x:Name="minimizeToTray" Content="Minimize To Tray" Foreground="White" Checked="MinimizeToTray_Changed" Unchecked="MinimizeToTray_Changed" Grid.Row="2" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <CheckBox x:Name="checkForUpdates" Content="Check For Updates" Foreground="White" Checked="CheckForUpdates_Changed" Unchecked="CheckForUpdates_Changed" Grid.Row="3" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <CheckBox x:Name="autoScanOnStartup" Content="Auto Scan On Startup" Foreground="White" Checked="AutoScanOnStartup_Changed" Unchecked="AutoScanOnStartup_Changed" Grid.Row="4" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <CheckBox x:Name="forceScanOnStartup" Content="Force Scan On Startup" Foreground="White" Checked="ForceScanOnStartup_Changed" Unchecked="ForceScanOnStartup_Changed" Grid.Row="5" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <CheckBox x:Name="saveLastWindowSize" Content="Save Last Window Size" Foreground="White" Checked="SaveLastWindowSize_Changed" Unchecked="SaveLastWindowSize_Changed" Grid.Row="6" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <Button x:Name="resetToDefaults" Content="Reset To Defaults" Grid.Row="7" Width="auto" Height="auto" HorizontalContentAlignment="Left" Foreground="White" Background="#FF3D3D3E" Click="ResetToDefaults_Click" Margin="0" HorizontalAlignment="Center" FontSize="14" />
     </Grid>
 </Window>
