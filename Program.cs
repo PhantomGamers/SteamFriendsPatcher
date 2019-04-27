@@ -520,7 +520,7 @@ namespace SteamFriendsPatcher
             bool preSteamStatus = Process.GetProcessesByName("Steam").Length > 0;
             if (preSteamStatus)
             {
-                if (System.Windows.Forms.MessageBox.Show("Steam will need to be restarted to clear cache. Restart automatically?", "Steam Friends Patcher", System.Windows.Forms.MessageBoxButtons.YesNo) != System.Windows.Forms.DialogResult.Yes)
+                if (System.Windows.Forms.MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?", "Steam Friends Patcher", System.Windows.Forms.MessageBoxButtons.YesNo) != System.Windows.Forms.DialogResult.Yes)
                 {
                     return;
                 }
@@ -554,6 +554,10 @@ namespace SteamFriendsPatcher
             {
                 Print("Some cache files in use, cannot delete.", "Error");
                 Print(ioe.ToString(), "Error");
+            }
+            catch (Exception all)
+            {
+                Print(all.ToString());
             }
 
             ToggleCacheScanner(preScannerStatus);
