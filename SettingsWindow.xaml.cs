@@ -15,10 +15,6 @@ namespace SteamFriendsPatcher
 
         private static bool firstLoad = false;
 
-        private readonly string startupLink = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                                                    @"Microsoft\Windows\Start Menu\Programs\Startup",
-                                                    Assembly.GetExecutingAssembly().GetName().Name + ".url");
-
         public SettingsWindow()
         {
             InitializeComponent();
@@ -50,22 +46,13 @@ namespace SteamFriendsPatcher
 
                 if (runOnStartup.IsChecked.GetValueOrDefault(false))
                 {
-                    using (StreamWriter writer = new StreamWriter(startupLink))
-                    {
-                        string app = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                        writer.WriteLine("[InternetShortcut]");
-                        writer.WriteLine("URL=file:///" + app);
-                        writer.WriteLine("IconIndex=0");
-                        string icon = app.Replace('\\', '/');
-                        writer.WriteLine("IconFile=" + icon);
-                        writer.Flush();
-                    }
+                    Program.CreateStartUpShortcut();
                 }
                 else
                 {
-                    if (File.Exists(startupLink))
+                    if (File.Exists(Program.startupLink))
                     {
-                        File.Delete(startupLink);
+                        File.Delete(Program.startupLink);
                     }
                 }
             }
@@ -140,7 +127,7 @@ namespace SteamFriendsPatcher
 
         private void LoadCheckBoxStates()
         {
-            Properties.Settings.Default.runOnStartup = File.Exists(startupLink);
+            Properties.Settings.Default.runOnStartup = File.Exists(Program.startupLink);
             runOnStartup.IsChecked = Properties.Settings.Default.runOnStartup;
             startMinimized.IsChecked = Properties.Settings.Default.startMinimized;
             minimizeToTray.IsChecked = Properties.Settings.Default.minimizeToTray;

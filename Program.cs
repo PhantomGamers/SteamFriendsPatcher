@@ -33,6 +33,15 @@ namespace SteamFriendsPatcher
         // title of friends window in set language
         private static readonly string FriendsString = FindFriendsListString();
 
+        // Link to startup file
+        public static readonly string startupLink = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                                                    @"Microsoft\Windows\Start Menu\Programs\Startup",
+                                                    Assembly.GetExecutingAssembly().GetName().Name + ".lnk");
+
+        public static readonly string startupLinkOld = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                                                    @"Microsoft\Windows\Start Menu\Programs\Startup",
+                                                    Assembly.GetExecutingAssembly().GetName().Name + ".url");
+
         // friends.css etag
         private static string etag = null;
 
@@ -648,6 +657,16 @@ namespace SteamFriendsPatcher
             // Validate buffers are the same length.
             // This also ensures that the count does not exceed the length of either buffer.
             return b1.Length == b2.Length && Memcmp(b1, b2, b1.Length) == 0;
+        }
+
+        public static void CreateStartUpShortcut()
+        {
+            IWshRuntimeLibrary.WshShell wsh = new IWshRuntimeLibrary.WshShell();
+            IWshRuntimeLibrary.IWshShortcut shortcut = wsh.CreateShortcut(startupLink) as IWshRuntimeLibrary.IWshShortcut;
+            shortcut.TargetPath = Assembly.GetExecutingAssembly().Location;
+            shortcut.WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            shortcut.IconLocation = Assembly.GetExecutingAssembly().Location;
+            shortcut.Save();
         }
 
         private static void ToggleScanButtonEnabled(bool status, string text = null)

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -42,6 +43,25 @@ namespace SteamFriendsPatcher
                     }
                 }
                 MainWindow.Show();
+            }
+        }
+
+        private static void PerformUpgrade()
+        {
+            if (SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired)
+            {
+                SteamFriendsPatcher.Properties.Settings.Default.Upgrade();
+
+                if (SteamFriendsPatcher.Properties.Settings.Default.upgradeVer == 0)
+                {
+                    if (File.Exists(Program.startupLinkOld))
+                        File.Delete(Program.startupLinkOld);
+                    Program.CreateStartUpShortcut();
+                }
+
+                SteamFriendsPatcher.Properties.Settings.Default.upgradeVer = 1;
+                SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired = false;
+                SteamFriendsPatcher.Properties.Settings.Default.Save();
             }
         }
     }

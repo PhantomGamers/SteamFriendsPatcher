@@ -130,5 +130,29 @@ namespace SteamFriendsPatcher.Properties {
                 this["minimizeToTray"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool upgradeRequired {
+            get {
+                return ((bool)(this["upgradeRequired"]));
+            }
+            set {
+                this["upgradeRequired"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int upgradeVer {
+            get {
+                return ((int)(this["upgradeVer"]));
+            }
+            set {
+                this["upgradeVer"] = value;
+            }
+        }
     }
 }
