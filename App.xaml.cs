@@ -57,8 +57,10 @@ namespace SteamFriendsPatcher
                 if (SteamFriendsPatcher.Properties.Settings.Default.upgradeVer == 0)
                 {
                     if (File.Exists(Program.startupLinkOld))
+                    {
                         File.Delete(Program.startupLinkOld);
-                    Program.CreateStartUpShortcut();
+                        Program.CreateStartUpShortcut();
+                    }
                 }
 
                 SteamFriendsPatcher.Properties.Settings.Default.upgradeVer = 1;
