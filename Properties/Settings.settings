@@ -2,7 +2,7 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SteamFriendsPatcher.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="runOnStartup" Type="System.Boolean" Scope="User">
+    <Setting Name="startWithWindows" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="startMinimized" Type="System.Boolean" Scope="User">
@@ -34,6 +34,12 @@
     </Setting>
     <Setting Name="upgradeVer" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="runSteamOnStartup" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="steamLaunchArgs" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

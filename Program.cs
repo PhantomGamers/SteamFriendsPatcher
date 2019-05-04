@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Semver;
+
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -12,14 +14,13 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Media;
-using Semver;
 
 namespace SteamFriendsPatcher
 {
     internal class Program
     {
         // location of steam directory
-        private static string steamDir = FindSteamDir();
+        public static string steamDir = FindSteamDir();
 
         // location of Steam's CEF Cache
         private static string steamCacheDir = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Steam\\htmlcache\\Cache\\");

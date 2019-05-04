@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -45,6 +46,11 @@ namespace SteamFriendsPatcher
             if (Properties.Settings.Default.autoScanOnStartup)
             {
                 Program.ToggleCacheScanner(true);
+            }
+
+            if (Properties.Settings.Default.runSteamOnStartup && Process.GetProcessesByName("Steam").Length == 0)
+            {
+                Process.Start(Program.steamDir + "\\Steam.exe", Properties.Settings.Default.steamLaunchArgs);
             }
         }
 

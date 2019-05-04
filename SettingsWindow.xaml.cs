@@ -1,7 +1,7 @@
-﻿using System;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace SteamFriendsPatcher
 {
@@ -10,132 +10,64 @@ namespace SteamFriendsPatcher
     /// </summary>
     public partial class SettingsWindow : Window
     {
-        // current settings window
-        private static SettingsWindow settingsWindow = null;
-
-        private static bool firstLoad = false;
-
         public SettingsWindow()
         {
             InitializeComponent();
-            // when creating a new settings window, track it in the static var.
-            settingsWindow = this;
-
-            /*
-            Console.WriteLine(Properties.Settings.Default.runOnStartup);
-            Console.WriteLine(Properties.Settings.Default.startInTray);
-            Console.WriteLine(Properties.Settings.Default.checkForUpdates);
-            Console.WriteLine(Properties.Settings.Default.autoScanOnStartup);
-            */
-
-            // set checkbox states to user settings or defaults
             LoadCheckBoxStates();
-        }
-
-        public static SettingsWindow GetSettingsWindow()
-        {
-            return settingsWindow;
-        }
-
-        private void RunOnStartup_Changed(object sender, RoutedEventArgs e)
-        {
-            if (firstLoad)
-            {
-                Properties.Settings.Default.runOnStartup = runOnStartup.IsChecked.GetValueOrDefault(false);
-                Properties.Settings.Default.Save();
-
-                if (runOnStartup.IsChecked.GetValueOrDefault(false))
-                {
-                    Program.CreateStartUpShortcut();
-                }
-                else
-                {
-                    if (File.Exists(Program.startupLink))
-                    {
-                        File.Delete(Program.startupLink);
-                    }
-                }
-            }
-        }
-
-        private void StartMinimized_Changed(object sender, RoutedEventArgs e)
-        {
-            if (firstLoad)
-            {
-                Properties.Settings.Default.startMinimized = startMinimized.IsChecked.GetValueOrDefault(false);
-                Properties.Settings.Default.Save();
-            }
-        }
-
-        private void MinimizeToTray_Changed(object sender, RoutedEventArgs e)
-        {
-            if (firstLoad)
-            {
-                Properties.Settings.Default.minimizeToTray = minimizeToTray.IsChecked.GetValueOrDefault(false);
-                Properties.Settings.Default.Save();
-            }
-        }
-
-        private void CheckForUpdates_Changed(object sender, RoutedEventArgs e)
-        {
-            if (firstLoad)
-            {
-                Properties.Settings.Default.checkForUpdates = checkForUpdates.IsChecked.GetValueOrDefault(false);
-                Properties.Settings.Default.Save();
-            }
-        }
-
-        private void AutoScanOnStartup_Changed(object sender, RoutedEventArgs e)
-        {
-            if (firstLoad)
-            {
-                Properties.Settings.Default.autoScanOnStartup = autoScanOnStartup.IsChecked.GetValueOrDefault(false);
-                Properties.Settings.Default.Save();
-            }
-        }
-
-        private void ForceScanOnStartup_Changed(object sender, RoutedEventArgs e)
-        {
-            if (firstLoad)
-            {
-                Properties.Settings.Default.forceScanOnStartup = forceScanOnStartup.IsChecked.GetValueOrDefault(false);
-                Properties.Settings.Default.Save();
-            }
-        }
-
-        private void SaveLastWindowSize_Changed(object sender, RoutedEventArgs e)
-        {
-            if (firstLoad)
-            {
-                Properties.Settings.Default.saveLastWindowSize = saveLastWindowSize.IsChecked.GetValueOrDefault(false);
-                Properties.Settings.Default.Save();
-            }
-        }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            settingsWindow = null;
-            firstLoad = false;
         }
 
         private void ResetToDefaults_Click(object sender, RoutedEventArgs e)
         {
-            firstLoad = false;
-            Properties.Settings.Default.Reset();
-            LoadCheckBoxStates();
+            foreach (var item in LogicalTreeHelper.GetChildren(settingsGrid))
+            {
+                if (item is CheckBox chkCast)
+                    chkCast.IsChecked = bool.Parse(Properties.Settings.Default.Properties[chkCast.Name].DefaultValue.ToString());
+
+                if (item is TextBox txtCast)
+                    txtCast.Text = Properties.Settings.Default.Properties[txtCast.Name].DefaultValue.ToString();
+            }
         }
 
         private void LoadCheckBoxStates()
         {
-            Properties.Settings.Default.runOnStartup = File.Exists(Program.startupLink);
-            runOnStartup.IsChecked = Properties.Settings.Default.runOnStartup;
-            startMinimized.IsChecked = Properties.Settings.Default.startMinimized;
-            minimizeToTray.IsChecked = Properties.Settings.Default.minimizeToTray;
-            checkForUpdates.IsChecked = Properties.Settings.Default.checkForUpdates;
-            autoScanOnStartup.IsChecked = Properties.Settings.Default.autoScanOnStartup;
-            forceScanOnStartup.IsChecked = Properties.Settings.Default.forceScanOnStartup;
-            saveLastWindowSize.IsChecked = Properties.Settings.Default.saveLastWindowSize;
-            firstLoad = true;
+            Properties.Settings.Default.startWithWindows = File.Exists(Program.startupLink);
+            foreach (var item in LogicalTreeHelper.GetChildren(settingsGrid))
+            {
+                if (item is CheckBox chkCast)
+                    chkCast.IsChecked = bool.Parse(Properties.Settings.Default[chkCast.Name].ToString());
+
+                if (item is TextBox txtCast)
+                    txtCast.Text = Properties.Settings.Default[txtCast.Name].ToString();
+            }
+        }
+
+        private void SaveSettings_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in LogicalTreeHelper.GetChildren(settingsGrid))
+            {
+                if (item is CheckBox chkCast)
+                {
+                    Properties.Settings.Default[chkCast.Name] = chkCast.IsChecked;
+                    Debug.WriteLine(chkCast.Name + "=" + Properties.Settings.Default[chkCast.Name].ToString());
+                }
+
+                if (item is TextBox txtCast)
+                    Properties.Settings.Default[txtCast.Name] = txtCast.Text;
+            }
+
+            Properties.Settings.Default.Save();
+
+            if (Properties.Settings.Default.startWithWindows && !File.Exists(Program.startupLink))
+                Program.CreateStartUpShortcut();
+            else if (!Properties.Settings.Default.startWithWindows && File.Exists(Program.startupLink))
+                File.Delete(Program.startupLink);
+
+            this.Close();
+        }
+
+        private void cancelChanges_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }

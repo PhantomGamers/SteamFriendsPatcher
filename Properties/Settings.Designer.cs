@@ -26,12 +26,12 @@ namespace SteamFriendsPatcher.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool runOnStartup {
+        public bool startWithWindows {
             get {
-                return ((bool)(this["runOnStartup"]));
+                return ((bool)(this["startWithWindows"]));
             }
             set {
-                this["runOnStartup"] = value;
+                this["startWithWindows"] = value;
             }
         }
         
@@ -152,6 +152,30 @@ namespace SteamFriendsPatcher.Properties {
             }
             set {
                 this["upgradeVer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool runSteamOnStartup {
+            get {
+                return ((bool)(this["runSteamOnStartup"]));
+            }
+            set {
+                this["runSteamOnStartup"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string steamLaunchArgs {
+            get {
+                return ((string)(this["steamLaunchArgs"]));
+            }
+            set {
+                this["steamLaunchArgs"] = value;
             }
         }
     }
