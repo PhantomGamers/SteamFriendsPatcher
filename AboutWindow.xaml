@@ -22,11 +22,12 @@
             To avoid this, use the "Start Scanner" option and leave the program running.<LineBreak />
             With the scanner option, whenever a new version of the friends.css is pushed it will automatically be patched.<LineBreak /><LineBreak />
             Recommended options:<LineBreak />
-            * Run On Startup<LineBreak />
+            * Start With Windows<LineBreak />
             * Start Minimized<LineBreak />
             * Minimize To Tray<LineBreak />
             * Check For Updates<LineBreak />
             * Auto Scan On Startup<LineBreak />
+            * Run Steam On Startup<LineBreak />
         </TextBlock>
     </Grid>
 </Window>

@@ -12,11 +12,12 @@ To avoid this, use the "Start Scanner" option and leave the program running.
 With the scanner option, whenever a new version of the friends.css is pushed it will automatically be patched.  
             
 # Recommended options:  
-* Run On Startup  
+* Start With Windows  
 * Start Minimized  
 * Minimize To Tray  
 * Check For Updates  
 * Auto Scan On Startup  
+* Run Steam On Startup  
 
 With these options configured, the program should be as easy as setup and forget!
 
