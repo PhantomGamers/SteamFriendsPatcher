@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
+using System.Threading;
 
 namespace SteamFriendsPatcher
 {
@@ -14,6 +13,9 @@ namespace SteamFriendsPatcher
     public partial class App : Application
     {
         public static MainWindow MainWindowRef { get; private set; }
+        public static System.Timers.Timer UpdateTimer { get; private set; }
+
+        public static bool UpdateTimerActive { get; private set; } = false;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -29,7 +31,7 @@ namespace SteamFriendsPatcher
                 PerformUpgrade();
                 string ver = ThisAssembly.AssemblyInformationalVersion;
                 MainWindowRef.Title += $"v{(ver.Substring(0, ver.IndexOf('+') > -1 ? ver.IndexOf('+') : ver.Length))}";
-                Task.Run(() => SetupTask());
+                Task.Run(() => Setup());
                 if (SteamFriendsPatcher.Properties.Settings.Default.saveLastWindowSize)
                 {
                     MainWindowRef.Width = SteamFriendsPatcher.Properties.Settings.Default.windowWidth;
@@ -48,11 +50,12 @@ namespace SteamFriendsPatcher
             }
         }
 
-        private static void SetupTask()
+        private static void Setup()
         {
             if (SteamFriendsPatcher.Properties.Settings.Default.checkForUpdates)
             {
                 Task.Run(() => Program.UpdateChecker());
+                ToggleUpdateTimer();
             }
 
             if (SteamFriendsPatcher.Properties.Settings.Default.forceScanOnStartup)
@@ -69,6 +72,33 @@ namespace SteamFriendsPatcher
             {
                 Process.Start(Program.steamDir + "\\Steam.exe", SteamFriendsPatcher.Properties.Settings.Default.steamLaunchArgs);
             }
+        }
+
+        public static void ToggleUpdateTimer(bool status = true)
+        {
+            if (!UpdateTimerActive && !status)
+                return;
+
+            if (!status)
+            {
+                UpdateTimer.Enabled = false;
+                return;
+            }
+
+            UpdateTimer = new System.Timers.Timer
+
+            {
+                Interval = System.TimeSpan.FromDays(1).TotalMilliseconds
+            };
+
+            UpdateTimer.Elapsed += UpdateTimer_Elapsed;
+            UpdateTimer.Enabled = true;
+            UpdateTimerActive = true;
+        }
+
+        private static void UpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            Program.UpdateChecker();
         }
 
         private static void PerformUpgrade()

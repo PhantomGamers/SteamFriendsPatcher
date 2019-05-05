@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -43,13 +44,11 @@ namespace SteamFriendsPatcher
 
         private void SaveSettings_Click(object sender, RoutedEventArgs e)
         {
+            bool checkForUpdates = Properties.Settings.Default.checkForUpdates;
             foreach (var item in LogicalTreeHelper.GetChildren(settingsGrid))
             {
                 if (item is CheckBox chkCast)
-                {
                     Properties.Settings.Default[chkCast.Name] = chkCast.IsChecked;
-                    Debug.WriteLine(chkCast.Name + "=" + Properties.Settings.Default[chkCast.Name].ToString());
-                }
 
                 if (item is TextBox txtCast)
                     Properties.Settings.Default[txtCast.Name] = txtCast.Text;
@@ -61,6 +60,15 @@ namespace SteamFriendsPatcher
                 Program.CreateStartUpShortcut();
             else if (!Properties.Settings.Default.startWithWindows && File.Exists(Program.startupLink))
                 File.Delete(Program.startupLink);
+
+            if (!checkForUpdates && Properties.Settings.Default.checkForUpdates)
+            {
+                Task.Run(() => Program.UpdateChecker());
+                App.ToggleUpdateTimer();
+            }
+
+            if (checkForUpdates && !Properties.Settings.Default.checkForUpdates)
+                App.ToggleUpdateTimer(false);
 
             this.Close();
         }
