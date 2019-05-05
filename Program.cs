@@ -1,4 +1,6 @@
-﻿using Semver;
+﻿using Microsoft.Win32;
+
+using Semver;
 
 using System;
 using System.Diagnostics;
@@ -7,14 +9,12 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Documents;
-using System.Windows.Media;
 using System.Windows.Forms;
-using Microsoft.Win32;
+using System.Windows.Media;
 
 namespace SteamFriendsPatcher
 {
@@ -666,7 +666,7 @@ namespace SteamFriendsPatcher
         {
             // Validate buffers are the same length.
             // This also ensures that the count does not exceed the length of either buffer.
-            return b1.Length == b2.Length && Memcmp(b1, b2, b1.Length) == 0;
+            return b1.Length == b2.Length && NativeMethods.Memcmp(b1, b2, b1.Length) == 0;
         }
 
         public static void CreateStartUpShortcut()
@@ -765,8 +765,5 @@ namespace SteamFriendsPatcher
                 });
             }
         }
-
-        [DllImport("msvcrt.dll", EntryPoint = "memcmp", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int Memcmp(byte[] b1, byte[] b2, long count);
     }
 }

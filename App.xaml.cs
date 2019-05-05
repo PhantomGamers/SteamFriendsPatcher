@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Threading;
 
 namespace SteamFriendsPatcher
 {
@@ -17,15 +18,12 @@ namespace SteamFriendsPatcher
 
         public static bool UpdateTimerActive { get; private set; } = false;
 
+        private static readonly Mutex singleInstance = new Mutex(true, Assembly.GetExecutingAssembly().GetName().Name);
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            Mutex singleInstance = new Mutex(true, Assembly.GetExecutingAssembly().GetName().Name, out bool isNewInstance);
-            if (!isNewInstance)
-            {
-                Current.Shutdown(1);
-            }
-            else
+            if (singleInstance.WaitOne(TimeSpan.Zero, true))
             {
                 MainWindowRef = new MainWindow();
                 PerformUpgrade();
@@ -47,6 +45,10 @@ namespace SteamFriendsPatcher
                     }
                 }
                 MainWindowRef.Show();
+            }
+            else
+            {
+                Current.Shutdown(1);
             }
         }
 

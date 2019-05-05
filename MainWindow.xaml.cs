@@ -20,15 +20,19 @@ namespace SteamFriendsPatcher
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            SettingsWindow settings = new SettingsWindow();
-            settings.Owner = this;
+            SettingsWindow settings = new SettingsWindow
+            {
+                Owner = this
+            };
             settings.ShowDialog();
         }
 
         private void AboutButton_Click(object sender, RoutedEventArgs e)
         {
-            AboutWindow about = new AboutWindow();
-            about.Owner = this;
+            AboutWindow about = new AboutWindow
+            {
+                Owner = this
+            };
             about.ShowDialog();
         }
 
@@ -64,11 +68,11 @@ namespace SteamFriendsPatcher
 
         private void ShowButton_Click(object sender, EventArgs e)
         {
-            if (this.WindowState == WindowState.Minimized)
-            {
+            if (!this.IsVisible)
                 this.Show();
+
+            if (this.WindowState == WindowState.Minimized)
                 this.WindowState = WindowState.Normal;
-            }
             this.Activate();
         }
 
