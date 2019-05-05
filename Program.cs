@@ -12,8 +12,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Media;
+using System.Windows.Forms;
+using Microsoft.Win32;
 
 namespace SteamFriendsPatcher
 {
@@ -23,13 +24,13 @@ namespace SteamFriendsPatcher
         public static string steamDir = FindSteamDir();
 
         // location of Steam's CEF Cache
-        private static string steamCacheDir = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Steam\\htmlcache\\Cache\\");
+        private static readonly string steamCacheDir = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Steam\\htmlcache\\Cache\\");
 
         // current language set on steam
-        private static string steamLang = FindSteamLang();
+        private static readonly string steamLang = FindSteamLang();
 
         // location of file containing translations for set language
-        private static string steamLangFile = steamDir + "\\friends\\trackerui_" + steamLang + ".txt";
+        private static readonly string steamLangFile = steamDir + "\\friends\\trackerui_" + steamLang + ".txt";
 
         // title of friends window in set language
         private static readonly string FriendsString = FindFriendsListString();
@@ -71,6 +72,8 @@ namespace SteamFriendsPatcher
         private static readonly object ToggleScannerButtonLock = new object();
         private static readonly object ToggleForceScannerButtonLock = new object();
 
+        private static readonly MainWindow Main = App.MainWindowRef;
+
         public static bool UpdateChecker()
         {
             lock (UpdateScannerLock)
@@ -96,7 +99,7 @@ namespace SteamFriendsPatcher
                         }
                         if (remoteVer > localVer)
                         {
-                            if (System.Windows.Forms.MessageBox.Show("Update available. Download now?", "Steam Friends Patcher - Update Available", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                            if (MessageBox.Show("Update available. Download now?", "Steam Friends Patcher - Update Available", MessageBoxButtons.YesNo) == DialogResult.Yes)
                             {
                                 Process.Start("https://github.com/PhantomGamers/SteamFriendsPatcher/releases/latest");
                             }
@@ -143,17 +146,17 @@ namespace SteamFriendsPatcher
             {
                 Print("Reloading friends window...");
                 Process.Start(steamDir + "\\Steam.exe", @"steam://friends/status/offline");
-                Task.Delay(1000).Wait();
+                Task.Delay(TimeSpan.FromSeconds(1)).Wait();
                 Process.Start(steamDir + "\\Steam.exe", @"steam://friends/status/online");
             }
 
             Print("Done! Put your custom css in " + steamDir + "\\clientui\\friends.custom.css", "Success");
             Print("Close and reopen your Steam friends window to see changes.", "Success");
 
-            MainWindow.clearCacheButtonRef.Dispatcher.Invoke((MethodInvoker)delegate
+            Main.Dispatcher.Invoke((MethodInvoker)delegate
             {
-                if (MainWindow.mainWindow.WindowState == System.Windows.WindowState.Minimized && Properties.Settings.Default.showNotificationsInTray)
-                    MainWindow.notifyIcon.ShowBalloonTip(0, "", "Friends.css patched successfully.", System.Windows.Forms.ToolTipIcon.Info);
+                if (Main.WindowState == System.Windows.WindowState.Minimized && Properties.Settings.Default.showNotificationsInTray)
+                    Main.NotifyIcon.ShowBalloonTip(0, "", "Friends.css patched successfully.", ToolTipIcon.Info);
             });
         }
 
@@ -327,7 +330,7 @@ namespace SteamFriendsPatcher
 
         private static string FindSteamDir()
         {
-            using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Valve\\Steam"))
+            using (var registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Valve\\Steam"))
             {
                 string filePath = null;
                 var regFilePath = registryKey?.GetValue("SteamPath");
@@ -342,7 +345,7 @@ namespace SteamFriendsPatcher
 
         private static string FindSteamLang()
         {
-            using (var registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Valve\\Steam"))
+            using (var registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Valve\\Steam"))
             {
                 return registryKey?.GetValue("Language").ToString();
             }
@@ -432,7 +435,7 @@ namespace SteamFriendsPatcher
                     {
                         Print("Windows is dumb.", "Debug");
                         Print(cacheDir.Exists.ToString(), "Debug");
-                        Task.Delay(1000).Wait();
+                        Task.Delay(TimeSpan.FromSeconds(1)).Wait();
                         continue;
                     }
                     break;
@@ -488,7 +491,7 @@ namespace SteamFriendsPatcher
             }
             catch
             {
-                Task.Delay(2000).Wait();
+                Task.Delay(TimeSpan.FromSeconds(2)).Wait();
                 if (File.Exists(e.FullPath))
                 {
                     Print($"Error opening file {e.Name}, retrying.", "Debug");
@@ -625,7 +628,7 @@ namespace SteamFriendsPatcher
             return;
         }
 
-        internal static byte[] Decompress(byte[] gzip)
+        private static byte[] Decompress(byte[] gzip)
         {
             // Create a GZIP stream with decompression mode.
             // ... Then create a buffer and write into while reading from the GZIP stream.
@@ -652,14 +655,14 @@ namespace SteamFriendsPatcher
             }
         }
 
-        internal static bool IsGZipHeader(byte[] arr)
+        private static bool IsGZipHeader(byte[] arr)
         {
             return arr.Length >= 2 &&
                 arr[0] == 31 &&
                 arr[1] == 139;
         }
 
-        internal static bool ByteArrayCompare(byte[] b1, byte[] b2)
+        private static bool ByteArrayCompare(byte[] b1, byte[] b2)
         {
             // Validate buffers are the same length.
             // This also ensures that the count does not exceed the length of either buffer.
@@ -680,9 +683,9 @@ namespace SteamFriendsPatcher
         {
             lock (ToggleScannerButtonLock)
             {
-                MainWindow.scanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButtonRef.Content = text ?? MainWindow.scanButtonRef.Content; });
-                MainWindow.scanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButtonRef.IsEnabled = status; });
-                MainWindow.scanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.scanButtonRef.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
+                Main.toggleScanButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.toggleScanButton.Content = text ?? Main.toggleScanButton.Content; });
+                Main.toggleScanButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.toggleScanButton.IsEnabled = status; });
+                Main.toggleScanButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.toggleScanButton.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
             }
         }
 
@@ -690,8 +693,8 @@ namespace SteamFriendsPatcher
         {
             lock (ToggleForceScannerButtonLock)
             {
-                MainWindow.forceScanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.forceScanButtonRef.IsEnabled = status; });
-                MainWindow.forceScanButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.forceScanButtonRef.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
+                Main.forceCheckButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.forceCheckButton.IsEnabled = status; });
+                Main.forceCheckButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.forceCheckButton.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
             }
         }
 
@@ -699,8 +702,8 @@ namespace SteamFriendsPatcher
         {
             lock (ToggleForceScannerButtonLock)
             {
-                MainWindow.clearCacheButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.clearCacheButtonRef.IsEnabled = status; });
-                MainWindow.clearCacheButtonRef.Dispatcher.Invoke((MethodInvoker)delegate { MainWindow.clearCacheButtonRef.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
+                Main.clearCacheButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.clearCacheButton.IsEnabled = status; });
+                Main.clearCacheButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.clearCacheButton.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
             }
         }
 
@@ -715,11 +718,11 @@ namespace SteamFriendsPatcher
             }
             lock (MessageLock)
             {
-                MainWindow.outputRef.Dispatcher.Invoke((MethodInvoker)delegate
+                Main.output.Dispatcher.Invoke((MethodInvoker)delegate
                 {
                     TextRange tr;
                     // Date & Time
-                    tr = new TextRange(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd)
+                    tr = new TextRange(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd)
                     {
                         Text = $"[{DateTime.Now}] "
                     };
@@ -729,36 +732,36 @@ namespace SteamFriendsPatcher
                     switch (messagetype)
                     {
                         case "Error":
-                            MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
-                            MainWindow.outputRef.Selection.Text = "[ERROR] ";
-                            MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#e51400"));
+                            Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
+                            Main.output.Selection.Text = "[ERROR] ";
+                            Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#e51400"));
                             break;
 
                         case "Warning":
-                            MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
-                            MainWindow.outputRef.Selection.Text = "[WARNING] ";
-                            MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#f0a30a"));
+                            Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
+                            Main.output.Selection.Text = "[WARNING] ";
+                            Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#f0a30a"));
                             break;
 
                         case "Success":
-                            MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
-                            MainWindow.outputRef.Selection.Text = "[SUCCESS] ";
-                            MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#60a917"));
+                            Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
+                            Main.output.Selection.Text = "[SUCCESS] ";
+                            Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#60a917"));
                             break;
 
                         default:
-                            MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
-                            MainWindow.outputRef.Selection.Text = "[INFO] ";
-                            MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
+                            Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
+                            Main.output.Selection.Text = "[INFO] ";
+                            Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
                             break;
                     }
 
                     // Message
-                    MainWindow.outputRef.Selection.Select(MainWindow.outputRef.Document.ContentEnd, MainWindow.outputRef.Document.ContentEnd);
-                    MainWindow.outputRef.Selection.Text = message + (newline ? "\n" : string.Empty);
-                    MainWindow.outputRef.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#ffffff"));
+                    Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
+                    Main.output.Selection.Text = message + (newline ? "\n" : string.Empty);
+                    Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#ffffff"));
 
-                    MainWindow.outputRef.ScrollToEnd();
+                    Main.output.ScrollToEnd();
                 });
             }
         }

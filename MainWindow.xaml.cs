@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace SteamFriendsPatcher
 {
@@ -12,45 +10,12 @@ namespace SteamFriendsPatcher
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static System.Windows.Forms.NotifyIcon notifyIcon;
-        public static RichTextBox outputRef;
-        public static Button scanButtonRef;
-        public static Button forceScanButtonRef;
-        public static Button clearCacheButtonRef;
-        public static MainWindow mainWindow;
+        public System.Windows.Forms.NotifyIcon NotifyIcon { get; private set; }
 
         public MainWindow()
         {
             InitializeComponent();
-            mainWindow = this;
-            outputRef = this.output;
-            scanButtonRef = this.toggleScanButton;
-            forceScanButtonRef = this.forceCheckButton;
-            clearCacheButtonRef = this.clearCacheButton;
             setupTrayIcon();
-        }
-
-        public static void SetupTask()
-        {
-            if (Properties.Settings.Default.checkForUpdates)
-            {
-                Task.Run(() => Program.UpdateChecker());
-            }
-
-            if (Properties.Settings.Default.forceScanOnStartup)
-            {
-                Program.FindCacheFile();
-            }
-
-            if (Properties.Settings.Default.autoScanOnStartup)
-            {
-                Program.ToggleCacheScanner(true);
-            }
-
-            if (Properties.Settings.Default.runSteamOnStartup && Process.GetProcessesByName("Steam").Length == 0)
-            {
-                Process.Start(Program.steamDir + "\\Steam.exe", Properties.Settings.Default.steamLaunchArgs);
-            }
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -73,7 +38,7 @@ namespace SteamFriendsPatcher
             var showButton = new System.Windows.Forms.MenuItem();
             var exitButton = new System.Windows.Forms.MenuItem();
 
-            notifyIcon = new System.Windows.Forms.NotifyIcon
+            NotifyIcon = new System.Windows.Forms.NotifyIcon
             {
                 Visible = true,
                 Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location),
@@ -94,7 +59,7 @@ namespace SteamFriendsPatcher
             exitButton.Click += new System.EventHandler(ExitButton_Click);
 
             // double click
-            notifyIcon.DoubleClick += new System.EventHandler(ShowButton_Click);
+            NotifyIcon.DoubleClick += new System.EventHandler(ShowButton_Click);
         }
 
         private void ShowButton_Click(object sender, EventArgs e)
@@ -143,7 +108,7 @@ namespace SteamFriendsPatcher
 
         private void Main_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            notifyIcon.Visible = false;
+            NotifyIcon.Visible = false;
             Program.ToggleCacheScanner(false);
         }
 
