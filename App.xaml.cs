@@ -18,11 +18,10 @@ namespace SteamFriendsPatcher
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            bool isNewInstance = false;
-            Mutex singleInstance = new Mutex(true, Assembly.GetExecutingAssembly().GetName().Name, out isNewInstance);
+            Mutex singleInstance = new Mutex(true, Assembly.GetExecutingAssembly().GetName().Name, out bool isNewInstance);
             if (!isNewInstance)
             {
-                Application.Current.Shutdown(1);
+                Current.Shutdown(1);
             }
             else
             {
