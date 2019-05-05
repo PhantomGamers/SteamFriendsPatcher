@@ -88,7 +88,7 @@
                 </Style>
             </RichTextBox.Resources>
         </RichTextBox>
-        <Button x:Name="toggleScanButton" Content="Start Scanning" Margin="10,0,0,10" Background="#FF3D3D3E" Foreground="White" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="ToggleScanButton_Click" Padding="10,1" />
+        <Button x:Name="toggleScanButton" Content="Start Scanning" Margin="10,0,0,10" Background="#FF3D3D3E" Foreground="White" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="ToggleScanButton_Click" Padding="10,1" BorderBrush="{x:Null}" />
         <Button x:Name="settingsButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="32" FontFamily="/SteamFriendsPatcher;component/resources/#Font Awesome 5 Free Solid" Background="#00DDDDDD" Foreground="White" Height="32" FontSize="24" BorderThickness="0" Margin="0,0,10,10" Click="SettingsButton_Click">
             <Rectangle Width="24" Height="24" Fill="White">
                 <Rectangle.OpacityMask>
@@ -103,7 +103,7 @@
                 </Rectangle.OpacityMask>
             </Rectangle>
         </Button>
-        <Button x:Name="forceCheckButton" Content="Force Check" HorizontalAlignment="Left" Margin="151,0,0,10" VerticalAlignment="Bottom" Background="#FF3D3D3E" Foreground="White" FontSize="18" Padding="10,1" Click="ForceCheckButton_Click" />
-        <Button x:Name="clearCacheButton" Content="Clear Steam Cache" HorizontalAlignment="Left" Margin="274,0,0,10" VerticalAlignment="Bottom" Background="#FF3D3D3E" Foreground="White" FontSize="18" Padding="10,1" Click="ClearCacheButton_Click" />
+        <Button x:Name="forceCheckButton" Content="Force Check" HorizontalAlignment="Left" Margin="151,0,0,10" VerticalAlignment="Bottom" Background="#FF3D3D3E" Foreground="White" FontSize="18" Padding="10,1" Click="ForceCheckButton_Click" BorderBrush="{x:Null}" />
+        <Button x:Name="clearCacheButton" Content="Clear Steam Cache" HorizontalAlignment="Left" Margin="274,0,0,10" VerticalAlignment="Bottom" Background="#FF3D3D3E" Foreground="White" FontSize="18" Padding="10,1" Click="ClearCacheButton_Click" BorderBrush="{x:Null}" />
     </Grid>
 </Window>

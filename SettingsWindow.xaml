@@ -31,7 +31,7 @@
         <CheckBox x:Name="showNotificationsInTray" Content="Show Notifications In Tray" Foreground="White" Grid.Row="7" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" />
         <CheckBox x:Name="runSteamOnStartup" Content="Run Steam On Startup" Foreground="White" Grid.Row="8" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" />
         <Label x:Name="steamLaunchArgText" Content="Steam Launch Arguments:" HorizontalAlignment="Left" Grid.Row="9" VerticalAlignment="Top" Foreground="White" FontSize="14" />
-        <TextBox x:Name="steamLaunchArgs" HorizontalAlignment="Left" Height="23" Margin="176,3,0,0" Grid.Row="9" TextWrapping="Wrap" VerticalAlignment="Top" Width="175" Background="#FF3D3D3E" Foreground="White" Tag="Steam launch args (e.g. -dev)"  Style="{DynamicResource TextBoxWatermarkNoFocus}">
+        <TextBox x:Name="steamLaunchArgs" Margin="170,0,0,0" Grid.Row="9" Background="#FF3D3D3E" Foreground="White" Tag="Steam launch args (e.g. -dev)"  Style="{DynamicResource TextBoxWatermarkNoFocus}" BorderBrush="{x:Null}" FontSize="14" VerticalContentAlignment="Center" MaxLines="1" Width="204">
             <TextBox.Resources>
                 <SolidColorBrush x:Key="TextBox.Static.Border" Color="#FFABAdB3" />
                 <SolidColorBrush x:Key="TextBox.MouseOver.Border" Color="#FF7EB4EA" />
@@ -56,9 +56,10 @@
                                         <TextBlock x:Name="InternalWatermarkLabel"
                                                    Text="{TemplateBinding Tag}"
                                                    Visibility="Collapsed" Focusable="False"
-                                                   VerticalAlignment="Top" Margin=" 5 1 0 0"
+                                                   VerticalAlignment="Center" Margin=" 5 1 0 0"
                                                    Foreground="Silver"
-                                                   Background="Transparent" />
+                                                   Background="Transparent"
+                                                   IsHitTestVisible="False" />
                                     </Grid>
                                 </Border>
                                 <ControlTemplate.Triggers>
@@ -91,8 +92,15 @@
                 </Style>
             </TextBox.Resources>
         </TextBox>
-        <Button x:Name="saveSettings" Content="Save Settings" Grid.Row="10" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="SaveSettings_Click" Margin="10" HorizontalAlignment="Left" FontSize="14" VerticalAlignment="Center" Width="96" />
-        <Button x:Name="cancelChanges" Content="Cancel" Grid.Row="10" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="cancelChanges_Click" Margin="111,10,10,10" HorizontalAlignment="Left" FontSize="14" VerticalAlignment="Center" Width="55" />
-        <Button x:Name="resetToDefaults" Content="Reset To Defaults" Grid.Row="10" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="ResetToDefaults_Click" Margin="171,10,10,10" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Center" Width="120" />
+        <Grid Grid.Row="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="saveSettings" Content="Save Settings" Grid.Row="10" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="SaveSettings_Click" Margin="0,10,10,0" FontSize="14" BorderBrush="{x:Null}" Padding="10" />
+            <Button x:Name="cancelChanges" Content="Cancel" Grid.Row="10" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="cancelChanges_Click" Margin="0,10,10,0" FontSize="14" BorderBrush="{x:Null}" Grid.Column="1" Padding="10" />
+            <Button x:Name="resetToDefaults" Content="Reset To Defaults" Grid.Column="2" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="ResetToDefaults_Click" Margin="0,10,0,0" FontSize="14" BorderBrush="{x:Null}" Grid.Row="10" Padding="10" />
+        </Grid>
     </Grid>
 </Window>
