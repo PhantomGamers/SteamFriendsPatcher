@@ -60,7 +60,7 @@
     <ApplicationIcon>steam_512_0dR_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>SteamFriendsPatcher.pfx</AssemblyOriginatorKeyFile>
