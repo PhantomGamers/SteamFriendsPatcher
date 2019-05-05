@@ -155,7 +155,7 @@ namespace SteamFriendsPatcher
 
             Main.Dispatcher.Invoke((MethodInvoker)delegate
             {
-                if (Main.WindowState == System.Windows.WindowState.Minimized && Properties.Settings.Default.showNotificationsInTray)
+                if (!Main.IsVisible && Properties.Settings.Default.showNotificationsInTray)
                     Main.NotifyIcon.ShowBalloonTip(0, "", "Friends.css patched successfully.", ToolTipIcon.Info);
             });
         }
