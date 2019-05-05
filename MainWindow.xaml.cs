@@ -12,7 +12,7 @@ namespace SteamFriendsPatcher
     /// </summary>
     public partial class MainWindow : Window
     {
-        private System.Windows.Forms.NotifyIcon notifyIcon;
+        public static System.Windows.Forms.NotifyIcon notifyIcon;
         public static RichTextBox outputRef;
         public static Button scanButtonRef;
         public static Button forceScanButtonRef;
@@ -27,7 +27,6 @@ namespace SteamFriendsPatcher
             scanButtonRef = this.toggleScanButton;
             forceScanButtonRef = this.forceCheckButton;
             clearCacheButtonRef = this.clearCacheButton;
-            //Task.Run(() => setupTask());
             setupTrayIcon();
         }
 
@@ -74,7 +73,7 @@ namespace SteamFriendsPatcher
             var showButton = new System.Windows.Forms.MenuItem();
             var exitButton = new System.Windows.Forms.MenuItem();
 
-            this.notifyIcon = new System.Windows.Forms.NotifyIcon
+            notifyIcon = new System.Windows.Forms.NotifyIcon
             {
                 Visible = true,
                 Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location),
@@ -95,7 +94,7 @@ namespace SteamFriendsPatcher
             exitButton.Click += new System.EventHandler(ExitButton_Click);
 
             // double click
-            this.notifyIcon.DoubleClick += new System.EventHandler(ShowButton_Click);
+            notifyIcon.DoubleClick += new System.EventHandler(ShowButton_Click);
         }
 
         private void ShowButton_Click(object sender, EventArgs e)

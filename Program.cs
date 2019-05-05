@@ -149,6 +149,12 @@ namespace SteamFriendsPatcher
 
             Print("Done! Put your custom css in " + steamDir + "\\clientui\\friends.custom.css", "Success");
             Print("Close and reopen your Steam friends window to see changes.", "Success");
+
+            MainWindow.clearCacheButtonRef.Dispatcher.Invoke((MethodInvoker)delegate
+            {
+                if (MainWindow.mainWindow.WindowState == System.Windows.WindowState.Minimized && Properties.Settings.Default.showNotificationsInTray)
+                    MainWindow.notifyIcon.ShowBalloonTip(0, "", "Friends.css patched successfully.", System.Windows.Forms.ToolTipIcon.Info);
+            });
         }
 
         public static void FindCacheFile(bool forceUpdate = false)

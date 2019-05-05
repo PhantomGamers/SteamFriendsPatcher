@@ -24,6 +24,7 @@ namespace SteamFriendsPatcher
             }
             else
             {
+                PerformUpgrade();
                 new MainWindow();
                 string ver = ThisAssembly.AssemblyInformationalVersion;
                 MainWindow.Title += $"v{ver.Substring(0, ver.IndexOf('+') > -1 ? ver.IndexOf('+') : ver.Length)}";
@@ -43,8 +44,6 @@ namespace SteamFriendsPatcher
                     }
                 }
                 MainWindow.Show();
-
-                PerformUpgrade();
             }
         }
 
@@ -53,6 +52,8 @@ namespace SteamFriendsPatcher
             if (SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired)
             {
                 SteamFriendsPatcher.Properties.Settings.Default.Upgrade();
+                SteamFriendsPatcher.Properties.Settings.Default.Reload();
+                SteamFriendsPatcher.Properties.Settings.Default.Save();
 
                 if (SteamFriendsPatcher.Properties.Settings.Default.upgradeVer == 0)
                 {
@@ -64,7 +65,7 @@ namespace SteamFriendsPatcher
                 }
 
                 SteamFriendsPatcher.Properties.Settings.Default.upgradeVer = 1;
-                SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired = false;
+                //SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired = false;
                 SteamFriendsPatcher.Properties.Settings.Default.Save();
             }
         }

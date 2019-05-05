@@ -178,5 +178,17 @@ namespace SteamFriendsPatcher.Properties {
                 this["steamLaunchArgs"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool showNotificationsInTray {
+            get {
+                return ((bool)(this["showNotificationsInTray"]));
+            }
+            set {
+                this["showNotificationsInTray"] = value;
+            }
+        }
     }
 }
