@@ -140,10 +140,13 @@ namespace SteamFriendsPatcher
                 {
                     if (item is Button button)
                     {
-                        button.IsEnabled = status;
-                        button.Visibility = status ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-                        if (button.Name == "toggleScanButton")
-                            button.Content = Program.scannerExists ? "Stop Scanning" : "Start Scanning";
+                        if (button.Name != "aboutButton" && button.Name != "settingsButton")
+                        {
+                            button.IsEnabled = status;
+                            button.Visibility = status ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                            if (button.Name == "toggleScanButton")
+                                button.Content = Program.scannerExists ? "Stop Scanning" : "Start Scanning";
+                        }
                     }
                 }
             });
