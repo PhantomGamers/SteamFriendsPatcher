@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace SteamFriendsPatcher
 {
@@ -18,7 +19,7 @@ namespace SteamFriendsPatcher
             SizeChanged += MainWindow_SizeChanged;
             StateChanged += MainWindow_StateChanged;
             InitializeComponent();
-            setupTrayIcon();
+            SetupTrayIcon();
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -68,7 +69,7 @@ namespace SteamFriendsPatcher
             about.ShowDialog();
         }
 
-        private void setupTrayIcon()
+        private void SetupTrayIcon()
         {
             var contextMenu = new System.Windows.Forms.ContextMenu();
             var showButton = new System.Windows.Forms.MenuItem();
@@ -116,9 +117,9 @@ namespace SteamFriendsPatcher
             return;
         }
 
-        private void ToggleScanButton_Click(object sender, RoutedEventArgs e)
+        private async void ToggleScanButton_Click(object sender, RoutedEventArgs e)
         {
-            Program.ToggleCacheScanner(!Program.scannerExists);
+            await Task.Run(() => Program.ToggleCacheScanner(!Program.scannerExists));
         }
 
         private async void ForceCheckButton_Click(object sender, RoutedEventArgs e)
@@ -129,6 +130,23 @@ namespace SteamFriendsPatcher
         private async void ClearCacheButton_Click(object sender, RoutedEventArgs e)
         {
             await Task.Run(() => Program.ClearSteamCache());
+        }
+
+        public void ToggleButtons(bool status)
+        {
+            this.Dispatcher.Invoke((System.Windows.Forms.MethodInvoker)delegate
+            {
+                foreach (var item in LogicalTreeHelper.GetChildren(mainGrid))
+                {
+                    if (item is Button button)
+                    {
+                        button.IsEnabled = status;
+                        button.Visibility = status ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                        if (button.Name == "toggleScanButton")
+                            button.Content = Program.scannerExists ? "Stop Scanning" : "Start Scanning";
+                    }
+                }
+            });
         }
     }
 }

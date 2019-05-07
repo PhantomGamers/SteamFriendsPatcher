@@ -168,9 +168,7 @@ namespace SteamFriendsPatcher
         {
             bool preScannerStatus = scannerExists;
             ToggleCacheScanner(false);
-            ToggleForceScanButtonEnabled(false);
-            ToggleScanButtonEnabled(false);
-            ToggleClearCacheButtonEnabled(false);
+            Main.ToggleButtons(false);
 
             Print("Force scan started.");
             GetLatestFriendsCSS(forceUpdate);
@@ -249,9 +247,7 @@ namespace SteamFriendsPatcher
             }
 
         ResetButtons:
-            ToggleForceScanButtonEnabled(true);
-            ToggleScanButtonEnabled(true);
-            ToggleClearCacheButtonEnabled(true);
+            Main.ToggleButtons(true);
             if (preScannerStatus) { ToggleCacheScanner(true); }
             return;
         }
@@ -395,6 +391,7 @@ namespace SteamFriendsPatcher
         {
             lock (ScannerLock)
             {
+                Main.ToggleButtons(false);
                 DirectoryInfo cacheDir;
                 if (!Directory.Exists(steamCacheDir))
                 {
@@ -410,10 +407,8 @@ namespace SteamFriendsPatcher
                 {
                     cacheWatcher.EnableRaisingEvents = isEnabled;
                     crashWatcher.EnableRaisingEvents = isEnabled;
-                    string buttonText = isEnabled ? "Stop Scanning" : "Start Scanning";
-                    ToggleScanButtonEnabled(true, buttonText);
-                    Print("Cache Watcher " + (isEnabled ? "Started" : "Stopped") + ".");
                     scannerExists = isEnabled;
+                    Print("Cache Watcher " + (isEnabled ? "Started" : "Stopped") + ".");
                     if (!isEnabled)
                     {
                         cacheLock.Dispose();
@@ -422,6 +417,7 @@ namespace SteamFriendsPatcher
                             File.Delete(Path.Combine(steamCacheDir, "tmp.lock"));
                         }
                     }
+                    Main.ToggleButtons(true);
                     return;
                 }
                 else if (!isEnabled)
@@ -451,10 +447,6 @@ namespace SteamFriendsPatcher
                     return;
                 }
 
-                ToggleScanButtonEnabled(false, "Stop Scanning");
-                ToggleForceScanButtonEnabled(false);
-                ToggleClearCacheButtonEnabled(false);
-
                 StartCrashScanner();
 
                 cacheWatcher = new FileSystemWatcher
@@ -472,9 +464,7 @@ namespace SteamFriendsPatcher
                 scannerExists = true;
                 Print("Cache Watcher Started.");
 
-                ToggleScanButtonEnabled(true);
-                ToggleForceScanButtonEnabled(true);
-                ToggleClearCacheButtonEnabled(true);
+                Main.ToggleButtons(true);
             }
 
             return;
@@ -582,14 +572,12 @@ namespace SteamFriendsPatcher
                 if (Process.GetProcessesByName("Steam").Length > 0)
                 {
                     Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.", "error");
-                    goto ResetButtons;
+                    Main.ToggleButtons(true);
                 }
             }
 
             ToggleCacheScanner(false);
-            ToggleForceScanButtonEnabled(false);
-            ToggleScanButtonEnabled(false);
-            ToggleClearCacheButtonEnabled(false);
+            Main.ToggleButtons(false);
 
             Print("Deleting cache files...");
             try
@@ -625,10 +613,7 @@ namespace SteamFriendsPatcher
                 }
             }
 
-        ResetButtons:
-            ToggleForceScanButtonEnabled(true);
-            ToggleScanButtonEnabled(true);
-            ToggleClearCacheButtonEnabled(true);
+            Main.ToggleButtons(true);
             return;
         }
 
@@ -681,34 +666,6 @@ namespace SteamFriendsPatcher
             shortcut.WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             shortcut.IconLocation = Assembly.GetExecutingAssembly().Location;
             shortcut.Save();
-        }
-
-        private static void ToggleScanButtonEnabled(bool status, string text = null)
-        {
-            lock (ToggleScannerButtonLock)
-            {
-                Main.toggleScanButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.toggleScanButton.Content = text ?? Main.toggleScanButton.Content; });
-                Main.toggleScanButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.toggleScanButton.IsEnabled = status; });
-                Main.toggleScanButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.toggleScanButton.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
-            }
-        }
-
-        private static void ToggleForceScanButtonEnabled(bool status)
-        {
-            lock (ToggleForceScannerButtonLock)
-            {
-                Main.forceCheckButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.forceCheckButton.IsEnabled = status; });
-                Main.forceCheckButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.forceCheckButton.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
-            }
-        }
-
-        private static void ToggleClearCacheButtonEnabled(bool status)
-        {
-            lock (ToggleForceScannerButtonLock)
-            {
-                Main.clearCacheButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.clearCacheButton.IsEnabled = status; });
-                Main.clearCacheButton.Dispatcher.Invoke((MethodInvoker)delegate { Main.clearCacheButton.Visibility = !status ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible; });
-            }
         }
 
         public static void Print(string message = null, string messagetype = "Info", bool newline = true)
