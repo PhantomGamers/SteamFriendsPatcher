@@ -26,6 +26,7 @@ namespace SteamFriendsPatcher
             if (singleInstance.WaitOne(TimeSpan.Zero, true))
             {
                 MainWindowRef = new MainWindow();
+
                 PerformUpgrade();
                 string ver = ThisAssembly.AssemblyInformationalVersion;
                 MainWindowRef.Title += $"v{(ver.Substring(0, ver.IndexOf('+') > -1 ? ver.IndexOf('+') : ver.Length))}";
@@ -36,15 +37,15 @@ namespace SteamFriendsPatcher
                     MainWindowRef.Height = SteamFriendsPatcher.Properties.Settings.Default.windowHeight;
                 }
 
-                if (SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
-                {
-                    MainWindowRef.WindowState = WindowState.Minimized;
-                    if (SteamFriendsPatcher.Properties.Settings.Default.minimizeToTray)
-                    {
-                        return;
-                    }
-                }
+                if (SteamFriendsPatcher.Properties.Settings.Default.minimizeToTray && SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
+                    return;
+
                 MainWindowRef.Show();
+
+                if (SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
+                    MainWindowRef.WindowState = WindowState.Minimized;
+
+                singleInstance.ReleaseMutex();
             }
             else
             {

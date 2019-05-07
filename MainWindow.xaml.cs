@@ -14,8 +14,35 @@ namespace SteamFriendsPatcher
 
         public MainWindow()
         {
+            Closing += MainWindow_Closing;
+            SizeChanged += MainWindow_SizeChanged;
+            StateChanged += MainWindow_StateChanged;
             InitializeComponent();
             setupTrayIcon();
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            NotifyIcon.Visible = false;
+            Program.ToggleCacheScanner(false);
+        }
+
+        private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (Properties.Settings.Default.saveLastWindowSize)
+            {
+                Properties.Settings.Default.windowWidth = Width;
+                Properties.Settings.Default.windowHeight = Height;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void MainWindow_StateChanged(object sender, EventArgs e)
+        {
+            if (Properties.Settings.Default.minimizeToTray && WindowState == WindowState.Minimized)
+            {
+                Hide();
+            }
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -68,12 +95,12 @@ namespace SteamFriendsPatcher
 
         private void ShowButton_Click(object sender, EventArgs e)
         {
-            if (!this.IsVisible)
-                this.Show();
+            if (!IsVisible)
+                Show();
 
-            if (this.WindowState == WindowState.Minimized)
-                this.WindowState = WindowState.Normal;
-            this.Activate();
+            if (WindowState == WindowState.Minimized)
+                WindowState = WindowState.Normal;
+            Activate();
         }
 
         private static void ExitButton_Click(object sender, EventArgs e)
@@ -90,30 +117,6 @@ namespace SteamFriendsPatcher
         private async void ForceCheckButton_Click(object sender, RoutedEventArgs e)
         {
             await Task.Run(() => Program.FindCacheFile(true));
-        }
-
-        private void Main_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (Properties.Settings.Default.saveLastWindowSize)
-            {
-                Properties.Settings.Default.windowWidth = this.Width;
-                Properties.Settings.Default.windowHeight = this.Height;
-                Properties.Settings.Default.Save();
-            }
-        }
-
-        private void Main_StateChanged(object sender, EventArgs e)
-        {
-            if (Properties.Settings.Default.minimizeToTray && this.WindowState == WindowState.Minimized)
-            {
-                this.Hide();
-            }
-        }
-
-        private void Main_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            NotifyIcon.Visible = false;
-            Program.ToggleCacheScanner(false);
         }
 
         private async void ClearCacheButton_Click(object sender, RoutedEventArgs e)
