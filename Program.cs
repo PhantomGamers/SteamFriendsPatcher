@@ -156,7 +156,11 @@ namespace SteamFriendsPatcher
             Main.Dispatcher.Invoke((MethodInvoker)delegate
             {
                 if (!Main.IsVisible && Properties.Settings.Default.showNotificationsInTray)
-                    Main.NotifyIcon.ShowBalloonTip(0, "", "Friends.css patched successfully.", ToolTipIcon.Info);
+                {
+                    Main.NotifyIcon.BalloonTipTitle = "Steam Friends Patcher";
+                    Main.NotifyIcon.BalloonTipText = "Successfully patched friends!";
+                    Main.NotifyIcon.ShowBalloonTip((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
+                }
             });
         }
 

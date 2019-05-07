@@ -42,6 +42,11 @@ namespace SteamFriendsPatcher
             if (Properties.Settings.Default.minimizeToTray && WindowState == WindowState.Minimized)
             {
                 Hide();
+                if (Properties.Settings.Default.showNotificationsInTray)
+                {
+                    NotifyIcon.BalloonTipText = Program.scannerExists ? "Scanning in background..." : "Minimized to tray, scanner not running.";
+                    NotifyIcon.ShowBalloonTip((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
+                }
             }
         }
 
@@ -91,6 +96,8 @@ namespace SteamFriendsPatcher
 
             // double click
             NotifyIcon.DoubleClick += new System.EventHandler(ShowButton_Click);
+
+            NotifyIcon.BalloonTipTitle = "Steam Friends Patcher";
         }
 
         private void ShowButton_Click(object sender, EventArgs e)
