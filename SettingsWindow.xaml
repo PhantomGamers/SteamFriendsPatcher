@@ -6,7 +6,7 @@
         xmlns:p="clr-namespace:SteamFriendsPatcher.Properties"
         xmlns:local="clr-namespace:SteamFriendsPatcher"
         mc:Ignorable="d"
-        Title="Steam Friends Patcher - Settings" Background="#FF1E1E1F" Foreground="White" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Icon="steam_512_0dR_icon.ico" Margin="0" SizeToContent="WidthAndHeight" Padding="0" MinWidth="400" MinHeight="400" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
+        Title="Steam Friends Patcher - Settings" Background="#FF1E1E1F" Foreground="White" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Icon="steam_512_0dR_icon.ico" Margin="0" SizeToContent="WidthAndHeight" Padding="0" MinWidth="400" MinHeight="400" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display">
     <Window.Resources>
         <Style x:Key="FocusVisual">
             <Setter Property="Control.Template">
@@ -111,17 +111,17 @@
             <RowDefinition />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <CheckBox x:Name="startWithWindows" Content="Start With Windows" Foreground="White" FontSize="14" Padding="4,-1,0,0" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Height="18" Width="141" />
-        <CheckBox x:Name="startMinimized" Content="Start Minimized" Foreground="White" Grid.Row="1" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" Height="18" Width="115" />
-        <CheckBox x:Name="minimizeToTray" Content="Minimize To Tray" Foreground="White" Grid.Row="2" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" Height="18" Width="121" />
-        <CheckBox x:Name="checkForUpdates" Content="Check For Updates" Foreground="White" Grid.Row="3" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" Height="18" Width="135" />
-        <CheckBox x:Name="autoScanOnStartup" Content="Auto Scan On Startup" Foreground="White" Grid.Row="4" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" Height="18" Width="153" />
-        <CheckBox x:Name="forceScanOnStartup" Content="Force Scan On Startup" Foreground="White" Grid.Row="5" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" Height="18" Width="156" />
-        <CheckBox x:Name="saveLastWindowSize" Content="Save Last Window Size" Foreground="White" Grid.Row="6" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" Height="18" Width="157" />
-        <CheckBox x:Name="showNotificationsInTray" Content="Show Notifications In Tray" Foreground="White" Grid.Row="7" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" Height="18" Width="177" />
-        <CheckBox x:Name="runSteamOnStartup" Content="Run Steam On Startup" Foreground="White" Grid.Row="8" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" Height="18" Width="157" />
-        <Label x:Name="steamLaunchArgText" Content="Steam Launch Arguments:" HorizontalAlignment="Left" Grid.Row="9" VerticalAlignment="Top" Foreground="White" FontSize="14" Height="29" Width="171" />
-        <TextBox x:Name="steamLaunchArgs" Margin="175,0,0,0" Grid.Row="9" Background="#FF3D3D3E" Foreground="White" Tag="Steam launch args (e.g. -dev)"  Style="{DynamicResource TextBoxWatermarkNoFocus}" BorderBrush="{x:Null}" FontSize="14" VerticalContentAlignment="Center" MaxLines="1" Grid.Column="1" Width="200">
+        <CheckBox x:Name="startWithWindows" Content="Start With Windows" Foreground="White" FontSize="14" Padding="4,-1,0,0" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display" />
+        <CheckBox x:Name="startMinimized" Content="Start Minimized" Foreground="White" Grid.Row="1" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <CheckBox x:Name="minimizeToTray" Content="Minimize To Tray" Foreground="White" Grid.Row="2" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <CheckBox x:Name="checkForUpdates" Content="Check For Updates" Foreground="White" Grid.Row="3" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <CheckBox x:Name="autoScanOnStartup" Content="Auto Scan On Startup" Foreground="White" Grid.Row="4" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <CheckBox x:Name="forceScanOnStartup" Content="Force Scan On Startup" Foreground="White" Grid.Row="5" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <CheckBox x:Name="saveLastWindowSize" Content="Save Last Window Size" Foreground="White" Grid.Row="6" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <CheckBox x:Name="showNotificationsInTray" Content="Show Notifications In Tray" Foreground="White" Grid.Row="7" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <CheckBox x:Name="runSteamOnStartup" Content="Run Steam On Startup" Foreground="White" Grid.Row="8" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <Label x:Name="steamLaunchArgText" Content="Steam Launch Arguments:" HorizontalAlignment="Left" Grid.Row="9" VerticalAlignment="Top" Foreground="White" FontSize="14" Height="29" Width="171" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <TextBox x:Name="steamLaunchArgs" Margin="175,0,0,0" Grid.Row="9" Background="#FF3D3D3E" Foreground="White" Tag="Steam launch args (e.g. -dev)"  Style="{DynamicResource TextBoxWatermarkNoFocus}" BorderBrush="{x:Null}" FontSize="14" VerticalContentAlignment="Center" MaxLines="1" Grid.Column="1" Width="200" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
             <TextBox.Resources>
                 <SolidColorBrush x:Key="TextBox.Static.Border" Color="#FFABAdB3" />
                 <SolidColorBrush x:Key="TextBox.MouseOver.Border" Color="#FF7EB4EA" />
@@ -188,9 +188,9 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Button x:Name="saveSettings" Content="Save Settings" Grid.Row="10" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="SaveSettings_Click" Margin="0,10,10,0" FontSize="14" BorderBrush="{x:Null}" Padding="10" />
-            <Button x:Name="cancelChanges" Content="Cancel" Grid.Row="10" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="cancelChanges_Click" Margin="0,10,10,0" FontSize="14" BorderBrush="{x:Null}" Grid.Column="1" Padding="10" />
-            <Button x:Name="resetToDefaults" Content="Reset To Defaults" Grid.Column="2" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="ResetToDefaults_Click" Margin="0,10,0,0" FontSize="14" BorderBrush="{x:Null}" Grid.Row="10" Padding="10" />
+            <Button x:Name="saveSettings" Content="Save Settings" Grid.Row="10" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="SaveSettings_Click" Margin="0,10,10,0" FontSize="14" BorderBrush="{x:Null}" Padding="10" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+            <Button x:Name="cancelChanges" Content="Cancel" Grid.Row="10" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="cancelChanges_Click" Margin="0,10,10,0" FontSize="14" BorderBrush="{x:Null}" Grid.Column="1" Padding="10" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+            <Button x:Name="resetToDefaults" Content="Reset To Defaults" Grid.Column="2" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="ResetToDefaults_Click" Margin="0,10,0,0" FontSize="14" BorderBrush="{x:Null}" Grid.Row="10" Padding="10" TextOptions.TextHintingMode="Fixed" />
         </Grid>
     </Grid>
 </Window>

@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Steam Friends Patcher - About" Background="#FF1E1E1F" Foreground="White" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" WindowStyle="ToolWindow" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
     <Grid Margin="10">
-        <Label x:Name="programName" Content="Steam Friends Patcher " HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18" TextOptions.TextHintingMode="Fixed" />
+        <Label x:Name="programName" Content="Steam Friends Patcher " HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Ideal" />
         <Label x:Name="authorName" Content="Made by PhantomGamers" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display" />
         <Label x:Name="label" Content="Github: " HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" Foreground="White" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
         <TextBlock HorizontalAlignment="Left" Margin="70,85,0,0" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">

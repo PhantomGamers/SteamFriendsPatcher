@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SteamFriendsPatcher"
         mc:Ignorable="d"
-        Title="Steam Friends Patcher " Background="#FF1E1E1F" Foreground="White" MinWidth="545" MinHeight="327" HorizontalAlignment="Left" VerticalAlignment="Bottom" Icon="steam_512_0dR_icon.ico" WindowStartupLocation="CenterScreen" Width="768" Height="535" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
+        Title="Steam Friends Patcher " Background="#FF1E1E1F" Foreground="White" MinWidth="545" MinHeight="327" HorizontalAlignment="Left" VerticalAlignment="Bottom" Icon="steam_512_0dR_icon.ico" WindowStartupLocation="CenterScreen" Width="768" Height="535" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display">
     <Grid x:Name="mainGrid">
-        <RichTextBox x:Name="output" Margin="10,10,10,50" Background="#FF3D3D3E" Foreground="White" BorderBrush="#FF2E2E2F" SelectionBrush="#FF1E1E1F" BorderThickness="2" IsReadOnly="True" Padding="0" Block.LineHeight="1.0" Style="{DynamicResource RichTextBoxNoFocusBorder}" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
+        <RichTextBox x:Name="output" Margin="10,10,10,50" Background="#FF3D3D3E" Foreground="White" BorderBrush="#FF2E2E2F" SelectionBrush="#FF1E1E1F" BorderThickness="2" IsReadOnly="True" Padding="0" Block.LineHeight="1.0" Style="{DynamicResource RichTextBoxNoFocusBorder}" TextOptions.TextHintingMode="Fixed">
             <RichTextBox.Resources>
                 <SolidColorBrush x:Key="TextBox.Static.Border" Color="#FFABAdB3" />
                 <SolidColorBrush x:Key="TextBox.MouseOver.Border" Color="#FF7EB4EA" />
