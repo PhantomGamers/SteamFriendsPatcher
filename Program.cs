@@ -673,7 +673,7 @@ namespace SteamFriendsPatcher
 #if DEBUG
             Debug.Write(message + Environment.NewLine);
 #endif
-            if (messagetype == "Debug")
+            if (messagetype == "Debug" && !Properties.Settings.Default.showDebugMessages)
             {
                 return;
             }
@@ -708,6 +708,12 @@ namespace SteamFriendsPatcher
                             Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
                             Main.output.Selection.Text = "[SUCCESS] ";
                             Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#60a917"));
+                            break;
+
+                        case "Debug":
+                            Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
+                            Main.output.Selection.Text = "[DEBUG] ";
+                            Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
                             break;
 
                         default:
