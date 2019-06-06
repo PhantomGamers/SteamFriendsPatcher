@@ -126,6 +126,9 @@ namespace SteamFriendsPatcher
 
         private static void PatchCacheFile(string friendscachefile, byte[] decompressedcachefile)
         {
+            Print($"Successfully found matching friends.css at {friendscachefile}.", "Success");
+            File.WriteAllBytes(steamDir + "\\clientui\\friends.original.css", Encoding.ASCII.GetBytes("/*" + etag + "*/\n").Concat(decompressedcachefile).ToArray());
+
             Print("Adding import line to friends.css...");
             decompressedcachefile = PrependFile(decompressedcachefile);
 
@@ -220,8 +223,6 @@ namespace SteamFriendsPatcher
                     if (decompressedcachefile.Length == friendscss.Length && ByteArrayCompare(decompressedcachefile, friendscss))
                     {
                         state.Stop();
-                        Print($"Successfully found matching friends.css at {s}.", "Success");
-                        File.WriteAllBytes(steamDir + "\\clientui\\friends.original.css", Encoding.ASCII.GetBytes("/*" + etag + "*/\n").Concat(decompressedcachefile).ToArray());
                         friendscachefile = s;
                         PatchCacheFile(s, decompressedcachefile);
                         return;
