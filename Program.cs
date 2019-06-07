@@ -831,52 +831,52 @@ namespace SteamFriendsPatcher
             {
                 Main.output.Dispatcher.Invoke(DispatcherPriority.Background, (MethodInvoker)delegate
                 {
-                    TextRange tr;
+                    if (Main.output.Document == null)
+                    {
+                        Main.output.Document = new FlowDocument();
+                    }
+
                     // Date & Time
-                    tr = new TextRange(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd)
+                    TextRange tr = new TextRange(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd)
                     {
                         Text = $"[{DateTime.Now}] "
                     };
                     tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
+                    tr.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
 
                     // Message Type
                     switch (messagetype)
                     {
                         case "Error":
-                            Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
-                            Main.output.Selection.Text = "[ERROR] ";
-                            Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#e51400"));
+                            tr.Text += "[ERROR] ";
+                            tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#e51400"));
                             break;
 
                         case "Warning":
-                            Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
-                            Main.output.Selection.Text = "[WARNING] ";
-                            Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#f0a30a"));
+                            tr.Text += "[WARNING] ";
+                            tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#f0a30a"));
                             break;
 
                         case "Success":
-                            Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
-                            Main.output.Selection.Text = "[SUCCESS] ";
-                            Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#60a917"));
+                            tr.Text += "[SUCCESS] ";
+                            tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#60a917"));
                             break;
 
                         case "Debug":
-                            Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
-                            Main.output.Selection.Text = "[DEBUG] ";
-                            Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
+                            tr.Text += "[DEBUG] ";
+                            tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
                             break;
 
                         default:
-                            Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
-                            Main.output.Selection.Text = "[INFO] ";
-                            Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
+                            tr.Text += "[INFO] ";
+                            tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
                             break;
                     }
 
                     // Message
-                    Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
-                    Main.output.Selection.Text = message + (newline ? "\n" : string.Empty);
-                    Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#ffffff"));
+                    tr.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
+                    tr.Text += message + (newline ? "\n" : string.Empty);
+                    tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("White"));
                 });
             }
         }

@@ -8,8 +8,7 @@
         Title="Steam Friends Patcher " Background="#FF1E1E1F" Foreground="White" MinWidth="545" MinHeight="327" HorizontalAlignment="Left" VerticalAlignment="Bottom" Icon="steam_512_0dR_icon.ico" WindowStartupLocation="CenterScreen" Width="768" Height="535" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display">
     <Grid x:Name="mainGrid">
         <FlowDocumentScrollViewer x:Name="output" Margin="10,10,10,50" BorderThickness="2" SelectionBrush="#FF1E1E1F" TextOptions.TextHintingMode="Fixed" Padding="0" Block.LineHeight="1.0" TextOptions.TextFormattingMode="Display" VerticalScrollBarVisibility="Auto" ForceCursor="True" Cursor="Arrow">
-            <FlowDocument Background="#FF3D3D3E" Foreground="White" FontFamily="Segoe UI" FontSize="12">
-            </FlowDocument>
+            <FlowDocument Background="#FF3D3D3E" Foreground="White" FontFamily="Segoe UI" FontSize="12" />
         </FlowDocumentScrollViewer>
         <Button x:Name="toggleScanButton" Content="Start Scanning" Margin="10,0,0,10" Background="#FF3D3D3E" Foreground="White" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="ToggleScanButton_Click" Padding="10,1" BorderBrush="{x:Null}" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Ideal" />
         <Button x:Name="settingsButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="32" FontFamily="/SteamFriendsPatcher;component/resources/#Font Awesome 5 Free Solid" Background="#00DDDDDD" Foreground="White" Height="32" FontSize="24" BorderThickness="0" Margin="0,0,10,10" Click="SettingsButton_Click">
