@@ -3,6 +3,7 @@
 using Semver;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -11,10 +12,12 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace SteamFriendsPatcher
 {
@@ -53,6 +56,8 @@ namespace SteamFriendsPatcher
         // patched friends.css
         public static byte[] friendscsspatched;
 
+        public static bool useDecompressionMethod = false;
+
         // original friends.css age
         public static DateTime friendscssage;
 
@@ -63,14 +68,14 @@ namespace SteamFriendsPatcher
         public static FileStream cacheLock;
         public static bool scannerExists = false;
 
+        private static List<string> pendingCacheFiles = new List<string>();
+
         // objects to lock to maintain thread safety
         private static readonly object MessageLock = new object();
 
         private static readonly object ScannerLock = new object();
         private static readonly object UpdateScannerLock = new object();
         private static readonly object GetFriendsCSSLock = new object();
-        private static readonly object ToggleScannerButtonLock = new object();
-        private static readonly object ToggleForceScannerButtonLock = new object();
 
         private static readonly MainWindow Main = App.MainWindowRef;
 
@@ -129,16 +134,8 @@ namespace SteamFriendsPatcher
             Print($"Successfully found matching friends.css at {friendscachefile}.", "Success");
             File.WriteAllBytes(steamDir + "\\clientui\\friends.original.css", Encoding.ASCII.GetBytes("/*" + etag + "*/\n").Concat(decompressedcachefile).ToArray());
 
-            Print("Adding import line to friends.css...");
-            decompressedcachefile = PrependFile(decompressedcachefile);
-
-            Print("Recompressing friends.css...");
-            using (FileStream file = new FileStream(friendscachefile, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
-            using (GZipStream gzip = new GZipStream(file, CompressionLevel.Optimal, false))
-            {
-                Print("Overwriting original friends.css...");
-                gzip.Write(decompressedcachefile, 0, decompressedcachefile.Length);
-            }
+            Print("Overwriting with patched version...");
+            File.WriteAllBytes(friendscachefile, friendscsspatched);
 
             if (!File.Exists(steamDir + "\\clientui\\friends.custom.css"))
             {
@@ -175,6 +172,13 @@ namespace SteamFriendsPatcher
 
             Print("Force scan started.");
             GetLatestFriendsCSS(forceUpdate);
+
+            if (friendscss == null || friendscsspatched == null)
+            {
+                Print("Friends.css could not be obtained, ending force check...");
+                goto ResetButtons;
+            }
+
             Print("Finding list of possible cache files...");
             if (!Directory.Exists(steamCacheDir))
             {
@@ -183,17 +187,18 @@ namespace SteamFriendsPatcher
                 goto ResetButtons;
             }
             var validFiles = new DirectoryInfo(steamCacheDir).EnumerateFiles("f_*", SearchOption.TopDirectoryOnly)
-                .Where(f => f.Length <= friendscss.Length)
+                .Where(f => (f.Length == friendscsspatched.Length || f.Length == friendscss.Length))
                 .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => f.FullName)
                 .ToList();
-            if (validFiles.Count() == 0)
+            var count = validFiles.Count();
+            if (count == 0)
             {
                 Print("No cache files found.", "Error");
                 Print("Please confirm that Steam is running and that the friends list is open and try again.", "Error");
                 goto ResetButtons;
             }
-            Print($"Found {validFiles.Count} possible cache files.");
+            Print($"Found {count} possible cache files.");
 
             string friendscachefile = null;
             bool patchedFileFound = false;
@@ -219,18 +224,34 @@ namespace SteamFriendsPatcher
 
                 if (IsGZipHeader(cachefile))
                 {
-                    byte[] decompressedcachefile = Decompress(cachefile);
-                    if (decompressedcachefile.Length == friendscss.Length && ByteArrayCompare(decompressedcachefile, friendscss))
+                    if (cachefile.Length == friendscss.Length && ByteArrayCompare(cachefile, friendscss))
                     {
                         state.Stop();
                         friendscachefile = s;
-                        PatchCacheFile(s, decompressedcachefile);
+                        PatchCacheFile(s, Decompress(cachefile));
                         return;
                     }
-                    else if (decompressedcachefile.Length == friendscsspatched.Length && ByteArrayCompare(decompressedcachefile, friendscsspatched))
+                    else if (cachefile.Length == friendscsspatched.Length && ByteArrayCompare(cachefile, friendscsspatched))
                     {
                         patchedFileFound = true;
                     }
+                    /*
+                    if (useDecompressionMethod)
+                    {
+                        byte[] decompressedcachefile = Decompress(cachefile);
+                        if (decompressedcachefile.Length == friendscss.Length && ByteArrayCompare(decompressedcachefile, friendscss))
+                        {
+                            state.Stop();
+                            friendscachefile = s;
+                            PatchCacheFile(s, decompressedcachefile);
+                            return;
+                        }
+                        else if (decompressedcachefile.Length == friendscsspatched.Length && ByteArrayCompare(decompressedcachefile, friendscsspatched))
+                        {
+                            patchedFileFound = true;
+                        }
+                    }
+                    */
                 }
             });
 
@@ -281,50 +302,75 @@ namespace SteamFriendsPatcher
             lock (GetFriendsCSSLock)
             {
                 Print("Downloading latest friends.css...");
-                try
+                using (var wc = new WebClient())
                 {
-                    WebClient wc = new WebClient();
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-
-                    string steamChat = wc.DownloadString("https://steam-chat.com/chat/clientui/?l=&build=&cc");
-                    string eTagRegex = "(?<=<link href=\"https:\\/\\/steamcommunity-a.akamaihd.net\\/public\\/css\\/webui\\/friends.css\\?v=)(.*?)(?=\")";
-                    etag = Regex.Match(steamChat, eTagRegex).Value;
-                    byte[] fc;
-                    if (!string.IsNullOrEmpty(etag))
+                    try
                     {
-                        fc = wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css?v=" + etag);
-                        if (fc.Length > 0)
+                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+
+                        string steamChat = wc.DownloadString("https://steam-chat.com/chat/clientui/?l=&build=&cc");
+                        wc.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
+                        wc.Encoding = Encoding.UTF8;
+                        string eTagRegex = "(?<=<link href=\"https:\\/\\/steamcommunity-a.akamaihd.net\\/public\\/css\\/webui\\/friends.css\\?v=)(.*?)(?=\")";
+                        etag = Regex.Match(steamChat, eTagRegex).Value;
+                        byte[] fc;
+                        if (string.IsNullOrEmpty(etag))
                         {
-                            friendscss = fc;
-                            friendscsspatched = PrependFile(fc);
-                            friendscssage = DateTime.Now;
-                            Print("Successfully downloaded latest friends.css", "Success");
-                            return true;
+                            fc = wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css");
+                            var count = wc.ResponseHeaders.Count;
+                            for (int i = 0; i < count; i++)
+                            {
+                                if (wc.ResponseHeaders.GetKey(i) == "ETag")
+                                {
+                                    etag = wc.ResponseHeaders.Get(i);
+                                    break;
+                                }
+                            }
                         }
+                        if (!string.IsNullOrEmpty(etag))
+                        {
+                            fc = wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css?v=" + etag);
+                            if (fc.Length > 0)
+                            {
+                                friendscss = fc;
+                                var tmp = PrependFile(Decompress(fc));
+
+                                using (MemoryStream file = new MemoryStream())
+                                {
+                                    using (GZipStream gzip = new GZipStream(file, CompressionLevel.Optimal, false))
+                                    {
+                                        gzip.Write(tmp, 0, tmp.Length);
+                                    }
+                                    friendscsspatched = file.ToArray();
+                                }
+                                friendscssage = DateTime.Now;
+                                Print("Successfully downloaded latest friends.css", "Success");
+                                return true;
+                            }
+                        }
+                        /*
+                        else
+                        {
+                            fc = wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css");
+                            if (fc.Length > 0)
+                            {
+                                friendscss = Decompress(fc);
+                                friendscsspatched = PrependFile(friendscss);
+                                friendscssage = DateTime.Now;
+                                Print("Successfully downloaded latest friends.css.", "Success");
+                                return true;
+                            }
+                        }
+                        */
                         Print("Failed to download friends.css", "Error");
                         return false;
                     }
-                    else
+                    catch (WebException we)
                     {
-                        Print("Could not find etag, downloading default css.", "Debug");
-                        fc = wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css");
-                        if (fc.Length > 0)
-                        {
-                            friendscss = fc;
-                            friendscsspatched = PrependFile(fc);
-                            friendscssage = DateTime.Now;
-                            Print("Successfully downloaded latest friends.css.", "Success");
-                            return true;
-                        }
                         Print("Failed to download friends.css.", "Error");
+                        Print(we.ToString(), "Error");
                         return false;
                     }
-                }
-                catch (WebException we)
-                {
-                    Print("Failed to download friends.css.", "Error");
-                    Print(we.ToString(), "Error");
-                    return false;
                 }
             }
         }
@@ -432,10 +478,10 @@ namespace SteamFriendsPatcher
                     {
                         cacheLock = new FileStream(Path.Combine(steamCacheDir, "tmp.lock"), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                     }
-                    catch (Exception)
+                    catch
                     {
                         Print("Windows is dumb.", "Debug");
-                        Print(cacheDir.Exists.ToString(), "Debug");
+                        Print("Does cache directory exist: " + cacheDir.Exists.ToString(), "Debug");
                         Task.Delay(TimeSpan.FromSeconds(1)).Wait();
                         continue;
                     }
@@ -455,11 +501,12 @@ namespace SteamFriendsPatcher
                     Path = steamCacheDir,
                     NotifyFilter = NotifyFilters.LastAccess
                                  | NotifyFilters.LastWrite
-                                 | NotifyFilters.FileName,
+                                 | NotifyFilters.FileName
+                                 | NotifyFilters.Size,
                     Filter = "f_*"
                 };
-                cacheWatcher.Created += new FileSystemEventHandler(CacheWatcher_Created);
-                cacheWatcher.Changed += new FileSystemEventHandler(CacheWatcher_Created);
+                cacheWatcher.Created += new FileSystemEventHandler(CacheWatcher_Changed);
+                cacheWatcher.Changed += new FileSystemEventHandler(CacheWatcher_Changed);
                 GetLatestFriendsCSS();
                 cacheWatcher.EnableRaisingEvents = true;
                 scannerExists = true;
@@ -471,11 +518,50 @@ namespace SteamFriendsPatcher
             return;
         }
 
-        private static void CacheWatcher_Created(object sender, FileSystemEventArgs e)
+        private static void CacheWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            Print($"New file found: {e.Name}", "Debug");
-            byte[] cachefile, decompressedcachefile;
+            if (pendingCacheFiles.Contains(e.Name) || friendscss == null || new System.IO.FileInfo(e.FullPath).Length != friendscss.Length)
+                return;
+            pendingCacheFiles.Add(e.Name);
+            Thread t = new Thread(new ParameterizedThreadStart(ProcessCacheFile));
+            t.Start(e);
+        }
 
+        private static void ProcessCacheFile(object obj)
+        {
+            FileSystemEventArgs e = (FileSystemEventArgs)obj;
+            Print($"New file found: {e.Name}", "Debug");
+            DateTime lastAccess, lastWrite;
+            long size;
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+            do
+            {
+                lastAccess = File.GetLastAccessTime(e.FullPath);
+                lastWrite = File.GetLastWriteTime(e.FullPath);
+                size = new System.IO.FileInfo(e.FullPath).Length;
+                Task.Delay(TimeSpan.FromMilliseconds(500)).Wait();
+            } while ((lastAccess != File.GetLastAccessTime(e.FullPath)
+                  || lastWrite != File.GetLastWriteTime(e.FullPath)
+                  || size != new System.IO.FileInfo(e.FullPath).Length) && timer.Elapsed < TimeSpan.FromSeconds(15));
+
+            timer.Stop();
+            if (timer.Elapsed > TimeSpan.FromSeconds(15))
+            {
+                Print($"{e.Name} kept changing, blacklisting...", "Debug");
+                return;
+            }
+
+            timer.Restart();
+            while (!IsFileReady(e.FullPath) && timer.Elapsed < TimeSpan.FromSeconds(15)) { Task.Delay(TimeSpan.FromMilliseconds(20)).Wait(); }
+            timer.Stop();
+            if (timer.Elapsed > TimeSpan.FromSeconds(15))
+            {
+                Print($"{e.Name} could not be read, blacklisting...", "Debug");
+                return;
+            }
+
+            byte[] cachefile;
             try
             {
                 using (FileStream f = new FileStream(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -490,7 +576,16 @@ namespace SteamFriendsPatcher
                 if (File.Exists(e.FullPath))
                 {
                     Print($"Error opening file {e.Name}, retrying.", "Debug");
-                    CacheWatcher_Created(sender, e);
+                    pendingCacheFiles.Remove(e.Name);
+                    if (pendingCacheFiles.Contains(e.Name))
+                    {
+                        Print($"Multiple occurrences of {e.Name} found in list, removing all...", "Debug");
+                        do
+                        {
+                            pendingCacheFiles.Remove(e.Name);
+                        } while (pendingCacheFiles.Contains(e.Name));
+                    }
+                    ProcessCacheFile(e);
                 }
                 return;
             }
@@ -498,22 +593,60 @@ namespace SteamFriendsPatcher
             if (!IsGZipHeader(cachefile))
             {
                 Print($"{e.Name} not a gzip file.", "Debug");
+                pendingCacheFiles.Remove(e.Name);
+                if (pendingCacheFiles.Contains(e.Name))
+                {
+                    Print($"Multiple occurrences of {e.Name} found in list, removing all...", "Debug");
+                    do
+                    {
+                        pendingCacheFiles.Remove(e.Name);
+                    } while (pendingCacheFiles.Contains(e.Name));
+                }
                 return;
             }
 
+            if (friendscss.Length == cachefile.Length && ByteArrayCompare(friendscss, cachefile))
+            {
+                PatchCacheFile(e.FullPath, Decompress(cachefile));
+            }
+            else
+            {
+                Print($"{e.Name} did not match.", "Debug");
+            }
+            pendingCacheFiles.Remove(e.Name);
+            if (pendingCacheFiles.Contains(e.Name))
+            {
+                Print($"Multiple occurrences of {e.Name} found in list, removing all...", "Debug");
+                do
+                {
+                    pendingCacheFiles.Remove(e.Name);
+                } while (pendingCacheFiles.Contains(e.Name));
+            }
+            return;
+
+            /*
             decompressedcachefile = Decompress(cachefile);
 
             if (decompressedcachefile.Length == friendscss.Length &&
                 ByteArrayCompare(decompressedcachefile, friendscss))
             {
-                Print($"Found match in {e.Name}");
                 PatchCacheFile(e.FullPath, decompressedcachefile);
             }
             else
             {
                 Print($"{e.Name} did not match.", "Debug");
             }
+            pendingCacheFiles.Remove(e.Name);
+            if(pendingCacheFiles.Contains(e.Name))
+            {
+                Print($"Multiple occurrences of {e.Name} found in list, removing all...", "Debug");
+                do
+                {
+                    pendingCacheFiles.Remove(e.Name);
+                } while (pendingCacheFiles.Contains(e.Name));
+            }
             return;
+            */
         }
 
         private static void StartCrashScanner()
@@ -564,9 +697,9 @@ namespace SteamFriendsPatcher
                 Print("Shutting down Steam...");
                 Process.Start(steamDir + "\\Steam.exe", "-shutdown");
                 Stopwatch stopwatch = Stopwatch.StartNew();
-                while (Process.GetProcessesByName("Steam").Length > 0 && stopwatch.Elapsed.Seconds < 10)
+                while (Process.GetProcessesByName("Steam").Length > 0 && stopwatch.Elapsed.Seconds < 15)
                 {
-                    Task.Delay(20).Wait();
+                    Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
                 }
 
                 stopwatch.Stop();
@@ -616,6 +749,21 @@ namespace SteamFriendsPatcher
 
             Main.ToggleButtons(true);
             return;
+        }
+
+        private static bool IsFileReady(string filename)
+        {
+            // If the file can be opened for exclusive access it means that the file
+            // is no longer locked by another process.
+            try
+            {
+                using (FileStream inputStream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.None))
+                    return inputStream.Length > 0;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         private static byte[] Decompress(byte[] gzip)
@@ -672,7 +820,7 @@ namespace SteamFriendsPatcher
         public static void Print(string message = null, string messagetype = "Info", bool newline = true)
         {
 #if DEBUG
-            Debug.Write(message + Environment.NewLine);
+            Debug.Write($"[{DateTime.Now}][{messagetype}] {message}" + (newline ? Environment.NewLine : string.Empty));
 #endif
             if (messagetype == "Debug" && !Properties.Settings.Default.showDebugMessages)
             {
@@ -680,7 +828,7 @@ namespace SteamFriendsPatcher
             }
             lock (MessageLock)
             {
-                Main.output.Dispatcher.Invoke((MethodInvoker)delegate
+                Main.output.Dispatcher.Invoke(DispatcherPriority.Background, (MethodInvoker)delegate
                 {
                     TextRange tr;
                     // Date & Time
