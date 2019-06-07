@@ -826,6 +826,7 @@ namespace SteamFriendsPatcher
             {
                 return;
             }
+
             lock (MessageLock)
             {
                 Main.output.Dispatcher.Invoke(DispatcherPriority.Background, (MethodInvoker)delegate
@@ -876,8 +877,6 @@ namespace SteamFriendsPatcher
                     Main.output.Selection.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
                     Main.output.Selection.Text = message + (newline ? "\n" : string.Empty);
                     Main.output.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#ffffff"));
-
-                    Main.output.ScrollToEnd();
                 });
             }
         }
