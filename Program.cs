@@ -413,7 +413,6 @@ namespace SteamFriendsPatcher
             string s = string.Empty;
             string tracker = null;
             string smatch = null;
-            return s;
             if (File.Exists(steamLangFile))
             {
                 tracker = File.ReadAllText(steamLangFile);
