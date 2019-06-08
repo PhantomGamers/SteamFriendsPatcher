@@ -711,7 +711,7 @@ namespace SteamFriendsPatcher
                 Print("Shutting down Steam...");
                 Process.Start(steamDir + "\\Steam.exe", "-shutdown");
                 Stopwatch stopwatch = Stopwatch.StartNew();
-                while (Process.GetProcessesByName("Steam").Length > 0 || Process.GetProcessesByName("SteamService").Length > 0 || Process.GetProcessesByName("steamwebhelper").Length > 0 || stopwatch.Elapsed.Seconds < 15)
+                while (Process.GetProcessesByName("Steam").Length > 0 || Process.GetProcessesByName("SteamService").Length > 0 || Process.GetProcessesByName("steamwebhelper").Length > 0 || stopwatch.Elapsed.Seconds < 30)
                 {
                     Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
                 }
