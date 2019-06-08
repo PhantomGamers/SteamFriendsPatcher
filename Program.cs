@@ -410,12 +410,18 @@ namespace SteamFriendsPatcher
         private static string FindFriendsListString()
         {
             string regex = "(?<=\"Friends_InviteInfo_FriendsList\"\\t{1,}\")(.*?)(?=\")";
-            string s = null;
+            string s = string.Empty;
             string tracker = null;
             string smatch = null;
+            return s;
             if (File.Exists(steamLangFile))
             {
                 tracker = File.ReadAllText(steamLangFile);
+            }
+            else
+            {
+                Print("Could not find friends list translation", "Warning");
+                return s;
             }
 
             if (!string.IsNullOrEmpty(tracker))
