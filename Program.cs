@@ -56,7 +56,7 @@ namespace SteamFriendsPatcher
         // patched friends.css
         public static byte[] friendscsspatched;
 
-        public static bool useDecompressionMethod = false;
+        public static string friendscssetag;
 
         // original friends.css age
         public static DateTime friendscssage;
@@ -301,7 +301,7 @@ namespace SteamFriendsPatcher
             }
             lock (GetFriendsCSSLock)
             {
-                Print("Downloading latest friends.css...");
+                Print("Checking for latest friends.css...");
                 using (var wc = new WebClient())
                 {
                     try
@@ -313,6 +313,13 @@ namespace SteamFriendsPatcher
                         wc.Encoding = Encoding.UTF8;
                         string eTagRegex = "(?<=<link href=\"https:\\/\\/steamcommunity-a.akamaihd.net\\/public\\/css\\/webui\\/friends.css\\?v=)(.*?)(?=\")";
                         etag = Regex.Match(steamChat, eTagRegex).Value;
+
+                        if (!string.IsNullOrEmpty(etag) && !string.IsNullOrEmpty(friendscssetag) && etag == friendscssetag)
+                        {
+                            Print("friends.css is already up to date.");
+                            return true;
+                        }
+
                         byte[] fc;
                         if (string.IsNullOrEmpty(etag))
                         {
@@ -327,6 +334,7 @@ namespace SteamFriendsPatcher
                                 }
                             }
                         }
+
                         if (!string.IsNullOrEmpty(etag))
                         {
                             fc = wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css?v=" + etag);
@@ -344,6 +352,7 @@ namespace SteamFriendsPatcher
                                     friendscsspatched = file.ToArray();
                                 }
                                 friendscssage = DateTime.Now;
+                                friendscssetag = etag;
                                 Print("Successfully downloaded latest friends.css", "Success");
                                 return true;
                             }
