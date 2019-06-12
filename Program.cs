@@ -701,8 +701,6 @@ namespace SteamFriendsPatcher
                     var element = sender as AutomationElement;
                     if (element.Current.ClassName == "SDL_app")
                     {
-                        Print(TreeWalker.ControlViewWalker.GetParent(element).Current.ProcessId.ToString());
-                        Print(AutomationElement.RootElement.Current.ProcessId.ToString());
                         GetLatestFriendsCSS();
                     }
                 });
