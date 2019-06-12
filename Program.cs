@@ -18,6 +18,7 @@ using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Windows.Automation;
 
 namespace SteamFriendsPatcher
 {
@@ -58,6 +59,8 @@ namespace SteamFriendsPatcher
         public static FileSystemWatcher crashWatcher;
         public static FileStream cacheLock;
         public static bool scannerExists = false;
+        public static bool friendslistWatcherExists = false;
+        public static bool updatePending = false;
 
         private static List<string> pendingCacheFiles = new List<string>();
 
@@ -295,12 +298,13 @@ namespace SteamFriendsPatcher
 
         public static bool GetLatestFriendsCSS(bool force = false)
         {
-            if (DateTime.Now.Subtract(friendscssage).TotalMinutes < 5.0 && !force)
+            if ((DateTime.Now.Subtract(friendscssage).TotalMinutes < 5.0 && !force) || updatePending)
             {
                 return true;
             }
             lock (GetFriendsCSSLock)
             {
+                updatePending = true;
                 Print("Checking for latest friends.css...");
                 using (var wc = new WebClient())
                 {
@@ -317,6 +321,7 @@ namespace SteamFriendsPatcher
                         if (!string.IsNullOrEmpty(etag) && !string.IsNullOrEmpty(friendscssetag) && etag == friendscssetag)
                         {
                             Print("friends.css is already up to date.");
+                            updatePending = false;
                             return true;
                         }
 
@@ -354,6 +359,7 @@ namespace SteamFriendsPatcher
                                 friendscssage = DateTime.Now;
                                 friendscssetag = etag;
                                 Print("Successfully downloaded latest friends.css");
+                                updatePending = false;
                                 return true;
                             }
                         }
@@ -372,12 +378,14 @@ namespace SteamFriendsPatcher
                         }
                         */
                         Print("Failed to download friends.css", LogLevel.Error);
+                        updatePending = false;
                         return false;
                     }
                     catch (WebException we)
                     {
                         Print("Failed to download friends.css.", LogLevel.Error);
                         Print(we.ToString(), LogLevel.Error);
+                        updatePending = false;
                         return false;
                     }
                 }
@@ -432,7 +440,6 @@ namespace SteamFriendsPatcher
                     cacheWatcher.EnableRaisingEvents = isEnabled;
                     crashWatcher.EnableRaisingEvents = isEnabled;
                     scannerExists = isEnabled;
-                    Print("Cache Watcher " + (isEnabled ? "Started" : "Stopped") + ".");
                     if (!isEnabled)
                     {
                         cacheLock.Dispose();
@@ -441,6 +448,9 @@ namespace SteamFriendsPatcher
                             File.Delete(Path.Combine(steamCacheDir, "tmp.lock"));
                         }
                     }
+                    Automation.RemoveAllEventHandlers();
+                    friendslistWatcherExists = false;
+                    Print("Cache Watcher " + (isEnabled ? "Started" : "Stopped") + ".");
                     Main.ToggleButtons(true);
                     return;
                 }
@@ -471,6 +481,8 @@ namespace SteamFriendsPatcher
                     return;
                 }
 
+                StartFriendsListWatcher();
+
                 StartCrashScanner();
 
                 cacheWatcher = new FileSystemWatcher
@@ -497,7 +509,7 @@ namespace SteamFriendsPatcher
 
         private static void CacheWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            if (pendingCacheFiles.Contains(e.Name) || friendscss == null || new System.IO.FileInfo(e.FullPath).Length != friendscss.Length)
+            if (pendingCacheFiles.Contains(e.Name) || (!updatePending && (friendscss == null || new System.IO.FileInfo(e.FullPath).Length != friendscss.Length)))
                 return;
             pendingCacheFiles.Add(e.Name);
             Thread t = new Thread(new ParameterizedThreadStart(ProcessCacheFile));
@@ -506,6 +518,10 @@ namespace SteamFriendsPatcher
 
         private static void ProcessCacheFile(object obj)
         {
+            while (updatePending)
+            {
+                Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
+            }
             FileSystemEventArgs e = (FileSystemEventArgs)obj;
             Print($"New file found: {e.Name}", LogLevel.Debug);
             DateTime lastAccess, lastWrite;
@@ -644,6 +660,7 @@ namespace SteamFriendsPatcher
             };
             crashWatcher.Created += new FileSystemEventHandler(CrashWatcher_Event);
             crashWatcher.Changed += new FileSystemEventHandler(CrashWatcher_Event);
+            crashWatcher.Deleted += new FileSystemEventHandler(CrashWatcher_Event);
 
             crashWatcher.EnableRaisingEvents = true;
 
@@ -652,8 +669,37 @@ namespace SteamFriendsPatcher
 
         private static void CrashWatcher_Event(object sender, FileSystemEventArgs e)
         {
-            Print("Steam start detected.", LogLevel.Debug);
-            GetLatestFriendsCSS();
+            if (e.ChangeType == WatcherChangeTypes.Changed || e.ChangeType == WatcherChangeTypes.Created)
+            {
+                Print("Steam start detected.", LogLevel.Debug);
+                GetLatestFriendsCSS();
+                if (scannerExists)
+                {
+                    StartFriendsListWatcher();
+                }
+            }
+            else if (e.ChangeType == WatcherChangeTypes.Deleted)
+            {
+                Print("Steam graceful shutdown detected.", LogLevel.Debug);
+                friendslistWatcherExists = false;
+                Automation.RemoveAllEventHandlers();
+            }
+        }
+
+        private static void StartFriendsListWatcher()
+        {
+            if (!friendslistWatcherExists && Process.GetProcessesByName("Steam").FirstOrDefault() != null)
+            {
+                friendslistWatcherExists = true;
+                Automation.AddAutomationEventHandler(WindowPattern.WindowOpenedEvent, AutomationElement.RootElement, TreeScope.Subtree, (sender, e) =>
+                {
+                    var element = sender as AutomationElement;
+                    if (element.Current.ClassName == "SDL_app")
+                    {
+                        GetLatestFriendsCSS();
+                    }
+                });
+            }
         }
 
         public static void ClearSteamCache()
