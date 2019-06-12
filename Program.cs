@@ -176,6 +176,11 @@ namespace SteamFriendsPatcher
             Print("Force scan started.");
             GetLatestFriendsCSS(forceUpdate);
 
+            while (updatePending)
+            {
+                Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
+            }
+
             if (friendscss == null || friendscsspatched == null)
             {
                 Print("Friends.css could not be obtained, ending force check...");
