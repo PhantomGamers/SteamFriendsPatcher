@@ -696,7 +696,7 @@ namespace SteamFriendsPatcher
             if (!friendslistWatcherExists && Process.GetProcessesByName("Steam").FirstOrDefault() != null)
             {
                 friendslistWatcherExists = true;
-                Automation.AddAutomationEventHandler(WindowPattern.WindowOpenedEvent, AutomationElement.RootElement, TreeScope.Subtree, (sender, e) =>
+                Automation.AddAutomationEventHandler(WindowPattern.WindowOpenedEvent, AutomationElement.RootElement, TreeScope.Children, (sender, e) =>
                 {
                     var element = sender as AutomationElement;
                     if (element.Current.ClassName == "SDL_app")
