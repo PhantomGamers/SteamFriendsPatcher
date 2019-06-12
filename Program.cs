@@ -401,7 +401,7 @@ namespace SteamFriendsPatcher
 
         private static bool FindFriendsWindow()
         {
-            if (NativeMethods.FindWindowByClass("SDL_app", IntPtr.Zero) != null)
+            if ((int)NativeMethods.FindWindowByClass("SDL_app") != 0)
             {
                 return true;
             }

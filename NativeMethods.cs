@@ -9,6 +9,6 @@ namespace SteamFriendsPatcher
         public static extern int Memcmp(byte[] b1, byte[] b2, long count);
 
         [DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
-        public static extern IntPtr FindWindowByClass(string lpClassName, IntPtr ZeroOnly);
+        public static extern IntPtr FindWindowByClass(string lpClassName, IntPtr ZeroOnly = default);
     }
 }
