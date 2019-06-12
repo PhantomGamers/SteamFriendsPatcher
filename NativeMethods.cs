@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace SteamFriendsPatcher
 {
@@ -6,5 +7,8 @@ namespace SteamFriendsPatcher
     {
         [DllImport("msvcrt.dll", EntryPoint = "memcmp", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Memcmp(byte[] b1, byte[] b2, long count);
+
+        [DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
+        public static extern IntPtr FindWindowByClass(string lpClassName, IntPtr ZeroOnly);
     }
 }

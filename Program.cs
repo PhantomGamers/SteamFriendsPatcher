@@ -29,15 +29,6 @@ namespace SteamFriendsPatcher
         // location of Steam's CEF Cache
         private static readonly string steamCacheDir = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Steam\\htmlcache\\Cache\\");
 
-        // current language set on steam
-        private static readonly string steamLang = FindSteamLang();
-
-        // location of file containing translations for set language
-        private static readonly string steamLangFile = steamDir + "\\friends\\trackerui_" + steamLang + ".txt";
-
-        // title of friends window in set language
-        private static readonly string FriendsString = FindFriendsListString();
-
         // Link to startup file
         public static readonly string startupLink = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                                     @"Microsoft\Windows\Start Menu\Programs\Startup",
@@ -408,46 +399,9 @@ namespace SteamFriendsPatcher
             }
         }
 
-        private static string FindSteamLang()
-        {
-            using (var registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Valve\\Steam"))
-            {
-                return registryKey?.GetValue("Language").ToString();
-            }
-        }
-
-        private static string FindFriendsListString()
-        {
-            string regex = "(?<=\"Friends_InviteInfo_FriendsList\"\\t{1,}\")(.*?)(?=\")";
-            string s = string.Empty;
-            string tracker = null;
-            string smatch = null;
-            if (File.Exists(steamLangFile))
-            {
-                tracker = File.ReadAllText(steamLangFile);
-            }
-            else
-            {
-                Print("Could not find friends list translation", LogLevel.Warning);
-                return s;
-            }
-
-            if (!string.IsNullOrEmpty(tracker))
-            {
-                smatch = Regex.Match(tracker, regex).Value;
-            }
-
-            if (!string.IsNullOrEmpty(smatch))
-            {
-                s = smatch;
-            }
-
-            return s;
-        }
-
         private static bool FindFriendsWindow()
         {
-            if (!string.IsNullOrEmpty(FriendsString) && WindowSearch.FindWindowLike.Find(0, FriendsString, "SDL_app").Count() > 0)
+            if (NativeMethods.FindWindowByClass("SDL_app", IntPtr.Zero) != null)
             {
                 return true;
             }

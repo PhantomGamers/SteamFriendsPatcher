@@ -94,7 +94,7 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="FindWindowLike.cs" />
+    <None Include="FindWindowLike.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
