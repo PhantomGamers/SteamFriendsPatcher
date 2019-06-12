@@ -527,53 +527,71 @@ namespace SteamFriendsPatcher
             {
                 Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
             }
-            FileSystemEventArgs e = (FileSystemEventArgs)obj;
-            Print($"New file found: {e.Name}", LogLevel.Debug);
-            DateTime lastAccess, lastWrite;
-            long size;
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
-            do
+            if (obj is FileSystemEventArgs e)
             {
-                lastAccess = File.GetLastAccessTime(e.FullPath);
-                lastWrite = File.GetLastWriteTime(e.FullPath);
-                size = new System.IO.FileInfo(e.FullPath).Length;
-                Task.Delay(TimeSpan.FromMilliseconds(500)).Wait();
-            } while ((lastAccess != File.GetLastAccessTime(e.FullPath)
-                  || lastWrite != File.GetLastWriteTime(e.FullPath)
-                  || size != new System.IO.FileInfo(e.FullPath).Length) && timer.Elapsed < TimeSpan.FromSeconds(15));
-
-            timer.Stop();
-            if (timer.Elapsed > TimeSpan.FromSeconds(15))
-            {
-                Print($"{e.Name} kept changing, blacklisting...", LogLevel.Debug);
-                return;
-            }
-
-            timer.Restart();
-            while (!IsFileReady(e.FullPath) && timer.Elapsed < TimeSpan.FromSeconds(15)) { Task.Delay(TimeSpan.FromMilliseconds(20)).Wait(); }
-            timer.Stop();
-            if (timer.Elapsed > TimeSpan.FromSeconds(15))
-            {
-                Print($"{e.Name} could not be read, blacklisting...", LogLevel.Debug);
-                return;
-            }
-
-            byte[] cachefile;
-            try
-            {
-                using (FileStream f = new FileStream(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                Print($"New file found: {e.Name}", LogLevel.Debug);
+                DateTime lastAccess, lastWrite;
+                long size;
+                Stopwatch timer = new Stopwatch();
+                timer.Start();
+                do
                 {
-                    cachefile = new byte[f.Length];
-                    f.Read(cachefile, 0, cachefile.Length);
+                    lastAccess = File.GetLastAccessTime(e.FullPath);
+                    lastWrite = File.GetLastWriteTime(e.FullPath);
+                    size = new System.IO.FileInfo(e.FullPath).Length;
+                    Task.Delay(TimeSpan.FromMilliseconds(500)).Wait();
+                } while ((lastAccess != File.GetLastAccessTime(e.FullPath)
+                      || lastWrite != File.GetLastWriteTime(e.FullPath)
+                      || size != new System.IO.FileInfo(e.FullPath).Length) && timer.Elapsed < TimeSpan.FromSeconds(15));
+
+                timer.Stop();
+                if (timer.Elapsed > TimeSpan.FromSeconds(15))
+                {
+                    Print($"{e.Name} kept changing, blacklisting...", LogLevel.Debug);
+                    return;
                 }
-            }
-            catch
-            {
-                Task.Delay(TimeSpan.FromSeconds(2)).Wait();
-                if (File.Exists(e.FullPath))
+
+                timer.Restart();
+                while (!IsFileReady(e.FullPath) && timer.Elapsed < TimeSpan.FromSeconds(15)) { Task.Delay(TimeSpan.FromMilliseconds(20)).Wait(); }
+                timer.Stop();
+                if (timer.Elapsed > TimeSpan.FromSeconds(15))
                 {
-                    Print($"Error opening file {e.Name}, retrying.", LogLevel.Debug);
+                    Print($"{e.Name} could not be read, blacklisting...", LogLevel.Debug);
+                    return;
+                }
+
+                byte[] cachefile;
+                try
+                {
+                    using (FileStream f = new FileStream(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        cachefile = new byte[f.Length];
+                        f.Read(cachefile, 0, cachefile.Length);
+                    }
+                }
+                catch
+                {
+                    Task.Delay(TimeSpan.FromSeconds(2)).Wait();
+                    if (File.Exists(e.FullPath))
+                    {
+                        Print($"Error opening file {e.Name}, retrying.", LogLevel.Debug);
+                        pendingCacheFiles.Remove(e.Name);
+                        if (pendingCacheFiles.Contains(e.Name))
+                        {
+                            Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
+                            do
+                            {
+                                pendingCacheFiles.Remove(e.Name);
+                            } while (pendingCacheFiles.Contains(e.Name));
+                        }
+                        ProcessCacheFile(e);
+                    }
+                    return;
+                }
+
+                if (!IsGZipHeader(cachefile))
+                {
+                    Print($"{e.Name} not a gzip file.", LogLevel.Debug);
                     pendingCacheFiles.Remove(e.Name);
                     if (pendingCacheFiles.Contains(e.Name))
                     {
@@ -583,14 +601,17 @@ namespace SteamFriendsPatcher
                             pendingCacheFiles.Remove(e.Name);
                         } while (pendingCacheFiles.Contains(e.Name));
                     }
-                    ProcessCacheFile(e);
+                    return;
                 }
-                return;
-            }
 
-            if (!IsGZipHeader(cachefile))
-            {
-                Print($"{e.Name} not a gzip file.", LogLevel.Debug);
+                if (friendscss.Length == cachefile.Length && ByteArrayCompare(friendscss, cachefile))
+                {
+                    PatchCacheFile(e.FullPath, Decompress(cachefile));
+                }
+                else
+                {
+                    Print($"{e.Name} did not match.", LogLevel.Debug);
+                }
                 pendingCacheFiles.Remove(e.Name);
                 if (pendingCacheFiles.Contains(e.Name))
                 {
@@ -601,50 +622,31 @@ namespace SteamFriendsPatcher
                     } while (pendingCacheFiles.Contains(e.Name));
                 }
                 return;
-            }
 
-            if (friendscss.Length == cachefile.Length && ByteArrayCompare(friendscss, cachefile))
-            {
-                PatchCacheFile(e.FullPath, Decompress(cachefile));
-            }
-            else
-            {
-                Print($"{e.Name} did not match.", LogLevel.Debug);
-            }
-            pendingCacheFiles.Remove(e.Name);
-            if (pendingCacheFiles.Contains(e.Name))
-            {
-                Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
-                do
+                /*
+                decompressedcachefile = Decompress(cachefile);
+
+                if (decompressedcachefile.Length == friendscss.Length &&
+                    ByteArrayCompare(decompressedcachefile, friendscss))
                 {
-                    pendingCacheFiles.Remove(e.Name);
-                } while (pendingCacheFiles.Contains(e.Name));
-            }
-            return;
-
-            /*
-            decompressedcachefile = Decompress(cachefile);
-
-            if (decompressedcachefile.Length == friendscss.Length &&
-                ByteArrayCompare(decompressedcachefile, friendscss))
-            {
-                PatchCacheFile(e.FullPath, decompressedcachefile);
-            }
-            else
-            {
-                Print($"{e.Name} did not match.", LogLevel.Debug);
-            }
-            pendingCacheFiles.Remove(e.Name);
-            if(pendingCacheFiles.Contains(e.Name))
-            {
-                Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
-                do
+                    PatchCacheFile(e.FullPath, decompressedcachefile);
+                }
+                else
                 {
-                    pendingCacheFiles.Remove(e.Name);
-                } while (pendingCacheFiles.Contains(e.Name));
+                    Print($"{e.Name} did not match.", LogLevel.Debug);
+                }
+                pendingCacheFiles.Remove(e.Name);
+                if(pendingCacheFiles.Contains(e.Name))
+                {
+                    Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
+                    do
+                    {
+                        pendingCacheFiles.Remove(e.Name);
+                    } while (pendingCacheFiles.Contains(e.Name));
+                }
+                return;
+                */
             }
-            return;
-            */
         }
 
         private static void StartCrashScanner()
@@ -698,10 +700,12 @@ namespace SteamFriendsPatcher
                 friendslistWatcherExists = true;
                 Automation.AddAutomationEventHandler(WindowPattern.WindowOpenedEvent, AutomationElement.RootElement, TreeScope.Children, (sender, e) =>
                 {
-                    var element = sender as AutomationElement;
-                    if (element.Current.ClassName == "SDL_app")
+                    if (sender is AutomationElement element)
                     {
-                        GetLatestFriendsCSS();
+                        if (element.Current.ClassName == "SDL_app")
+                        {
+                            GetLatestFriendsCSS();
+                        }
                     }
                 });
             }
@@ -718,7 +722,7 @@ namespace SteamFriendsPatcher
             bool preSteamStatus = Process.GetProcessesByName("Steam").FirstOrDefault() != null;
             if (preSteamStatus)
             {
-                if (MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?", "Steam Friends Patcher", System.Windows.Forms.MessageBoxButtons.YesNo) != System.Windows.Forms.DialogResult.Yes)
+                if (MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?", "Steam Friends Patcher", MessageBoxButtons.YesNo) != DialogResult.Yes)
                 {
                     return;
                 }
