@@ -202,5 +202,17 @@ namespace SteamFriendsPatcher.Properties {
                 this["showDebugMessages"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool outputToLog {
+            get {
+                return ((bool)(this["outputToLog"]));
+            }
+            set {
+                this["outputToLog"] = value;
+            }
+        }
     }
 }

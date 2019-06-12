@@ -76,6 +76,7 @@ namespace SteamFriendsPatcher
         private static readonly object ScannerLock = new object();
         private static readonly object UpdateScannerLock = new object();
         private static readonly object GetFriendsCSSLock = new object();
+        // private static readonly object LogPrintLock = new object();
 
         private static readonly MainWindow Main = App.MainWindowRef;
 
@@ -847,7 +848,20 @@ namespace SteamFriendsPatcher
 #if DEBUG
             Debug.Write(fullMessage);
 #endif
-            if (messagetype == "Debug" && !Properties.Settings.Default.showDebugMessages)
+            /*
+            if (SteamFriendsPatcher.Properties.Settings.Default.outputToLog)
+            {
+                lock (LogPrintLock)
+                {
+                    FileInfo file = new FileInfo(Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), $"PhantomGamers/logs/SteamFriendsPatcher_"
+                                       + $"{DateTime.Now.ToString("yyyyMMdd")}.log"));
+                    Directory.CreateDirectory(file.Directory.FullName);
+                    File.AppendAllText(file.FullName, fullMessage);
+                }
+            }
+            */
+
+            if (logLevel == LogLevel.Debug && !Properties.Settings.Default.showDebugMessages)
             {
                 return;
             }
