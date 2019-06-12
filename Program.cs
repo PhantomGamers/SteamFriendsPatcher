@@ -303,7 +303,7 @@ namespace SteamFriendsPatcher
 
         public static bool GetLatestFriendsCSS(bool force = false)
         {
-            if ((DateTime.Now.Subtract(friendscssage).TotalMinutes < 5.0 && !force) || updatePending)
+            if ((DateTime.Now.Subtract(friendscssage).TotalMinutes < 1 && !force) || updatePending)
             {
                 return true;
             }
