@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -71,7 +72,7 @@ namespace SteamFriendsPatcher
                 Program.ToggleCacheScanner(true);
             }
 
-            if (SteamFriendsPatcher.Properties.Settings.Default.runSteamOnStartup && Process.GetProcessesByName("Steam").Length == 0)
+            if (SteamFriendsPatcher.Properties.Settings.Default.runSteamOnStartup && Process.GetProcessesByName("Steam").FirstOrDefault() == null)
             {
                 Process.Start(Program.steamDir + "\\Steam.exe", SteamFriendsPatcher.Properties.Settings.Default.steamLaunchArgs);
             }
