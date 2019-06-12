@@ -79,6 +79,14 @@ namespace SteamFriendsPatcher
 
         private static readonly MainWindow Main = App.MainWindowRef;
 
+        public enum LogLevel
+        {
+            Debug,
+            Info,
+            Warning,
+            Error
+        }
+
         public static bool UpdateChecker()
         {
             lock (UpdateScannerLock)
@@ -99,7 +107,7 @@ namespace SteamFriendsPatcher
                         if (!SemVersion.TryParse(assemblyVer, out SemVersion localVer) ||
                             !SemVersion.TryParse(latestvervalue, out SemVersion remoteVer))
                         {
-                            Print("Update check failed, failed to parse version string.", "Error");
+                            Print("Update check failed, failed to parse version string.", LogLevel.Error);
                             return false;
                         }
                         if (remoteVer > localVer)
@@ -117,13 +125,13 @@ namespace SteamFriendsPatcher
                             return false;
                         }
                     }
-                    Print("Failed to check for updates.", "Error");
+                    Print("Failed to check for updates.", LogLevel.Error);
                     return false;
                 }
                 catch (WebException we)
                 {
-                    Print("Failed to check for updates.", "Error");
-                    Print(we.ToString(), "Error");
+                    Print("Failed to check for updates.", LogLevel.Error);
+                    Print(we.ToString(), LogLevel.Error);
                 }
                 return false;
             }
@@ -131,7 +139,7 @@ namespace SteamFriendsPatcher
 
         private static void PatchCacheFile(string friendscachefile, byte[] decompressedcachefile)
         {
-            Print($"Successfully found matching friends.css at {friendscachefile}.", "Success");
+            Print($"Successfully found matching friends.css at {friendscachefile}.");
             File.WriteAllBytes(steamDir + "\\clientui\\friends.original.css", Encoding.ASCII.GetBytes("/*" + etag + "*/\n").Concat(decompressedcachefile).ToArray());
 
             Print("Overwriting with patched version...");
@@ -150,8 +158,8 @@ namespace SteamFriendsPatcher
                 Process.Start(steamDir + "\\Steam.exe", @"steam://friends/status/online");
             }
 
-            Print("Done! Put your custom css in " + steamDir + "\\clientui\\friends.custom.css", "Success");
-            Print("Close and reopen your Steam friends window to see changes.", "Success");
+            Print("Done! Put your custom css in " + steamDir + "\\clientui\\friends.custom.css");
+            Print("Close and reopen your Steam friends window to see changes.");
 
             Main.Dispatcher.Invoke((MethodInvoker)delegate
             {
@@ -182,8 +190,8 @@ namespace SteamFriendsPatcher
             Print("Finding list of possible cache files...");
             if (!Directory.Exists(steamCacheDir))
             {
-                Print("Cache folder does not exist.", "error");
-                Print("Please confirm that Steam is running and that the friends list is open and try again.", "error");
+                Print("Cache folder does not exist.", LogLevel.Error);
+                Print("Please confirm that Steam is running and that the friends list is open and try again.", LogLevel.Error);
                 goto ResetButtons;
             }
             var validFiles = new DirectoryInfo(steamCacheDir).EnumerateFiles("f_*", SearchOption.TopDirectoryOnly)
@@ -194,8 +202,8 @@ namespace SteamFriendsPatcher
             var count = validFiles.Count();
             if (count == 0)
             {
-                Print("No cache files found.", "Error");
-                Print("Please confirm that Steam is running and that the friends list is open and try again.", "Error");
+                Print("No cache files found.", LogLevel.Error);
+                Print("Please confirm that Steam is running and that the friends list is open and try again.", LogLevel.Error);
                 goto ResetButtons;
             }
             Print($"Found {count} possible cache files.");
@@ -218,7 +226,7 @@ namespace SteamFriendsPatcher
                 }
                 catch
                 {
-                    Print($"Error, {s} could not be opened.", "Debug");
+                    Print($"Error, {s} could not be opened.", LogLevel.Debug);
                     return;
                 }
 
@@ -259,7 +267,7 @@ namespace SteamFriendsPatcher
             {
                 if (!patchedFileFound)
                 {
-                    Print("Cache file does not exist or is outdated.", "Warning");
+                    Print("Cache file does not exist or is outdated.", LogLevel.Warning);
                 }
                 else
                 {
@@ -353,7 +361,7 @@ namespace SteamFriendsPatcher
                                 }
                                 friendscssage = DateTime.Now;
                                 friendscssetag = etag;
-                                Print("Successfully downloaded latest friends.css", "Success");
+                                Print("Successfully downloaded latest friends.css");
                                 return true;
                             }
                         }
@@ -366,18 +374,18 @@ namespace SteamFriendsPatcher
                                 friendscss = Decompress(fc);
                                 friendscsspatched = PrependFile(friendscss);
                                 friendscssage = DateTime.Now;
-                                Print("Successfully downloaded latest friends.css.", "Success");
+                                Print("Successfully downloaded latest friends.css.");
                                 return true;
                             }
                         }
                         */
-                        Print("Failed to download friends.css", "Error");
+                        Print("Failed to download friends.css", LogLevel.Error);
                         return false;
                     }
                     catch (WebException we)
                     {
-                        Print("Failed to download friends.css.", "Error");
-                        Print(we.ToString(), "Error");
+                        Print("Failed to download friends.css.", LogLevel.Error);
+                        Print(we.ToString(), LogLevel.Error);
                         return false;
                     }
                 }
@@ -419,7 +427,7 @@ namespace SteamFriendsPatcher
             }
             else
             {
-                Print("Could not find friends list translation", "Warning");
+                Print("Could not find friends list translation", LogLevel.Warning);
                 return s;
             }
 
@@ -494,8 +502,8 @@ namespace SteamFriendsPatcher
                     }
                     catch
                     {
-                        Print("Windows is dumb.", "Debug");
-                        Print("Does cache directory exist: " + cacheDir.Exists.ToString(), "Debug");
+                        Print("Windows is dumb.", LogLevel.Debug);
+                        Print("Does cache directory exist: " + cacheDir.Exists.ToString(), LogLevel.Debug);
                         Task.Delay(TimeSpan.FromSeconds(1)).Wait();
                         continue;
                     }
@@ -504,7 +512,7 @@ namespace SteamFriendsPatcher
 
                 if (!File.Exists(Path.Combine(steamCacheDir, "tmp.lock")))
                 {
-                    Print("Could not lock Cache. Scanner can not be started.", "Error");
+                    Print("Could not lock Cache. Scanner can not be started.", LogLevel.Error);
                     return;
                 }
 
@@ -544,7 +552,7 @@ namespace SteamFriendsPatcher
         private static void ProcessCacheFile(object obj)
         {
             FileSystemEventArgs e = (FileSystemEventArgs)obj;
-            Print($"New file found: {e.Name}", "Debug");
+            Print($"New file found: {e.Name}", LogLevel.Debug);
             DateTime lastAccess, lastWrite;
             long size;
             Stopwatch timer = new Stopwatch();
@@ -562,7 +570,7 @@ namespace SteamFriendsPatcher
             timer.Stop();
             if (timer.Elapsed > TimeSpan.FromSeconds(15))
             {
-                Print($"{e.Name} kept changing, blacklisting...", "Debug");
+                Print($"{e.Name} kept changing, blacklisting...", LogLevel.Debug);
                 return;
             }
 
@@ -571,7 +579,7 @@ namespace SteamFriendsPatcher
             timer.Stop();
             if (timer.Elapsed > TimeSpan.FromSeconds(15))
             {
-                Print($"{e.Name} could not be read, blacklisting...", "Debug");
+                Print($"{e.Name} could not be read, blacklisting...", LogLevel.Debug);
                 return;
             }
 
@@ -589,11 +597,11 @@ namespace SteamFriendsPatcher
                 Task.Delay(TimeSpan.FromSeconds(2)).Wait();
                 if (File.Exists(e.FullPath))
                 {
-                    Print($"Error opening file {e.Name}, retrying.", "Debug");
+                    Print($"Error opening file {e.Name}, retrying.", LogLevel.Debug);
                     pendingCacheFiles.Remove(e.Name);
                     if (pendingCacheFiles.Contains(e.Name))
                     {
-                        Print($"Multiple occurrences of {e.Name} found in list, removing all...", "Debug");
+                        Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
                         do
                         {
                             pendingCacheFiles.Remove(e.Name);
@@ -606,11 +614,11 @@ namespace SteamFriendsPatcher
 
             if (!IsGZipHeader(cachefile))
             {
-                Print($"{e.Name} not a gzip file.", "Debug");
+                Print($"{e.Name} not a gzip file.", LogLevel.Debug);
                 pendingCacheFiles.Remove(e.Name);
                 if (pendingCacheFiles.Contains(e.Name))
                 {
-                    Print($"Multiple occurrences of {e.Name} found in list, removing all...", "Debug");
+                    Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
                     do
                     {
                         pendingCacheFiles.Remove(e.Name);
@@ -625,12 +633,12 @@ namespace SteamFriendsPatcher
             }
             else
             {
-                Print($"{e.Name} did not match.", "Debug");
+                Print($"{e.Name} did not match.", LogLevel.Debug);
             }
             pendingCacheFiles.Remove(e.Name);
             if (pendingCacheFiles.Contains(e.Name))
             {
-                Print($"Multiple occurrences of {e.Name} found in list, removing all...", "Debug");
+                Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
                 do
                 {
                     pendingCacheFiles.Remove(e.Name);
@@ -648,12 +656,12 @@ namespace SteamFriendsPatcher
             }
             else
             {
-                Print($"{e.Name} did not match.", "Debug");
+                Print($"{e.Name} did not match.", LogLevel.Debug);
             }
             pendingCacheFiles.Remove(e.Name);
             if(pendingCacheFiles.Contains(e.Name))
             {
-                Print($"Multiple occurrences of {e.Name} found in list, removing all...", "Debug");
+                Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
                 do
                 {
                     pendingCacheFiles.Remove(e.Name);
@@ -667,7 +675,7 @@ namespace SteamFriendsPatcher
         {
             if (!Directory.Exists(steamDir))
             {
-                Print("Steam directory not found.", "Warning");
+                Print("Steam directory not found.", LogLevel.Warning);
                 return;
             }
 
@@ -684,12 +692,12 @@ namespace SteamFriendsPatcher
 
             crashWatcher.EnableRaisingEvents = true;
 
-            Print("Crash scanner started.", "Debug");
+            Print("Crash scanner started.", LogLevel.Debug);
         }
 
         private static void CrashWatcher_Event(object sender, FileSystemEventArgs e)
         {
-            Print("Steam start detected.", "Debug");
+            Print("Steam start detected.", LogLevel.Debug);
             GetLatestFriendsCSS();
         }
 
@@ -697,7 +705,7 @@ namespace SteamFriendsPatcher
         {
             if (!Directory.Exists(steamCacheDir))
             {
-                Print("Cache folder does not exist.", "Warning");
+                Print("Cache folder does not exist.", LogLevel.Warning);
                 return;
             }
             bool preScannerStatus = scannerExists;
@@ -719,7 +727,7 @@ namespace SteamFriendsPatcher
                 stopwatch.Stop();
                 if (Process.GetProcessesByName("Steam").Length > 0 || Process.GetProcessesByName("SteamService").Length > 0 || Process.GetProcessesByName("steamwebhelper").Length > 0)
                 {
-                    Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.", "error");
+                    Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.", LogLevel.Error);
                     Main.ToggleButtons(true);
                     return;
                 }
@@ -735,8 +743,8 @@ namespace SteamFriendsPatcher
             }
             catch (IOException ioe)
             {
-                Print("Some cache files in use, cannot delete.", "Error");
-                Print(ioe.ToString(), "Error");
+                Print("Some cache files in use, cannot delete.", LogLevel.Error);
+                Print(ioe.ToString(), LogLevel.Error);
             }
             finally
             {
@@ -757,7 +765,7 @@ namespace SteamFriendsPatcher
                     }
                     if (i == 9)
                     {
-                        Print("Failed to start Steam.", "Error");
+                        Print("Failed to start Steam.", LogLevel.Error);
                     }
                 }
             }
@@ -832,10 +840,12 @@ namespace SteamFriendsPatcher
             shortcut.Save();
         }
 
-        public static void Print(string message = null, string messagetype = "Info", bool newline = true)
+        public static void Print(string message = null, LogLevel logLevel = LogLevel.Info, bool newline = true)
         {
+            string dateTime = DateTime.Now.ToString();
+            string fullMessage = $"[{dateTime}][{logLevel}] {message}" + (newline ? Environment.NewLine : string.Empty);
 #if DEBUG
-            Debug.Write($"[{DateTime.Now}][{messagetype}] {message}" + (newline ? Environment.NewLine : string.Empty));
+            Debug.Write(fullMessage);
 #endif
             if (messagetype == "Debug" && !Properties.Settings.Default.showDebugMessages)
             {
@@ -854,36 +864,24 @@ namespace SteamFriendsPatcher
                     // Date & Time
                     TextRange tr = new TextRange(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd)
                     {
-                        Text = $"[{DateTime.Now}] "
+                        Text = $"[{dateTime}] "
                     };
                     tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
                     tr.Select(Main.output.Document.ContentEnd, Main.output.Document.ContentEnd);
+                    tr.Text += $"[{logLevel}] ";
 
                     // Message Type
-                    switch (messagetype)
+                    switch (logLevel)
                     {
-                        case "Error":
-                            tr.Text += "[ERROR] ";
+                        case LogLevel.Error:
                             tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#e51400"));
                             break;
 
-                        case "Warning":
-                            tr.Text += "[WARNING] ";
+                        case LogLevel.Warning:
                             tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#f0a30a"));
                             break;
 
-                        case "Success":
-                            tr.Text += "[SUCCESS] ";
-                            tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#60a917"));
-                            break;
-
-                        case "Debug":
-                            tr.Text += "[DEBUG] ";
-                            tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
-                            break;
-
                         default:
-                            tr.Text += "[INFO] ";
                             tr.ApplyPropertyValue(TextElement.ForegroundProperty, (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a"));
                             break;
                     }
