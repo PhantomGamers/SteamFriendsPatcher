@@ -19,6 +19,8 @@ namespace SteamFriendsPatcher
 
         public static bool UpdateTimerActive { get; private set; } = false;
 
+        private static bool firstShown { get; set; } = false;
+
         private static readonly Mutex singleInstance = new Mutex(true, Assembly.GetExecutingAssembly().GetName().Name);
 
         protected override void OnStartup(StartupEventArgs e)
@@ -38,18 +40,36 @@ namespace SteamFriendsPatcher
                     MainWindowRef.Height = SteamFriendsPatcher.Properties.Settings.Default.windowHeight;
                 }
 
-                if (SteamFriendsPatcher.Properties.Settings.Default.minimizeToTray && SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
-                    return;
-
+                MainWindowRef.WindowState = WindowState.Minimized;
                 MainWindowRef.Show();
 
-                if (SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
-                    MainWindowRef.WindowState = WindowState.Minimized;
+                if (SteamFriendsPatcher.Properties.Settings.Default.minimizeToTray && SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
+                {
+                    MainWindowRef.Hide();
+                }
+
+                if (!SteamFriendsPatcher.Properties.Settings.Default.minimizeToTray && SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
+                {
+                    var workingArea = SystemParameters.WorkArea;
+                    MainWindowRef.Left = (workingArea.Width - SteamFriendsPatcher.Properties.Settings.Default.windowWidth) / 2 + workingArea.Left;
+                    MainWindowRef.Top = (workingArea.Height - SteamFriendsPatcher.Properties.Settings.Default.windowHeight) / 2 + workingArea.Top;
+                    firstShown = true;
+                }
+
+                if (!SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
+                {
+                    MainWindowRef.WindowState = WindowState.Normal;
+                }
 
                 singleInstance.ReleaseMutex();
             }
             else
             {
+                NativeMethods.PostMessage(
+                    (IntPtr)NativeMethods.HWND_BROADCAST,
+                    NativeMethods.WM_SHOWME,
+                    IntPtr.Zero,
+                    IntPtr.Zero);
                 Current.Shutdown(1);
             }
         }
@@ -76,6 +96,24 @@ namespace SteamFriendsPatcher
             {
                 Process.Start(Program.steamDir + "\\Steam.exe", SteamFriendsPatcher.Properties.Settings.Default.steamLaunchArgs);
             }
+        }
+
+        public static void ShowMain()
+        {
+            if (!firstShown)
+            {
+                var workingArea = SystemParameters.WorkArea;
+                MainWindowRef.Left = (workingArea.Width - SteamFriendsPatcher.Properties.Settings.Default.windowWidth) / 2 + workingArea.Left;
+                MainWindowRef.Top = (workingArea.Height - SteamFriendsPatcher.Properties.Settings.Default.windowHeight) / 2 + workingArea.Top;
+                firstShown = true;
+            }
+
+            if (!MainWindowRef.IsVisible)
+                MainWindowRef.Show();
+
+            if (MainWindowRef.WindowState == WindowState.Minimized)
+                MainWindowRef.WindowState = WindowState.Normal;
+            MainWindowRef.Activate();
         }
 
         public static void ToggleUpdateTimer(bool status = true)

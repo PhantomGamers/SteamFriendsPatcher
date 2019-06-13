@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 
 namespace SteamFriendsPatcher
 {
@@ -18,8 +19,25 @@ namespace SteamFriendsPatcher
             Closing += MainWindow_Closing;
             SizeChanged += MainWindow_SizeChanged;
             StateChanged += MainWindow_StateChanged;
+            SourceInitialized += MainWindow_SourceInitialized;
             InitializeComponent();
             SetupTrayIcon();
+        }
+
+        private void MainWindow_SourceInitialized(object sender, EventArgs e)
+        {
+            HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+            source.AddHook(new HwndSourceHook(WndProc));
+        }
+
+        private static IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == NativeMethods.WM_SHOWME)
+            {
+                App.ShowMain();
+            }
+
+            return IntPtr.Zero;
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -103,12 +121,7 @@ namespace SteamFriendsPatcher
 
         private void ShowButton_Click(object sender, EventArgs e)
         {
-            if (!IsVisible)
-                Show();
-
-            if (WindowState == WindowState.Minimized)
-                WindowState = WindowState.Normal;
-            Activate();
+            App.ShowMain();
         }
 
         private static void ExitButton_Click(object sender, EventArgs e)
