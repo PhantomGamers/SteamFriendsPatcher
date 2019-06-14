@@ -15,10 +15,10 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Windows.Automation;
+using System.Windows;
 
 namespace SteamFriendsPatcher
 {
@@ -107,7 +107,7 @@ namespace SteamFriendsPatcher
                         }
                         if (remoteVer > localVer)
                         {
-                            if (MessageBox.Show("Update available. Download now?", "Steam Friends Patcher - Update Available", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            if (MessageBox.Show("Update available. Download now?", "Steam Friends Patcher - Update Available", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                             {
                                 Process.Start("https://github.com/PhantomGamers/SteamFriendsPatcher/releases/latest");
                             }
@@ -156,7 +156,7 @@ namespace SteamFriendsPatcher
             Print("Done! Put your custom css in " + steamDir + "\\clientui\\friends.custom.css");
             Print("Close and reopen your Steam friends window to see changes.");
 
-            Main.Dispatcher.Invoke((MethodInvoker)delegate
+            Main.Dispatcher.Invoke(() =>
             {
                 if (!Main.IsVisible && Properties.Settings.Default.showNotificationsInTray)
                 {
@@ -722,7 +722,7 @@ namespace SteamFriendsPatcher
             bool preSteamStatus = Process.GetProcessesByName("Steam").FirstOrDefault() != null;
             if (preSteamStatus)
             {
-                if (MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?", "Steam Friends Patcher", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                if (MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?", "Steam Friends Patcher", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 {
                     return;
                 }
@@ -871,7 +871,7 @@ namespace SteamFriendsPatcher
 
             lock (MessageLock)
             {
-                Main.output.Dispatcher.Invoke(DispatcherPriority.Background, (MethodInvoker)delegate
+                Main.output.Dispatcher.Invoke(() =>
                 {
                     if (Main.output.Document == null)
                     {

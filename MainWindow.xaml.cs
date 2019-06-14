@@ -147,7 +147,7 @@ namespace SteamFriendsPatcher
 
         public void ToggleButtons(bool status)
         {
-            this.Dispatcher.Invoke((System.Windows.Forms.MethodInvoker)delegate
+            this.Dispatcher.Invoke(() =>
             {
                 foreach (var item in LogicalTreeHelper.GetChildren(mainGrid))
                 {
