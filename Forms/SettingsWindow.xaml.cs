@@ -83,7 +83,7 @@ namespace SteamFriendsPatcher.Forms
             Close();
         }
 
-        private void cancelChanges_Click(object sender, RoutedEventArgs e)
+        private void CancelChanges_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }

@@ -255,7 +255,7 @@
                     FontSize="14" BorderBrush="{x:Null}" Padding="10" TextOptions.TextFormattingMode="Display"
                     TextOptions.TextHintingMode="Fixed" />
             <Button x:Name="CancelChanges" Content="Cancel" Height="auto" HorizontalContentAlignment="Center"
-                    Foreground="White" Background="#FF3D3D3E" Click="cancelChanges_Click" Margin="0,10,10,0"
+                    Foreground="White" Background="#FF3D3D3E" Click="CancelChanges_Click" Margin="0,10,10,0"
                     FontSize="14" BorderBrush="{x:Null}"
                     Grid.Row="0" Grid.Column="1" Padding="10" TextOptions.TextFormattingMode="Display"
                     TextOptions.TextHintingMode="Fixed" />
