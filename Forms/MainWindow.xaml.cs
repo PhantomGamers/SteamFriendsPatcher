@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
 using SteamFriendsPatcher.Properties;
+using Application = System.Windows.Application;
+using Button = System.Windows.Controls.Button;
 using ContextMenu = System.Windows.Forms.ContextMenu;
 using MenuItem = System.Windows.Forms.MenuItem;
 
@@ -124,7 +126,7 @@ namespace SteamFriendsPatcher.Forms
         private static void ExitButton_Click(object sender, EventArgs e)
         {
             // ReSharper disable once RedundantNameQualifier
-            System.Windows.Application.Current.Shutdown();
+            Application.Current.Shutdown();
         }
 
         private async void ToggleScanButton_Click(object sender, RoutedEventArgs e)
@@ -147,7 +149,7 @@ namespace SteamFriendsPatcher.Forms
             Dispatcher.Invoke(() =>
             {
                 foreach (var item in LogicalTreeHelper.GetChildren(MainGrid))
-                    if (item is System.Windows.Controls.Button button)
+                    if (item is Button button)
                         if (button.Name != "aboutButton" && button.Name != "settingsButton")
                         {
                             button.IsEnabled = status;

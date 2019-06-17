@@ -4,27 +4,45 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Steam Friends Patcher " Background="#FF1E1E1F" Foreground="White" MinWidth="545" MinHeight="327" HorizontalAlignment="Left" VerticalAlignment="Bottom" WindowStartupLocation="CenterScreen" Width="768" Height="535" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display">
+        Title="Steam Friends Patcher " Background="#FF1E1E1F" Foreground="White" MinWidth="545" MinHeight="327"
+        HorizontalAlignment="Left" VerticalAlignment="Bottom" WindowStartupLocation="CenterScreen" Width="768"
+        Height="535" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display">
     <Grid x:Name="MainGrid">
-        <FlowDocumentScrollViewer x:Name="Output" Margin="10,10,10,50" BorderThickness="2" SelectionBrush="#FF1E1E1F" TextOptions.TextHintingMode="Fixed" Padding="0" Block.LineHeight="1.0" TextOptions.TextFormattingMode="Display" VerticalScrollBarVisibility="Auto" ForceCursor="True" Cursor="Arrow">
+        <FlowDocumentScrollViewer x:Name="Output" Margin="10,10,10,50" BorderThickness="2" SelectionBrush="#FF1E1E1F"
+                                  TextOptions.TextHintingMode="Fixed" Padding="0" Block.LineHeight="1.0"
+                                  TextOptions.TextFormattingMode="Display" VerticalScrollBarVisibility="Auto"
+                                  ForceCursor="True" Cursor="Arrow">
             <FlowDocument Background="#FF3D3D3E" Foreground="White" FontFamily="Segoe UI" FontSize="12" />
         </FlowDocumentScrollViewer>
-        <Button x:Name="ToggleScanButton" Content="Start Scanning" Margin="10,0,0,10" Background="#FF3D3D3E" Foreground="White" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="ToggleScanButton_Click" Padding="10,1" BorderBrush="{x:Null}" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Ideal" />
-        <Button x:Name="SettingsButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="32" Background="#00DDDDDD" Foreground="White" Height="32" FontSize="24" BorderThickness="0" Margin="0,0,10,10" Click="SettingsButton_Click">
+        <Button x:Name="ToggleScanButton" Content="Start Scanning" Margin="10,0,0,10" Background="#FF3D3D3E"
+                Foreground="White" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                Click="ToggleScanButton_Click" Padding="10,1" BorderBrush="{x:Null}"
+                TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Ideal" />
+        <Button x:Name="SettingsButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="32"
+                Background="#00DDDDDD" Foreground="White" Height="32" FontSize="24" BorderThickness="0"
+                Margin="0,0,10,10" Click="SettingsButton_Click">
             <Rectangle Width="24" Height="24" Fill="White">
                 <Rectangle.OpacityMask>
                     <VisualBrush Stretch="Fill" Visual="{StaticResource Cog}" />
                 </Rectangle.OpacityMask>
             </Rectangle>
         </Button>
-        <Button x:Name="AboutButton"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="32" Background="#00DDDDDD" Foreground="White" Height="32" FontSize="24" BorderThickness="0" Margin="0,0,50,10" Click="AboutButton_Click">
+        <Button x:Name="AboutButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="32"
+                Background="#00DDDDDD" Foreground="White" Height="32" FontSize="24" BorderThickness="0"
+                Margin="0,0,50,10" Click="AboutButton_Click">
             <Rectangle Width="24" Height="24" Fill="White">
                 <Rectangle.OpacityMask>
                     <VisualBrush Stretch="Fill" Visual="{StaticResource InfoCircle}" />
                 </Rectangle.OpacityMask>
             </Rectangle>
         </Button>
-        <Button x:Name="ForceCheckButton" Content="Force Check" HorizontalAlignment="Left" Margin="151,0,0,10" VerticalAlignment="Bottom" Background="#FF3D3D3E" Foreground="White" FontSize="18" Padding="10,1" Click="ForceCheckButton_Click" BorderBrush="{x:Null}" TextOptions.TextFormattingMode="Ideal" TextOptions.TextHintingMode="Fixed" />
-        <Button x:Name="ClearCacheButton" Content="Clear Steam Cache" HorizontalAlignment="Left" Margin="274,0,0,10" VerticalAlignment="Bottom" Background="#FF3D3D3E" Foreground="White" FontSize="18" Padding="10,1" Click="ClearCacheButton_Click" BorderBrush="{x:Null}" TextOptions.TextFormattingMode="Ideal" TextOptions.TextHintingMode="Fixed" />
+        <Button x:Name="ForceCheckButton" Content="Force Check" HorizontalAlignment="Left" Margin="151,0,0,10"
+                VerticalAlignment="Bottom" Background="#FF3D3D3E" Foreground="White" FontSize="18" Padding="10,1"
+                Click="ForceCheckButton_Click" BorderBrush="{x:Null}" TextOptions.TextFormattingMode="Ideal"
+                TextOptions.TextHintingMode="Fixed" />
+        <Button x:Name="ClearCacheButton" Content="Clear Steam Cache" HorizontalAlignment="Left" Margin="274,0,0,10"
+                VerticalAlignment="Bottom" Background="#FF3D3D3E" Foreground="White" FontSize="18" Padding="10,1"
+                Click="ClearCacheButton_Click" BorderBrush="{x:Null}" TextOptions.TextFormattingMode="Ideal"
+                TextOptions.TextHintingMode="Fixed" />
     </Grid>
 </Window>

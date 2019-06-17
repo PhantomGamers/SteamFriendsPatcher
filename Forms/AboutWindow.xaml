@@ -4,22 +4,35 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Steam Friends Patcher - About" Background="#FF1E1E1F" Foreground="White" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" WindowStyle="ToolWindow" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
+        Title="Steam Friends Patcher - About" Background="#FF1E1E1F" Foreground="White" SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" WindowStyle="ToolWindow"
+        TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
     <Grid Margin="10">
-        <Label x:Name="ProgramName" Content="Steam Friends Patcher " HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Ideal" />
-        <Label x:Name="AuthorName" Content="Made by PhantomGamers" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display" />
-        <Label x:Name="Label" Content="Github: " HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" Foreground="White" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
-        <TextBlock HorizontalAlignment="Left" Margin="70,85,0,0" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
-            <Hyperlink NavigateUri="https://github.com/PhantomGamers/SteamFriendsPatcher" RequestNavigate="Hyperlink_RequestNavigate">
+        <Label x:Name="ProgramName" Content="Steam Friends Patcher " HorizontalAlignment="Left" Margin="10,10,0,0"
+               VerticalAlignment="Top" Foreground="White" FontSize="18" TextOptions.TextHintingMode="Fixed"
+               TextOptions.TextFormattingMode="Ideal" />
+        <Label x:Name="AuthorName" Content="Made by PhantomGamers" HorizontalAlignment="Left" Margin="10,45,0,0"
+               VerticalAlignment="Top" Foreground="White" FontSize="14" TextOptions.TextHintingMode="Fixed"
+               TextOptions.TextFormattingMode="Display" />
+        <Label x:Name="Label" Content="Github: " HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top"
+               Foreground="White" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <TextBlock HorizontalAlignment="Left" Margin="70,85,0,0" VerticalAlignment="Top"
+                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
+            <Hyperlink NavigateUri="https://github.com/PhantomGamers/SteamFriendsPatcher"
+                       RequestNavigate="Hyperlink_RequestNavigate">
                 https://github.com/PhantomGamers/SteamFriendsPatcher
             </Hyperlink>
         </TextBlock>
-        <TextBlock x:Name="TextBlock" HorizontalAlignment="Left" Margin="13,111,0,0" TextWrapping="Wrap" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
+        <TextBlock x:Name="TextBlock" HorizontalAlignment="Left" Margin="13,111,0,0" TextWrapping="Wrap"
+                   VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
             This utility is designed to allow you to apply themes to the new Steam friends UI.<LineBreak />
-            To use manually, simply click "Force Check," by default this will run when you start the program.<LineBreak />
-            You will be required to do this everytime Valve pushes a new version of the friends.css file used by Steam.<LineBreak />
+            To use manually, simply click "Force Check," by default this will run when you start the program.
+            <LineBreak />
+            You will be required to do this everytime Valve pushes a new version of the friends.css file used by Steam.
+            <LineBreak />
             To avoid this, use the "Start Scanner" option and leave the program running.<LineBreak />
-            With the scanner option, whenever a new version of the friends.css is pushed it will automatically be patched.<LineBreak /><LineBreak />
+            With the scanner option, whenever a new version of the friends.css is pushed it will automatically be patched.
+            <LineBreak /><LineBreak />
             Recommended options:<LineBreak />
             * Start With Windows<LineBreak />
             * Start Minimized<LineBreak />

@@ -4,7 +4,7 @@ using System.Windows.Navigation;
 namespace SteamFriendsPatcher.Forms
 {
     /// <summary>
-    /// Interaction logic for AboutWindow.xaml
+    ///     Interaction logic for AboutWindow.xaml
     /// </summary>
     public partial class AboutWindow
     {

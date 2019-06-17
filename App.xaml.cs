@@ -5,24 +5,26 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using SteamFriendsPatcher.Forms;
+using SteamFriendsPatcher.Properties;
+using Timer = System.Timers.Timer;
 
 namespace SteamFriendsPatcher
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    ///     Interaction logic for App.xaml
     /// </summary>
     public partial class App
     {
+        private static readonly Mutex SingleInstance = new Mutex(true, Assembly.GetExecutingAssembly().GetName().Name);
         public static MainWindow MainWindowRef { get; private set; }
-        public static System.Timers.Timer UpdateTimer { get; private set; }
+        public static Timer UpdateTimer { get; private set; }
 
         public static bool UpdateTimerActive { get; private set; }
 
         private static bool FirstShown { get; set; }
-
-        private static readonly Mutex SingleInstance = new Mutex(true, Assembly.GetExecutingAssembly().GetName().Name);
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -35,39 +37,33 @@ namespace SteamFriendsPatcher
                 const string ver = ThisAssembly.AssemblyInformationalVersion;
                 MainWindowRef.Title += $"v{ver.Substring(0, ver.IndexOf('+') > -1 ? ver.IndexOf('+') : ver.Length)}";
                 Task.Run(Setup);
-                if (SteamFriendsPatcher.Properties.Settings.Default.saveLastWindowSize)
+                if (Settings.Default.saveLastWindowSize)
                 {
-                    MainWindowRef.Width = SteamFriendsPatcher.Properties.Settings.Default.windowWidth;
-                    MainWindowRef.Height = SteamFriendsPatcher.Properties.Settings.Default.windowHeight;
+                    MainWindowRef.Width = Settings.Default.windowWidth;
+                    MainWindowRef.Height = Settings.Default.windowHeight;
                 }
 
                 MainWindowRef.WindowState = WindowState.Minimized;
                 MainWindowRef.Show();
 
-                if (SteamFriendsPatcher.Properties.Settings.Default.minimizeToTray && SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
-                {
-                    MainWindowRef.Hide();
-                }
+                if (Settings.Default.minimizeToTray && Settings.Default.startMinimized) MainWindowRef.Hide();
 
-                if (!SteamFriendsPatcher.Properties.Settings.Default.minimizeToTray && SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
+                if (!Settings.Default.minimizeToTray && Settings.Default.startMinimized)
                 {
                     var workingArea = SystemParameters.WorkArea;
-                    MainWindowRef.Left = (workingArea.Width - SteamFriendsPatcher.Properties.Settings.Default.windowWidth) / 2 + workingArea.Left;
-                    MainWindowRef.Top = (workingArea.Height - SteamFriendsPatcher.Properties.Settings.Default.windowHeight) / 2 + workingArea.Top;
+                    MainWindowRef.Left = (workingArea.Width - Settings.Default.windowWidth) / 2 + workingArea.Left;
+                    MainWindowRef.Top = (workingArea.Height - Settings.Default.windowHeight) / 2 + workingArea.Top;
                     FirstShown = true;
                 }
 
-                if (!SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
-                {
-                    MainWindowRef.WindowState = WindowState.Normal;
-                }
+                if (!Settings.Default.startMinimized) MainWindowRef.WindowState = WindowState.Normal;
 
                 SingleInstance.ReleaseMutex();
             }
             else
             {
                 NativeMethods.PostMessage(
-                    (IntPtr)NativeMethods.HwndBroadcast,
+                    (IntPtr) NativeMethods.HwndBroadcast,
                     NativeMethods.WmShowme,
                     IntPtr.Zero,
                     IntPtr.Zero);
@@ -77,26 +73,18 @@ namespace SteamFriendsPatcher
 
         private static void Setup()
         {
-            if (SteamFriendsPatcher.Properties.Settings.Default.checkForUpdates)
+            if (Settings.Default.checkForUpdates)
             {
                 Task.Run(Program.UpdateChecker);
                 ToggleUpdateTimer();
             }
 
-            if (SteamFriendsPatcher.Properties.Settings.Default.forceScanOnStartup)
-            {
-                Program.FindCacheFile();
-            }
+            if (Settings.Default.forceScanOnStartup) Program.FindCacheFile();
 
-            if (SteamFriendsPatcher.Properties.Settings.Default.autoScanOnStartup)
-            {
-                Program.ToggleCacheScanner(true);
-            }
+            if (Settings.Default.autoScanOnStartup) Program.ToggleCacheScanner(true);
 
-            if (SteamFriendsPatcher.Properties.Settings.Default.runSteamOnStartup && Process.GetProcessesByName("Steam").FirstOrDefault() == null)
-            {
-                Process.Start(Program.steamDir + "\\Steam.exe", SteamFriendsPatcher.Properties.Settings.Default.steamLaunchArgs);
-            }
+            if (Settings.Default.runSteamOnStartup && Process.GetProcessesByName("Steam").FirstOrDefault() == null)
+                Process.Start(Program.steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
         }
 
         public static void ShowMain()
@@ -104,8 +92,8 @@ namespace SteamFriendsPatcher
             if (!FirstShown)
             {
                 var workingArea = SystemParameters.WorkArea;
-                MainWindowRef.Left = (workingArea.Width - SteamFriendsPatcher.Properties.Settings.Default.windowWidth) / 2 + workingArea.Left;
-                MainWindowRef.Top = (workingArea.Height - SteamFriendsPatcher.Properties.Settings.Default.windowHeight) / 2 + workingArea.Top;
+                MainWindowRef.Left = (workingArea.Width - Settings.Default.windowWidth) / 2 + workingArea.Left;
+                MainWindowRef.Top = (workingArea.Height - Settings.Default.windowHeight) / 2 + workingArea.Top;
                 FirstShown = true;
             }
 
@@ -128,7 +116,7 @@ namespace SteamFriendsPatcher
                 return;
             }
 
-            UpdateTimer = new System.Timers.Timer
+            UpdateTimer = new Timer
 
             {
                 Interval = TimeSpan.FromDays(1).TotalMilliseconds
@@ -139,28 +127,26 @@ namespace SteamFriendsPatcher
             UpdateTimerActive = true;
         }
 
-        private static void UpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private static void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             Program.UpdateChecker();
         }
 
         private static void PerformUpgrade()
         {
-            if (!SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired) return;
-            SteamFriendsPatcher.Properties.Settings.Default.Upgrade();
+            if (!Settings.Default.upgradeRequired) return;
+            Settings.Default.Upgrade();
 
-            if (SteamFriendsPatcher.Properties.Settings.Default.upgradeVer == 0)
-            {
+            if (Settings.Default.upgradeVer == 0)
                 if (File.Exists(Program.StartupLinkOld))
                 {
                     File.Delete(Program.StartupLinkOld);
                     Program.CreateStartUpShortcut();
                 }
-            }
 
-            SteamFriendsPatcher.Properties.Settings.Default.upgradeVer = 1;
-            SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired = false;
-            SteamFriendsPatcher.Properties.Settings.Default.Save();
+            Settings.Default.upgradeVer = 1;
+            Settings.Default.upgradeRequired = false;
+            Settings.Default.Save();
         }
     }
 }

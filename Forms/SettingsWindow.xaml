@@ -4,13 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Steam Friends Patcher - Settings" Background="#FF1E1E1F" Foreground="White" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Margin="0" SizeToContent="WidthAndHeight" Padding="0" MinWidth="400" MinHeight="400" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display">
+        Title="Steam Friends Patcher - Settings" Background="#FF1E1E1F" Foreground="White" WindowStyle="ToolWindow"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Margin="0" SizeToContent="WidthAndHeight" Padding="0"
+        MinWidth="400" MinHeight="400" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display">
     <Window.Resources>
         <Style x:Key="FocusVisual">
             <Setter Property="Control.Template">
                 <Setter.Value>
                     <ControlTemplate>
-                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2" />
+                        <Rectangle Margin="2" SnapsToDevicePixels="true"
+                                   Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                                   StrokeThickness="1" StrokeDashArray="1 2" />
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -20,7 +24,9 @@
             <Setter Property="Control.Template">
                 <Setter.Value>
                     <ControlTemplate>
-                        <Rectangle Margin="14,0,0,0" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2" />
+                        <Rectangle Margin="14,0,0,0" SnapsToDevicePixels="true"
+                                   Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                                   StrokeThickness="1" StrokeDashArray="1 2" />
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -49,13 +55,26 @@
                                 <ColumnDefinition Width="11*" />
                                 <ColumnDefinition Width="115*" />
                             </Grid.ColumnDefinitions>
-                            <Border x:Name="checkBoxBorder" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="1,1,0,0" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                            <Border x:Name="checkBoxBorder" BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Background="{TemplateBinding Background}"
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="1,1,0,0"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
                                 <Grid x:Name="markGrid">
-                                    <Path x:Name="optionMark" Data="F1 M 9.97498,1.22334L 4.6983,9.09834L 4.52164,9.09834L 0,5.19331L 1.27664,3.52165L 4.255,6.08833L 8.33331,1.52588e-005L 9.97498,1.22334 Z " Fill="{StaticResource OptionMark.Static.Glyph}" Margin="1" Opacity="0" Stretch="None" />
-                                    <Rectangle x:Name="indeterminateMark" Fill="{StaticResource OptionMark.Static.Glyph}" Margin="2" Opacity="0" />
+                                    <Path x:Name="optionMark"
+                                          Data="F1 M 9.97498,1.22334L 4.6983,9.09834L 4.52164,9.09834L 0,5.19331L 1.27664,3.52165L 4.255,6.08833L 8.33331,1.52588e-005L 9.97498,1.22334 Z "
+                                          Fill="{StaticResource OptionMark.Static.Glyph}" Margin="1" Opacity="0"
+                                          Stretch="None" />
+                                    <Rectangle x:Name="indeterminateMark"
+                                               Fill="{StaticResource OptionMark.Static.Glyph}" Margin="2" Opacity="0" />
                                 </Grid>
                             </Border>
-                            <ContentPresenter x:Name="contentPresenter" Grid.Column="1" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Grid.ColumnSpan="2" />
+                            <ContentPresenter x:Name="contentPresenter" Grid.Column="1" Focusable="False"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}" RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Grid.ColumnSpan="2" />
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="HasContent" Value="true">
@@ -63,21 +82,32 @@
                                 <Setter Property="Padding" Value="4,-1,0,0" />
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="true">
-                                <Setter Property="Background" TargetName="checkBoxBorder" Value="{StaticResource OptionMark.MouseOver.Background}" />
-                                <Setter Property="Fill" TargetName="optionMark" Value="{StaticResource OptionMark.MouseOver.Glyph}" />
-                                <Setter Property="Fill" TargetName="indeterminateMark" Value="{StaticResource OptionMark.MouseOver.Glyph}" />
+                                <Setter Property="Background" TargetName="checkBoxBorder"
+                                        Value="{StaticResource OptionMark.MouseOver.Background}" />
+                                <Setter Property="Fill" TargetName="optionMark"
+                                        Value="{StaticResource OptionMark.MouseOver.Glyph}" />
+                                <Setter Property="Fill" TargetName="indeterminateMark"
+                                        Value="{StaticResource OptionMark.MouseOver.Glyph}" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="false">
-                                <Setter Property="Background" TargetName="checkBoxBorder" Value="{StaticResource OptionMark.Disabled.Background}" />
-                                <Setter Property="BorderBrush" TargetName="checkBoxBorder" Value="{StaticResource OptionMark.Disabled.Border}" />
-                                <Setter Property="Fill" TargetName="optionMark" Value="{StaticResource OptionMark.Disabled.Glyph}" />
-                                <Setter Property="Fill" TargetName="indeterminateMark" Value="{StaticResource OptionMark.Disabled.Glyph}" />
+                                <Setter Property="Background" TargetName="checkBoxBorder"
+                                        Value="{StaticResource OptionMark.Disabled.Background}" />
+                                <Setter Property="BorderBrush" TargetName="checkBoxBorder"
+                                        Value="{StaticResource OptionMark.Disabled.Border}" />
+                                <Setter Property="Fill" TargetName="optionMark"
+                                        Value="{StaticResource OptionMark.Disabled.Glyph}" />
+                                <Setter Property="Fill" TargetName="indeterminateMark"
+                                        Value="{StaticResource OptionMark.Disabled.Glyph}" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="true">
-                                <Setter Property="Background" TargetName="checkBoxBorder" Value="{StaticResource OptionMark.Pressed.Background}" />
-                                <Setter Property="BorderBrush" TargetName="checkBoxBorder" Value="{StaticResource OptionMark.Pressed.Border}" />
-                                <Setter Property="Fill" TargetName="optionMark" Value="{StaticResource OptionMark.Pressed.Glyph}" />
-                                <Setter Property="Fill" TargetName="indeterminateMark" Value="{StaticResource OptionMark.Pressed.Glyph}" />
+                                <Setter Property="Background" TargetName="checkBoxBorder"
+                                        Value="{StaticResource OptionMark.Pressed.Background}" />
+                                <Setter Property="BorderBrush" TargetName="checkBoxBorder"
+                                        Value="{StaticResource OptionMark.Pressed.Border}" />
+                                <Setter Property="Fill" TargetName="optionMark"
+                                        Value="{StaticResource OptionMark.Pressed.Glyph}" />
+                                <Setter Property="Fill" TargetName="indeterminateMark"
+                                        Value="{StaticResource OptionMark.Pressed.Glyph}" />
                             </Trigger>
                             <Trigger Property="IsChecked" Value="true">
                                 <Setter Property="Opacity" TargetName="optionMark" Value="1" />
@@ -113,29 +143,45 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <!-- ReSharper disable InconsistentNaming -->
-        <CheckBox x:Name="startWithWindows" Content="Start With Windows" Foreground="White" FontSize="14" Padding="4,-1,0,0" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display" />
+        <CheckBox x:Name="startWithWindows" Content="Start With Windows" Foreground="White" FontSize="14"
+                  Padding="4,-1,0,0" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  TextOptions.TextHintingMode="Fixed" TextOptions.TextFormattingMode="Display" />
         <CheckBox x:Name="startMinimized" Content="Start Minimized" Foreground="White" Grid.Row="1" Grid.Column="0"
-                  FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+                  FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
         <CheckBox x:Name="minimizeToTray" Content="Minimize To Tray" Foreground="White" Grid.Row="2" Grid.Column="0"
-                  FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+                  FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
         <CheckBox x:Name="checkForUpdates" Content="Check For Updates" Foreground="White" Grid.Row="3" Grid.Column="0"
-                  FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+                  FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
         <CheckBox x:Name="autoScanOnStartup" Content="Auto Scan On Startup" Foreground="White" Grid.Row="4"
-                  Grid.Column="0" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+                  Grid.Column="0" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
         <CheckBox x:Name="forceScanOnStartup" Content="Force Scan On Startup" Foreground="White" Grid.Row="5"
-                  Grid.Column="0" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+                  Grid.Column="0" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
         <CheckBox x:Name="saveLastWindowSize" Content="Save Last Window Size" Foreground="White" Grid.Row="6"
-                  Grid.Column="0" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+                  Grid.Column="0" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
         <CheckBox x:Name="showNotificationsInTray" Content="Show Notifications In Tray" Foreground="White" Grid.Row="7"
-                  Grid.Column="0" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
-        <CheckBox x:Name="showDebugMessages" Content="Show Debug Messages" Foreground="White" Grid.Row="8" Grid.Column="0"
-                  FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+                  Grid.Column="0" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <CheckBox x:Name="showDebugMessages" Content="Show Debug Messages" Foreground="White" Grid.Row="8"
+                  Grid.Column="0"
+                  FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
         <CheckBox x:Name="runSteamOnStartup" Content="Run Steam On Startup" Foreground="White" Grid.Row="9"
-                  Grid.Column="0" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+                  Grid.Column="0" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
         <Label x:Name="steamLaunchArgText" Content="Steam Launch Arguments:" HorizontalAlignment="Left" Grid.Row="10"
-               Grid.Column="0" VerticalAlignment="Top" Foreground="White" FontSize="14" Height="29" Width="171" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
-        <TextBox x:Name="steamLaunchArgs" Margin="175,0,0,0" Grid.Row="10" Background="#FF3D3D3E" Foreground="White" Tag="Steam launch args (e.g. -dev)"  Style="{DynamicResource TextBoxWatermarkNoFocus}" BorderBrush="{x:Null}" FontSize="14" VerticalContentAlignment="Center" MaxLines="1" Grid.Column="1" Width="200" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
-        <!-- ReSharper restore InconsistentNaming -->
+               Grid.Column="0" VerticalAlignment="Top" Foreground="White" FontSize="14" Height="29" Width="171"
+               TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
+        <TextBox x:Name="steamLaunchArgs" Margin="175,0,0,0" Grid.Row="10" Background="#FF3D3D3E" Foreground="White"
+                 Tag="Steam launch args (e.g. -dev)" Style="{DynamicResource TextBoxWatermarkNoFocus}"
+                 BorderBrush="{x:Null}" FontSize="14" VerticalContentAlignment="Center" MaxLines="1" Grid.Column="1"
+                 Width="200" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed">
+            <!-- ReSharper restore InconsistentNaming -->
             <TextBox.Resources>
                 <SolidColorBrush x:Key="TextBox.Static.Border" Color="#FFABAdB3" />
                 <Style x:Key="TextBoxWatermarkNoFocus" TargetType="{x:Type TextBox}">
@@ -152,9 +198,13 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type TextBox}">
-                                <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
                                     <Grid>
-                                        <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+                                        <ScrollViewer x:Name="PART_ContentHost" Focusable="false"
+                                                      HorizontalScrollBarVisibility="Hidden"
+                                                      VerticalScrollBarVisibility="Hidden" />
                                         <TextBlock x:Name="InternalWatermarkLabel"
                                                    Text="{TemplateBinding Tag}"
                                                    Visibility="Collapsed" Focusable="False"
@@ -188,7 +238,8 @@
                                 <Condition Property="IsInactiveSelectionHighlightEnabled" Value="true" />
                                 <Condition Property="IsSelectionActive" Value="false" />
                             </MultiTrigger.Conditions>
-                            <Setter Property="SelectionBrush" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}" />
+                            <Setter Property="SelectionBrush"
+                                    Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}" />
                         </MultiTrigger>
                     </Style.Triggers>
                 </Style>
@@ -213,10 +264,19 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Button x:Name="SaveSettings" Content="Save Settings" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="SaveSettings_Click" Margin="0,10,10,0" FontSize="14" BorderBrush="{x:Null}" Padding="10" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
-            <Button x:Name="CancelChanges" Content="Cancel" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="cancelChanges_Click" Margin="0,10,10,0" FontSize="14" BorderBrush="{x:Null}"
-                    Grid.Row="0" Grid.Column="1" Padding="10" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" />
-            <Button x:Name="ResetToDefaults" Content="Reset To Defaults" Grid.Column="2" Height="auto" HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E" Click="ResetToDefaults_Click" Margin="0,10,0,0" FontSize="14" BorderBrush="{x:Null}" Grid.Row="10" Padding="10" TextOptions.TextHintingMode="Fixed" />
+            <Button x:Name="SaveSettings" Content="Save Settings" Height="auto" HorizontalContentAlignment="Center"
+                    Foreground="White" Background="#FF3D3D3E" Click="SaveSettings_Click" Margin="0,10,10,0"
+                    FontSize="14" BorderBrush="{x:Null}" Padding="10" TextOptions.TextFormattingMode="Display"
+                    TextOptions.TextHintingMode="Fixed" />
+            <Button x:Name="CancelChanges" Content="Cancel" Height="auto" HorizontalContentAlignment="Center"
+                    Foreground="White" Background="#FF3D3D3E" Click="cancelChanges_Click" Margin="0,10,10,0"
+                    FontSize="14" BorderBrush="{x:Null}"
+                    Grid.Row="0" Grid.Column="1" Padding="10" TextOptions.TextFormattingMode="Display"
+                    TextOptions.TextHintingMode="Fixed" />
+            <Button x:Name="ResetToDefaults" Content="Reset To Defaults" Grid.Column="2" Height="auto"
+                    HorizontalContentAlignment="Center" Foreground="White" Background="#FF3D3D3E"
+                    Click="ResetToDefaults_Click" Margin="0,10,0,0" FontSize="14" BorderBrush="{x:Null}" Grid.Row="10"
+                    Padding="10" TextOptions.TextHintingMode="Fixed" />
         </Grid>
     </Grid>
 </Window>
