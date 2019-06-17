@@ -6,34 +6,35 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using SteamFriendsPatcher.Forms;
 
 namespace SteamFriendsPatcher
 {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App
     {
         public static MainWindow MainWindowRef { get; private set; }
         public static System.Timers.Timer UpdateTimer { get; private set; }
 
-        public static bool UpdateTimerActive { get; private set; } = false;
+        public static bool UpdateTimerActive { get; private set; }
 
-        private static bool firstShown { get; set; } = false;
+        private static bool FirstShown { get; set; }
 
-        private static readonly Mutex singleInstance = new Mutex(true, Assembly.GetExecutingAssembly().GetName().Name);
+        private static readonly Mutex SingleInstance = new Mutex(true, Assembly.GetExecutingAssembly().GetName().Name);
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            if (singleInstance.WaitOne(TimeSpan.Zero, true))
+            if (SingleInstance.WaitOne(TimeSpan.Zero, true))
             {
                 MainWindowRef = new MainWindow();
 
                 PerformUpgrade();
-                string ver = ThisAssembly.AssemblyInformationalVersion;
-                MainWindowRef.Title += $"v{(ver.Substring(0, ver.IndexOf('+') > -1 ? ver.IndexOf('+') : ver.Length))}";
-                Task.Run(() => Setup());
+                const string ver = ThisAssembly.AssemblyInformationalVersion;
+                MainWindowRef.Title += $"v{ver.Substring(0, ver.IndexOf('+') > -1 ? ver.IndexOf('+') : ver.Length)}";
+                Task.Run(Setup);
                 if (SteamFriendsPatcher.Properties.Settings.Default.saveLastWindowSize)
                 {
                     MainWindowRef.Width = SteamFriendsPatcher.Properties.Settings.Default.windowWidth;
@@ -53,7 +54,7 @@ namespace SteamFriendsPatcher
                     var workingArea = SystemParameters.WorkArea;
                     MainWindowRef.Left = (workingArea.Width - SteamFriendsPatcher.Properties.Settings.Default.windowWidth) / 2 + workingArea.Left;
                     MainWindowRef.Top = (workingArea.Height - SteamFriendsPatcher.Properties.Settings.Default.windowHeight) / 2 + workingArea.Top;
-                    firstShown = true;
+                    FirstShown = true;
                 }
 
                 if (!SteamFriendsPatcher.Properties.Settings.Default.startMinimized)
@@ -61,13 +62,13 @@ namespace SteamFriendsPatcher
                     MainWindowRef.WindowState = WindowState.Normal;
                 }
 
-                singleInstance.ReleaseMutex();
+                SingleInstance.ReleaseMutex();
             }
             else
             {
                 NativeMethods.PostMessage(
-                    (IntPtr)NativeMethods.HWND_BROADCAST,
-                    NativeMethods.WM_SHOWME,
+                    (IntPtr)NativeMethods.HwndBroadcast,
+                    NativeMethods.WmShowme,
                     IntPtr.Zero,
                     IntPtr.Zero);
                 Current.Shutdown(1);
@@ -78,7 +79,7 @@ namespace SteamFriendsPatcher
         {
             if (SteamFriendsPatcher.Properties.Settings.Default.checkForUpdates)
             {
-                Task.Run(() => Program.UpdateChecker());
+                Task.Run(Program.UpdateChecker);
                 ToggleUpdateTimer();
             }
 
@@ -100,12 +101,12 @@ namespace SteamFriendsPatcher
 
         public static void ShowMain()
         {
-            if (!firstShown)
+            if (!FirstShown)
             {
                 var workingArea = SystemParameters.WorkArea;
                 MainWindowRef.Left = (workingArea.Width - SteamFriendsPatcher.Properties.Settings.Default.windowWidth) / 2 + workingArea.Left;
                 MainWindowRef.Top = (workingArea.Height - SteamFriendsPatcher.Properties.Settings.Default.windowHeight) / 2 + workingArea.Top;
-                firstShown = true;
+                FirstShown = true;
             }
 
             if (!MainWindowRef.IsVisible)
@@ -130,7 +131,7 @@ namespace SteamFriendsPatcher
             UpdateTimer = new System.Timers.Timer
 
             {
-                Interval = System.TimeSpan.FromDays(1).TotalMilliseconds
+                Interval = TimeSpan.FromDays(1).TotalMilliseconds
             };
 
             UpdateTimer.Elapsed += UpdateTimer_Elapsed;
@@ -145,23 +146,21 @@ namespace SteamFriendsPatcher
 
         private static void PerformUpgrade()
         {
-            if (SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired)
+            if (!SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired) return;
+            SteamFriendsPatcher.Properties.Settings.Default.Upgrade();
+
+            if (SteamFriendsPatcher.Properties.Settings.Default.upgradeVer == 0)
             {
-                SteamFriendsPatcher.Properties.Settings.Default.Upgrade();
-
-                if (SteamFriendsPatcher.Properties.Settings.Default.upgradeVer == 0)
+                if (File.Exists(Program.StartupLinkOld))
                 {
-                    if (File.Exists(Program.startupLinkOld))
-                    {
-                        File.Delete(Program.startupLinkOld);
-                        Program.CreateStartUpShortcut();
-                    }
+                    File.Delete(Program.StartupLinkOld);
+                    Program.CreateStartUpShortcut();
                 }
-
-                SteamFriendsPatcher.Properties.Settings.Default.upgradeVer = 1;
-                SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired = false;
-                SteamFriendsPatcher.Properties.Settings.Default.Save();
             }
+
+            SteamFriendsPatcher.Properties.Settings.Default.upgradeVer = 1;
+            SteamFriendsPatcher.Properties.Settings.Default.upgradeRequired = false;
+            SteamFriendsPatcher.Properties.Settings.Default.Save();
         }
     }
 }

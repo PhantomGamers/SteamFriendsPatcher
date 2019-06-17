@@ -1,18 +1,17 @@
 ﻿using System.Diagnostics;
-using System.Windows;
 using System.Windows.Navigation;
 
-namespace SteamFriendsPatcher
+namespace SteamFriendsPatcher.Forms
 {
     /// <summary>
     /// Interaction logic for AboutWindow.xaml
     /// </summary>
-    public partial class AboutWindow : Window
+    public partial class AboutWindow
     {
         public AboutWindow()
         {
             InitializeComponent();
-            this.programName.Content += $"v{ThisAssembly.AssemblyInformationalVersion}";
+            ProgramName.Content += $"v{ThisAssembly.AssemblyInformationalVersion}";
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
