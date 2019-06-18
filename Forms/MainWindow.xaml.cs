@@ -152,11 +152,11 @@ namespace SteamFriendsPatcher.Forms
             {
                 foreach (var item in LogicalTreeHelper.GetChildren(MainGrid))
                     if (item is Button button)
-                        if (button.Name != "aboutButton" && button.Name != "settingsButton")
+                        if (button.Name != "AboutButton" && button.Name != "SettingsButton")
                         {
                             button.IsEnabled = status;
                             button.Visibility = status ? Visibility.Visible : Visibility.Hidden;
-                            if (button.Name == "toggleScanButton")
+                            if (button.Name == "ToggleScanButton")
                                 button.Content = Program.scannerExists ? "Stop Scanning" : "Start Scanning";
                         }
             });
