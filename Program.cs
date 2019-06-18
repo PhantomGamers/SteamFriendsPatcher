@@ -826,9 +826,8 @@ namespace SteamFriendsPatcher
         public static void Print(string message = null, LogLevel logLevel = LogLevel.Info, bool newline = true)
         {
             var dateTime = DateTime.Now.ToString("G", CultureInfo.CurrentCulture);
-            var fullMessage = $"[{dateTime}][{logLevel}] {message}" + (newline ? Environment.NewLine : string.Empty);
 #if DEBUG
-            Debug.Write(fullMessage);
+            Debug.Write($"[{dateTime}][{logLevel}] {message}" + (newline ? Environment.NewLine : string.Empty));
 #endif
             /*
             if (SteamFriendsPatcher.Properties.Settings.Default.outputToLog)
