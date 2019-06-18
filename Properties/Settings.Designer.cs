@@ -214,5 +214,29 @@ namespace SteamFriendsPatcher.Properties {
                 this["outputToLog"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool showTrayIconWindow {
+            get {
+                return ((bool)(this["showTrayIconWindow"]));
+            }
+            set {
+                this["showTrayIconWindow"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool showTrayIconHidden {
+            get {
+                return ((bool)(this["showTrayIconHidden"]));
+            }
+            set {
+                this["showTrayIconHidden"] = value;
+            }
+        }
     }
 }

@@ -80,6 +80,8 @@ namespace SteamFriendsPatcher.Forms
             if (checkForUpdatesSetting && !Settings.Default.checkForUpdates)
                 App.ToggleUpdateTimer(false);
 
+            App.MainWindowRef.NotifyIcon.Visible = Settings.Default.showTrayIconWindow;
+
             Close();
         }
 

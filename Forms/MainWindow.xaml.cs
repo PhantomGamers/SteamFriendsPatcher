@@ -61,6 +61,9 @@ namespace SteamFriendsPatcher.Forms
         {
             if (!Settings.Default.minimizeToTray || WindowState != WindowState.Minimized) return;
             Hide();
+
+            NotifyIcon.Visible = Settings.Default.showTrayIconHidden;
+
             if (!Settings.Default.showNotificationsInTray) return;
             NotifyIcon.BalloonTipText = Program.scannerExists
                 ? "Scanning in background..."
@@ -94,7 +97,7 @@ namespace SteamFriendsPatcher.Forms
 
             NotifyIcon = new NotifyIcon
             {
-                Visible = true,
+                Visible = false,
                 Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location),
                 Text = Title,
                 ContextMenu = contextMenu
