@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Interop;
 using SteamFriendsPatcher.Properties;
@@ -128,7 +129,6 @@ namespace SteamFriendsPatcher.Forms
 
         private static void ExitButton_Click(object sender, EventArgs e)
         {
-            // ReSharper disable once RedundantNameQualifier
             Application.Current.Shutdown();
         }
 

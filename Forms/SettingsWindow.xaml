@@ -187,7 +187,8 @@
                TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
         <TextBox x:Name="steamLaunchArgs" Margin="0" Grid.Row="12" Background="#FF3D3D3E" Foreground="White"
                  Tag="Steam launch args (e.g. -dev)" Style="{DynamicResource TextBoxWatermarkNoFocus}"
-                 BorderBrush="{x:Null}" FontSize="14" VerticalContentAlignment="Center" MaxLines="1" Grid.Column="1" TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Width="187" Height="29">
+                 BorderBrush="{x:Null}" FontSize="14" VerticalContentAlignment="Center" MaxLines="1" Grid.Column="1"
+                 TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Width="187" Height="29">
             <!-- ReSharper restore InconsistentNaming -->
             <TextBox.Resources>
                 <SolidColorBrush x:Key="TextBox.Static.Border" Color="#FFABAdB3" />
@@ -252,7 +253,8 @@
                 </Style>
             </TextBox.Resources>
         </TextBox>
-        <Grid Grid.Row="13" Grid.ColumnSpan="2" Grid.Column="0" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
+        <Grid Grid.Row="13" Grid.ColumnSpan="2" Grid.Column="0"
+              d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />

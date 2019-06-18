@@ -20,6 +20,7 @@ namespace SteamFriendsPatcher
     {
         private static readonly Mutex SingleInstance = new Mutex(true, Assembly.GetExecutingAssembly().GetName().Name);
         public static MainWindow MainWindowRef { get; private set; }
+        // ReSharper disable once RedundantNameQualifier
         public static Timer UpdateTimer { get; private set; }
 
         public static bool UpdateTimerActive { get; private set; }
