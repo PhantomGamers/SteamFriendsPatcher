@@ -46,9 +46,18 @@ namespace SteamFriendsPatcher
                 var workingArea = SystemParameters.WorkArea;
                 MainWindowRef.Left = (workingArea.Width - Settings.Default.windowWidth) / 2 + workingArea.Left;
                 MainWindowRef.Top = (workingArea.Height - Settings.Default.windowHeight) / 2 + workingArea.Top;
-                ShowMain();
 
-                if (Settings.Default.minimizeToTray && Settings.Default.startMinimized) MainWindowRef.Hide();
+                MainWindowRef.Show();
+
+                if (Settings.Default.minimizeToTray && Settings.Default.startMinimized)
+                {
+                    MainWindowRef.NotifyIcon.Visible = Settings.Default.showTrayIconHidden;
+                    MainWindowRef.Hide();
+                }
+                else
+                {
+                    MainWindowRef.NotifyIcon.Visible = Settings.Default.showTrayIconWindow;
+                }
 
                 if (!Settings.Default.startMinimized) MainWindowRef.WindowState = WindowState.Normal;
 
