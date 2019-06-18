@@ -510,11 +510,11 @@ namespace SteamFriendsPatcher
                 (friendscss == null || new FileInfo(e.FullPath).Length != friendscss.Length))
                 return;
             PendingCacheFiles.Add(e.Name);
-            var t = new Thread(ProcessCacheFile);
+            var t = new Thread(ProcessCacheFileEvent);
             t.Start(e);
         }
 
-        private static void ProcessCacheFile(object obj)
+        private static void ProcessCacheFileEvent(object obj)
         {
             while (updatePending) Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
 
@@ -575,7 +575,7 @@ namespace SteamFriendsPatcher
                     } while (PendingCacheFiles.Contains(e.Name));
                 }
 
-                ProcessCacheFile(e);
+                ProcessCacheFileEvent(e);
                 return;
             }
 
