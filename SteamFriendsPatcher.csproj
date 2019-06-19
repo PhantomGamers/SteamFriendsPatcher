@@ -81,8 +81,8 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Resource Include="Resources\cog.svg" />
-    <Resource Include="Resources\info-circle.svg" />
+    <None Include="Resources\cog.svg" />
+    <None Include="Resources\info-circle.svg" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
