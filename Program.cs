@@ -292,7 +292,7 @@ namespace SteamFriendsPatcher
 
             // custom overrides original (!important tags not needed)
             const string appendText =
-                "@import url(\"https://steamloopback.host/friends.original.css\");\n@import url(\"https://steamloopback.host/friends.custom.css\");\n{";
+                "@import url(\"https://steamloopback.host/friends.original.css\");\n@import url(\"https://steamloopback.host/friends.custom.css\");\n";
 
             // original overrides custom (!important tags needed, this is the original behavior)
             // string appendText = "@import url(\"https://steamloopback.host/friends.custom.css\");\n@import url(\"https://steamloopback.host/friends.original.css\");\n{";
