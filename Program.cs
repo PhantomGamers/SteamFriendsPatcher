@@ -737,7 +737,7 @@ namespace SteamFriendsPatcher
             if (preSteamStatus)
             {
                 Print("Restarting Steam...");
-                Process.Start(steamDir + "\\Steam.exe");
+                Process.Start(steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
                 for (var i = 0; i < 10; i++)
                 {
                     if (Process.GetProcessesByName("Steam").FirstOrDefault() != null)
