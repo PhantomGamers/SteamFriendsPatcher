@@ -53,6 +53,10 @@ namespace SteamFriendsPatcher
             @"Microsoft\Windows\Start Menu\Programs\Startup",
             Assembly.GetExecutingAssembly().GetName().Name + ".url");
 
+        // location of Library UI files
+        private static readonly string LibraryUIDir = Path.Combine(steamDir, "steamui");
+        private static readonly string LibraryCSS = Path.Combine(LibraryUIDir, "css\\libraryroot.css");
+
         // friends.css etag
         private static string _etag;
 
@@ -278,6 +282,41 @@ namespace SteamFriendsPatcher
                     Print("Cache file does not exist or is outdated.", LogLevel.Warning);
                 else
                     Print("Cache file is already patched.");
+            }
+
+            if(Settings.Default.patchLibraryBeta)
+            {
+                Print("Patching Library [BETA]...");
+                string librarycss;
+                string patchedText = "/*patched*/";
+                try {
+                librarycss = File.ReadAllText(LibraryCSS);
+                } catch(Exception e)
+                {
+                    Print(e.ToString(), LogLevel.Error);
+                    Print("File could not be read, aborting...", LogLevel.Error);
+                    goto ResetButtons;
+                }
+                if(librarycss.StartsWith(patchedText))
+                {
+                    Print("Library already patched.");
+                    goto ResetButtons;
+                }
+                File.Delete(Path.Combine(LibraryUIDir, "libraryroot.original.css"));
+                File.Copy(LibraryCSS, Path.Combine(LibraryUIDir, "libraryroot.original.css"));
+                int originalLibCSSLength = librarycss.Length;
+                librarycss = patchedText + "\n@import url(\"https://steamloopback.host/libraryroot.original.css\");\n@import url(\"https://steamloopback.host/libraryroot.custom.css\");\n";
+                var fillerText = new string('\t', originalLibCSSLength - librarycss.Length);
+                librarycss += fillerText;
+                if(!File.Exists(Path.Combine(LibraryUIDir, "libraryroot.custom.css")))
+                {
+                    File.Create(Path.Combine(LibraryUIDir, "libraryroot.custom.css")).Dispose();
+                }
+                File.WriteAllText(LibraryCSS, librarycss);
+                
+                Print("Library patched! [BETA]");
+                Print("Put custom library css in " + Path.Combine(LibraryUIDir, "libraryroot.custom.css"));
+
             }
 
             ResetButtons:
@@ -732,6 +771,9 @@ namespace SteamFriendsPatcher
             {
                 Print("Cache files deleted.");
             }
+
+            Print("Deleting patched library file...");
+            File.Delete(LibraryCSS);
 
             ToggleCacheScanner(preScannerStatus);
             if (preSteamStatus)
