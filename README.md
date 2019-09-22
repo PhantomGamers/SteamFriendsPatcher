@@ -23,6 +23,7 @@ With these options configured, the program should be as easy as setup and forget
 
 # Todo/Bugs
 * Implement CEF index parsing to better find the correct cache file (Pull Request welcome to anyone who has experience with this)  
+* Currently breaks Big Picture Mode chat due to Big Picture not utilizing steamloopback.host
 
 # Dependencies
 * [.NET Framework 4.6.1](https://www.microsoft.com/en-us/download/details.aspx?id=49981)
