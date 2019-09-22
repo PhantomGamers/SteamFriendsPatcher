@@ -771,7 +771,13 @@ namespace SteamFriendsPatcher
                 TreeScope.Children, (sender, e) =>
                 {
                     if (!(sender is AutomationElement element)) return;
+                    try {
                     if (element.Current.ClassName == "SDL_app") GetLatestFriendsCss();
+                    }
+                    catch(ElementNotAvailableException)
+                    {
+
+                    }
                 });
         }
 
