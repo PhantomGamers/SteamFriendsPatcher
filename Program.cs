@@ -73,8 +73,9 @@ namespace SteamFriendsPatcher
 
         // FileSystemWatchers
         public static FileSystemWatcher cacheWatcher;
-
         public static FileSystemWatcher crashWatcher;
+        public static FileSystemWatcher libraryWatcher;
+
         public static FileStream cacheLock;
         public static bool scannerExists;
         public static bool friendslistWatcherExists;
@@ -284,40 +285,7 @@ namespace SteamFriendsPatcher
                     Print("Cache file is already patched.");
             }
 
-            if(Settings.Default.patchLibraryBeta)
-            {
-                Print("Patching Library [BETA]...");
-                string librarycss;
-                string patchedText = "/*patched*/";
-                try {
-                librarycss = File.ReadAllText(LibraryCSS);
-                } catch(Exception e)
-                {
-                    Print(e.ToString(), LogLevel.Error);
-                    Print("File could not be read, aborting...", LogLevel.Error);
-                    goto ResetButtons;
-                }
-                if(librarycss.StartsWith(patchedText))
-                {
-                    Print("Library already patched.");
-                    goto ResetButtons;
-                }
-                File.Delete(Path.Combine(LibraryUIDir, "libraryroot.original.css"));
-                File.Copy(LibraryCSS, Path.Combine(LibraryUIDir, "libraryroot.original.css"));
-                int originalLibCSSLength = librarycss.Length;
-                librarycss = patchedText + "\n@import url(\"https://steamloopback.host/libraryroot.original.css\");\n@import url(\"https://steamloopback.host/libraryroot.custom.css\");\n";
-                var fillerText = new string('\t', originalLibCSSLength - librarycss.Length);
-                librarycss += fillerText;
-                if(!File.Exists(Path.Combine(LibraryUIDir, "libraryroot.custom.css")))
-                {
-                    File.Create(Path.Combine(LibraryUIDir, "libraryroot.custom.css")).Dispose();
-                }
-                File.WriteAllText(LibraryCSS, librarycss);
-                
-                Print("Library patched! [BETA]");
-                Print("Put custom library css in " + Path.Combine(LibraryUIDir, "libraryroot.custom.css"));
-
-            }
+            PatchLibrary();
 
             ResetButtons:
             Main.ToggleButtons(true);
@@ -342,6 +310,44 @@ namespace SteamFriendsPatcher
 
             var output = append.Concat(file).Concat(Encoding.ASCII.GetBytes("}")).ToArray();
             return output;
+        }
+
+        public static void PatchLibrary()
+        {
+            if(Settings.Default.patchLibraryBeta)
+            {
+                Print("Patching Library [BETA]...");
+                string librarycss;
+                string patchedText = "/*patched*/";
+                try {
+                librarycss = File.ReadAllText(LibraryCSS);
+                } catch(Exception e)
+                {
+                    Print(e.ToString(), LogLevel.Error);
+                    Print("File could not be read, aborting...", LogLevel.Error);
+                    return;
+                }
+                if(librarycss.StartsWith(patchedText))
+                {
+                    Print("Library already patched.");
+                    return;
+                }
+                File.Delete(Path.Combine(LibraryUIDir, "libraryroot.original.css"));
+                File.Copy(LibraryCSS, Path.Combine(LibraryUIDir, "libraryroot.original.css"));
+                int originalLibCSSLength = librarycss.Length;
+                librarycss = patchedText + "\n@import url(\"https://steamloopback.host/libraryroot.original.css\");\n@import url(\"https://steamloopback.host/libraryroot.custom.css\");\n";
+                var fillerText = new string('\t', originalLibCSSLength - librarycss.Length);
+                librarycss += fillerText;
+                if(!File.Exists(Path.Combine(LibraryUIDir, "libraryroot.custom.css")))
+                {
+                    File.Create(Path.Combine(LibraryUIDir, "libraryroot.custom.css")).Dispose();
+                }
+                File.WriteAllText(LibraryCSS, librarycss);
+                
+                Print("Library patched! [BETA]");
+                Print("Put custom library css in " + Path.Combine(LibraryUIDir, "libraryroot.custom.css"));
+
+            }
         }
 
         public static bool GetLatestFriendsCss(bool force = false)
@@ -478,6 +484,7 @@ namespace SteamFriendsPatcher
                 {
                     cacheWatcher.EnableRaisingEvents = isEnabled;
                     crashWatcher.EnableRaisingEvents = isEnabled;
+                    libraryWatcher.EnableRaisingEvents = isEnabled;
                     scannerExists = isEnabled;
                     if (!isEnabled)
                     {
@@ -522,6 +529,8 @@ namespace SteamFriendsPatcher
                 StartFriendsListWatcher();
 
                 StartCrashScanner();
+
+                StartLibraryScanner();
 
                 cacheWatcher = new FileSystemWatcher
                 {
@@ -713,6 +722,44 @@ namespace SteamFriendsPatcher
                     friendslistWatcherExists = false;
                     Automation.RemoveAllEventHandlers();
                     break;
+            }
+        }
+
+        private static void StartLibraryScanner()
+        {
+            if (!Directory.Exists(steamDir))
+            {
+                Print("Steam directory not found.", LogLevel.Warning);
+                return;
+            }
+
+            libraryWatcher = new FileSystemWatcher
+            {
+                Path = Path.Combine(LibraryUIDir, "css"),
+                NotifyFilter = NotifyFilters.LastAccess
+                               | NotifyFilters.LastWrite
+                               | NotifyFilters.FileName,
+                Filter = "libraryroot.css"
+            };
+            libraryWatcher.Created += LibraryWatcher_Event;
+            libraryWatcher.Changed += LibraryWatcher_Event;
+
+            libraryWatcher.EnableRaisingEvents = true;
+
+            Print("Library scanner started.", LogLevel.Debug);
+        }
+
+        private static void LibraryWatcher_Event(object sender, FileSystemEventArgs e)
+        {
+            switch (e.ChangeType)
+            {
+                case WatcherChangeTypes.Changed:
+                case WatcherChangeTypes.Created:
+                {
+                    Print("Library change detected.", LogLevel.Debug);
+                    PatchLibrary();
+                    break;
+                }
             }
         }
 
