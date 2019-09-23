@@ -316,6 +316,11 @@ namespace SteamFriendsPatcher
         {
             if(Settings.Default.patchLibraryBeta)
             {
+                if(!Directory.Exists(Path.Combine(LibraryUIDir, "css")))
+                {
+                    Print("Library UI directory not found.");
+                    return;
+                }
                 Print("Patching Library [BETA]...");
                 string librarycss;
                 string patchedText = "/*patched*/";
@@ -482,9 +487,9 @@ namespace SteamFriendsPatcher
 
                 if (scannerExists)
                 {
-                    cacheWatcher.EnableRaisingEvents = isEnabled;
-                    crashWatcher.EnableRaisingEvents = isEnabled;
-                    libraryWatcher.EnableRaisingEvents = isEnabled;
+                    if(cacheWatcher != null) cacheWatcher.EnableRaisingEvents = isEnabled;
+                    if(crashWatcher != null) crashWatcher.EnableRaisingEvents = isEnabled;
+                    if(libraryWatcher != null) libraryWatcher.EnableRaisingEvents = isEnabled;
                     scannerExists = isEnabled;
                     if (!isEnabled)
                     {
@@ -530,7 +535,10 @@ namespace SteamFriendsPatcher
 
                 StartCrashScanner();
 
-                StartLibraryScanner();
+                if(Settings.Default.patchLibraryBeta && Directory.Exists(Path.Combine(LibraryUIDir, "css")))
+                {
+                    StartLibraryScanner();
+                }
 
                 cacheWatcher = new FileSystemWatcher
                 {
@@ -825,8 +833,11 @@ namespace SteamFriendsPatcher
                 Print("Cache files deleted.");
             }
 
-            Print("Deleting patched library file...");
-            File.Delete(LibraryCSS);
+            if(File.Exists(LibraryCSS))
+            {
+                Print("Deleting patched library file...");
+                File.Delete(LibraryCSS);
+            }
 
             ToggleCacheScanner(preScannerStatus);
             if (preSteamStatus)
