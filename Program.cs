@@ -173,6 +173,12 @@ namespace SteamFriendsPatcher
             Print("Done! Put your custom css in " + steamDir + "\\clientui\\friends.custom.css");
             Print("Close and reopen your Steam friends window to see changes.");
 
+            if(Settings.Default.restartSteamOnPatch)
+            {
+                ShutdownSteam();
+                RestartSteam();
+            }
+
             Main.Dispatcher.Invoke(() =>
             {
                 if (Main.IsVisible || !Settings.Default.showNotificationsInTray) return;
@@ -796,6 +802,36 @@ namespace SteamFriendsPatcher
                 });
         }
 
+        private static void ShutdownSteam()
+        {
+                var steamp = Process.GetProcessesByName("Steam").FirstOrDefault();
+                Print("Shutting down Steam...");
+                Process.Start(steamDir + "\\Steam.exe", "-shutdown");
+                if (steamp != null && !steamp.WaitForExit((int) TimeSpan.FromSeconds(30).TotalMilliseconds))
+                {
+                    Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.",
+                        LogLevel.Error);
+                    Main.ToggleButtons(true);
+                    return;
+                }
+        }
+
+        private static void RestartSteam()
+        {
+            Print("Restarting Steam...");
+                Process.Start(steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
+                for (var i = 0; i < 10; i++)
+                {
+                    if (Process.GetProcessesByName("Steam").FirstOrDefault() != null)
+                    {
+                        Print("Steam started.");
+                        break;
+                    }
+
+                    if (i == 9) Print("Failed to start Steam.", LogLevel.Error);
+                }
+        }
+
         public static void ClearSteamCache()
         {
             if (!Directory.Exists(SteamCacheDir))
@@ -810,17 +846,10 @@ namespace SteamFriendsPatcher
             {
                 if (MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?",
                         "Steam Friends Patcher", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
-                var steamp = Process.GetProcessesByName("Steam").FirstOrDefault();
-                Print("Shutting down Steam...");
-                Process.Start(steamDir + "\\Steam.exe", "-shutdown");
-                if (steamp != null && !steamp.WaitForExit((int) TimeSpan.FromSeconds(30).TotalMilliseconds))
-                {
-                    Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.",
-                        LogLevel.Error);
-                    Main.ToggleButtons(true);
-                    return;
-                }
+                
             }
+
+            ShutdownSteam();
 
             ToggleCacheScanner(false);
             Main.ToggleButtons(false);
@@ -849,18 +878,7 @@ namespace SteamFriendsPatcher
             ToggleCacheScanner(preScannerStatus);
             if (preSteamStatus)
             {
-                Print("Restarting Steam...");
-                Process.Start(steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
-                for (var i = 0; i < 10; i++)
-                {
-                    if (Process.GetProcessesByName("Steam").FirstOrDefault() != null)
-                    {
-                        Print("Steam started.");
-                        break;
-                    }
-
-                    if (i == 9) Print("Failed to start Steam.", LogLevel.Error);
-                }
+                RestartSteam();
             }
 
             Main.ToggleButtons(true);

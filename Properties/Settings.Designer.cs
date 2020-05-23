@@ -262,5 +262,17 @@ namespace SteamFriendsPatcher.Properties {
                 this["closeToTray"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool restartSteamOnPatch {
+            get {
+                return ((bool)(this["restartSteamOnPatch"]));
+            }
+            set {
+                this["restartSteamOnPatch"] = value;
+            }
+        }
     }
 }
