@@ -329,7 +329,8 @@ namespace SteamFriendsPatcher
                 }
                 if(!File.Exists(Path.Combine(LibraryUIDir, "libraryroot.css")))
                 {
-                    Print("Default library theme not found, please restart Steam and try again.");
+                    Print("Library CSS not found.");
+                    return;
                 }
                 Print("Patching Library [BETA]...");
                 string librarycss;
