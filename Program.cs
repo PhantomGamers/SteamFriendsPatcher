@@ -321,6 +321,10 @@ namespace SteamFriendsPatcher
                     Print("Library UI directory not found.");
                     return;
                 }
+                if(!File.Exists(Path.Combine(LibraryUIDir, "libraryroot.css")))
+                {
+                    Print("Default library theme not found, please restart Steam and try again.");
+                }
                 Print("Patching Library [BETA]...");
                 string librarycss;
                 string patchedText = "/*patched*/";
@@ -337,7 +341,10 @@ namespace SteamFriendsPatcher
                     Print("Library already patched.");
                     return;
                 }
-                File.Delete(Path.Combine(LibraryUIDir, "libraryroot.original.css"));
+                if(File.Exists(Path.Combine(LibraryUIDir, "libraryroot.original.css"))) 
+                {
+                    File.Delete(Path.Combine(LibraryUIDir, "libraryroot.original.css"));
+                }
                 File.Copy(LibraryCSS, Path.Combine(LibraryUIDir, "libraryroot.original.css"));
                 int originalLibCSSLength = librarycss.Length;
                 librarycss = patchedText + "\n@import url(\"https://steamloopback.host/libraryroot.original.css\");\n@import url(\"https://steamloopback.host/libraryroot.custom.css\");\n";
