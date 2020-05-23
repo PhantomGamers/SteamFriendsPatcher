@@ -74,6 +74,11 @@ namespace SteamFriendsPatcher
             }
         }
 
+        private void OnExit(object sender, ExitEventArgs e)
+        {
+            MainWindowRef.OnExit();
+        }
+
         private static void Setup()
         {
             if (Settings.Default.checkForUpdates)

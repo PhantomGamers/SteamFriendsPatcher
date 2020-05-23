@@ -144,6 +144,8 @@
             <RowDefinition />
             <RowDefinition />
             <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
         </Grid.RowDefinitions>
         <!-- ReSharper disable InconsistentNaming -->
         <CheckBox x:Name="startWithWindows" Content="Start With Windows" Foreground="White" FontSize="14"
@@ -155,41 +157,44 @@
         <CheckBox x:Name="minimizeToTray" Content="Minimize To Tray" Foreground="White" Grid.Row="2" Grid.Column="0"
                   FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <CheckBox x:Name="checkForUpdates" Content="Check For Updates" Foreground="White" Grid.Row="3" Grid.Column="0"
+        <CheckBox x:Name="closeToTray" Content="Close To Tray" Foreground="White" Grid.Row="3" Grid.Column="0"
                   FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <CheckBox x:Name="autoScanOnStartup" Content="Auto Scan On Startup" Foreground="White" Grid.Row="4"
+        <CheckBox x:Name="checkForUpdates" Content="Check For Updates" Foreground="White" Grid.Row="4" Grid.Column="0"
+                  FontSize="14"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
+        <CheckBox x:Name="autoScanOnStartup" Content="Auto Scan On Startup" Foreground="White" Grid.Row="5"
                   Grid.Column="0" FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <CheckBox x:Name="forceScanOnStartup" Content="Force Scan On Startup" Foreground="White" Grid.Row="5"
+        <CheckBox x:Name="forceScanOnStartup" Content="Force Scan On Startup" Foreground="White" Grid.Row="6"
                   Grid.Column="0" FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <CheckBox x:Name="saveLastWindowSize" Content="Save Last Window Size" Foreground="White" Grid.Row="6"
+        <CheckBox x:Name="saveLastWindowSize" Content="Save Last Window Size" Foreground="White" Grid.Row="7"
                   Grid.Column="0" FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <CheckBox x:Name="showTrayIconWindow" Content="Show Tray Icon While Visible" Foreground="White" Grid.Row="7"
+        <CheckBox x:Name="showTrayIconWindow" Content="Show Tray Icon While Visible" Foreground="White" Grid.Row="8"
                   Grid.Column="0" FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <CheckBox x:Name="showTrayIconHidden" Content="Show Tray Icon While Hidden" Foreground="White" Grid.Row="8"
+        <CheckBox x:Name="showTrayIconHidden" Content="Show Tray Icon While Hidden" Foreground="White" Grid.Row="9"
                   Grid.Column="0" FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <CheckBox x:Name="showNotificationsInTray" Content="Show Notifications In Tray" Foreground="White" Grid.Row="9"
+        <CheckBox x:Name="showNotificationsInTray" Content="Show Notifications In Tray" Foreground="White" Grid.Row="10"
                   Grid.Column="0" FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <CheckBox x:Name="showDebugMessages" Content="Show Debug Messages" Foreground="White" Grid.Row="10"
+        <CheckBox x:Name="showDebugMessages" Content="Show Debug Messages" Foreground="White" Grid.Row="11"
                   Grid.Column="0"
                   FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <CheckBox x:Name="runSteamOnStartup" Content="Run Steam On Startup" Foreground="White" Grid.Row="11"
+        <CheckBox x:Name="runSteamOnStartup" Content="Run Steam On Startup" Foreground="White" Grid.Row="12"
                   Grid.Column="0" FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <CheckBox x:Name="patchLibraryBeta" Content="Patch Library [BETA]" Foreground="White" Grid.Row="12"
+        <CheckBox x:Name="patchLibraryBeta" Content="Patch Library [BETA]" Foreground="White" Grid.Row="13"
                   Grid.Column="0" FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <Label x:Name="steamLaunchArgText" Content="Steam Launch Arguments:" Grid.Row="13"
+        <Label x:Name="steamLaunchArgText" Content="Steam Launch Arguments:" Grid.Row="14"
                Grid.Column="0" Foreground="White" FontSize="14"
                TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <TextBox x:Name="steamLaunchArgs" Margin="0" Grid.Row="13" Background="#FF3D3D3E" Foreground="White"
+        <TextBox x:Name="steamLaunchArgs" Margin="0" Grid.Row="14" Background="#FF3D3D3E" Foreground="White"
                  Tag="Steam launch args (e.g. -dev)" Style="{DynamicResource TextBoxWatermarkNoFocus}"
                  BorderBrush="{x:Null}" FontSize="14" VerticalContentAlignment="Center" MaxLines="1" Grid.Column="1"
                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Width="187" Height="29">
@@ -257,7 +262,7 @@
                 </Style>
             </TextBox.Resources>
         </TextBox>
-        <Grid Grid.Row="14" Grid.ColumnSpan="2" Grid.Column="0"
+        <Grid Grid.Row="15" Grid.ColumnSpan="2" Grid.Column="0"
               d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />

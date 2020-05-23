@@ -30,6 +30,8 @@ namespace SteamFriendsPatcher.Forms
 
         public NotifyIcon NotifyIcon { get; private set; }
 
+        private static bool IsShuttingDown { get; set; } = false;
+
         private void MainWindow_SourceInitialized(object sender, EventArgs e)
         {
             var source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
@@ -44,6 +46,19 @@ namespace SteamFriendsPatcher.Forms
         }
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            if (!Settings.Default.closeToTray)
+            {
+                Application.Current.Shutdown();
+                return;
+            } else if(!IsShuttingDown)
+            {
+            e.Cancel = true;
+            GoToTray();
+            }
+        }
+
+        public void OnExit()
         {
             NotifyIcon.Visible = false;
             Program.ToggleCacheScanner(false);
@@ -60,8 +75,12 @@ namespace SteamFriendsPatcher.Forms
         private void MainWindow_StateChanged(object sender, EventArgs e)
         {
             if (!Settings.Default.minimizeToTray || WindowState != WindowState.Minimized) return;
-            Hide();
+            GoToTray();
+        }
 
+        private void GoToTray()
+        {
+            Hide();
             NotifyIcon.Visible = Settings.Default.showTrayIconHidden;
 
             if (!Settings.Default.showNotificationsInTray) return;
@@ -129,6 +148,7 @@ namespace SteamFriendsPatcher.Forms
         private static void ExitButton_Click(object sender, EventArgs e)
         {
             Application.Current.Shutdown();
+            IsShuttingDown = true;
         }
 
         private async void ToggleScanButton_Click(object sender, RoutedEventArgs e)
