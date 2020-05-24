@@ -327,7 +327,7 @@ namespace SteamFriendsPatcher
                     Print("Library UI directory not found.");
                     return;
                 }
-                if(!File.Exists(Path.Combine(LibraryUIDir, "libraryroot.css")))
+                if(!File.Exists(LibraryCSS))
                 {
                     Print("Library CSS not found.");
                     return;
