@@ -222,7 +222,7 @@ namespace SteamFriendsPatcher
             var count = validFiles.Count;
             if (count == 0)
             {
-                Print("No cache files found.", LogLevel.Error);
+                Print("No matching cache files found.", LogLevel.Error);
                 Print("Please confirm that Steam is running and that the friends list is open and try again.",
                     LogLevel.Error);
                 goto ResetButtons;
