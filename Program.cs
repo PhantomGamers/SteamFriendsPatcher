@@ -362,6 +362,54 @@ namespace SteamFriendsPatcher
                     File.Create(Path.Combine(LibraryUIDir, "libraryroot.custom.css")).Dispose();
                 }
                 File.WriteAllText(LibraryCSS, librarycss);
+
+                string maincss = File.ReadAllText(Path.Combine(LibraryUIDir, "css", "main.css"));
+                bool maincsspatched = false;
+                if(maincss.StartsWith(patchedText))
+                {
+                    Print("Library main.css already patched.", LogLevel.Debug);
+                    maincsspatched = true;
+                }
+                if(!maincsspatched)
+                {
+                    if(File.Exists(Path.Combine(LibraryUIDir, "main.original.css")))
+                    {
+                        File.Delete(Path.Combine(LibraryUIDir, "main.original.css"));
+                    }
+                    if(!File.Exists(Path.Combine(LibraryUIDir, "main.custom.css")))
+                    {
+                        File.Create(Path.Combine(LibraryUIDir, "main.custom.css")).Dispose();
+                    }
+                    File.Copy(Path.Combine(LibraryUIDir, "css", "main.css"), Path.Combine(LibraryUIDir, "main.original.css"));
+                    int originalmaincsslength = maincss.Length;
+                    maincss = patchedText + "\n@import url(\"https://steamloopback.host/main.original.css\");\n@import url(\"https://steamloopback.host/main.custom.css\");\n";
+                    maincss += new string('\t', originalmaincsslength - maincss.Length);
+                    File.WriteAllText(Path.Combine(LibraryUIDir, "css", "main.css"), maincss);
+                }
+                
+            string ofriendscss = File.ReadAllText(steamDir + "\\clientui\\css\\friends.css");
+            bool ofriendscsspatched = false;
+            if(ofriendscss.StartsWith(patchedText))
+            {
+               Print("Offline friends.css already patched.", LogLevel.Debug);
+               ofriendscsspatched = true;
+            }
+            if(!ofriendscsspatched)
+            {
+                if(File.Exists(steamDir + "\\clientui\\ofriends.original.css"))
+                {
+                    File.Delete(steamDir + "\\clientui\\ofriends.original.css");
+                }
+                if(!File.Exists(steamDir + "\\clientui\\ofriends.custom.css"))
+                {
+                    File.Create(steamDir + "\\clientui\\ofriends.custom.css").Dispose();
+                }
+                File.Copy(steamDir + "\\clientui\\css\\friends.css", steamDir + "\\clientui\\ofriends.original.css");
+                int originalofriendscsslength = ofriendscss.Length;
+                ofriendscss = patchedText + "\n@import url(\"https://steamloopback.host/ofriends.original.css\");\n@import url(\"https://steamloopback.host/ofriends.custom.css\");\n";
+                ofriendscss += new string('\t', originalofriendscsslength - ofriendscss.Length);
+                File.WriteAllText(steamDir + "\\clientui\\css\\friends.css", ofriendscss);
+            }
                 
                 Print("Library patched! [BETA]");
                 Print("Put custom library css in " + Path.Combine(LibraryUIDir, "libraryroot.custom.css"));
