@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using SteamFriendsPatcher.Properties;
+using System.Diagnostics;
+using System.Configuration;
 
 namespace SteamFriendsPatcher.Forms
 {
@@ -88,6 +90,11 @@ namespace SteamFriendsPatcher.Forms
         private void CancelChanges_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void OpenConfigPath_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(Path.GetDirectoryName(ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath));
         }
     }
 }
