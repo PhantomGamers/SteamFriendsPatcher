@@ -66,6 +66,8 @@ namespace SteamFriendsPatcher.Forms
                         break;
                 }
 
+            Settings.Default.steamLocaleArgs = Settings.Default.steamLocaleArgs;
+
             Settings.Default.Save();
 
             if (Settings.Default.startWithWindows && !File.Exists(Program.StartupLink))

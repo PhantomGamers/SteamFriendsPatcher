@@ -412,8 +412,7 @@ namespace SteamFriendsPatcher
 
                         if (!string.IsNullOrEmpty(_etag))
                         {
-                            var fc = wc.DownloadData(
-                                "https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css?v=" + _etag);
+                            var fc = wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css?v=" + _etag + Settings.Default.steamLocaleArgs);
                             if (fc.Length > 0)
                             {
                                 friendscss = fc;
