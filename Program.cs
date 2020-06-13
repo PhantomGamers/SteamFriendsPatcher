@@ -190,6 +190,7 @@ namespace SteamFriendsPatcher
 
         public static void FindCacheFile(bool forceUpdate = false)
         {
+            Settings.Default.Reload();
             var preScannerStatus = scannerExists;
             ToggleCacheScanner(false);
             Main.ToggleButtons(false);
@@ -431,7 +432,7 @@ namespace SteamFriendsPatcher
                         ServicePointManager.SecurityProtocol =
                             SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
-                        var steamChat = wc.DownloadString("https://steam-chat.com/chat/clientui/?l=&build=&cc");
+                        var steamChat = wc.DownloadString("https://steam-chat.com/chat/clientui/?l=&cc=&build");
                         wc.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
                         wc.Encoding = Encoding.UTF8;
                         const string eTagRegex =
@@ -460,7 +461,7 @@ namespace SteamFriendsPatcher
 
                         if (!string.IsNullOrEmpty(_etag))
                         {
-                            var fc = wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css?v=" + _etag + Settings.Default.steamLocaleArgs);
+                            var fc = wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css?v=" + _etag + Settings.Default.steamLocaleArgs.Trim().Trim('\"'));
                             if (fc.Length > 0)
                             {
                                 friendscss = fc;

@@ -39,6 +39,7 @@ namespace SteamFriendsPatcher.Forms
 
         private void LoadCheckBoxStates()
         {
+            Settings.Default.Reload();
             Settings.Default.startWithWindows = File.Exists(Program.StartupLink);
             foreach (var item in LogicalTreeHelper.GetChildren(SettingsGrid))
                 switch (item)
@@ -54,6 +55,7 @@ namespace SteamFriendsPatcher.Forms
 
         private void SaveSettings_Click(object sender, RoutedEventArgs e)
         {
+            Settings.Default.Reload();
             var checkForUpdatesSetting = Settings.Default.checkForUpdates;
             foreach (var item in LogicalTreeHelper.GetChildren(SettingsGrid))
                 switch (item)
