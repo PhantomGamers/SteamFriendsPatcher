@@ -415,7 +415,7 @@ namespace SteamFriendsPatcher
                         wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows; U; Windows NT 10.0; en-US; Valve Steam Client/default/1596241936; ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36");
 
                         Settings.Default.Reload();
-                        var steamChat = wc.DownloadString("https://steam-chat.com/chat/clientui/?l=&cc=&build=" + Settings.Default.steamLocale);
+                        var steamChat = wc.DownloadString("https://steam-chat.com/chat/clientui/?l=&cc=" + Settings.Default.steamLocale + "&build=");
 
                         wc.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
                         //File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "steam-chat.txt"), steamChat);
