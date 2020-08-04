@@ -90,9 +90,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FileWatcher.cs" />
     <Compile Include="Forms\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utilities.cs" />
     <None Include="FindWindowLike.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

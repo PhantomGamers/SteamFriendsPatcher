@@ -61,7 +61,7 @@ namespace SteamFriendsPatcher.Forms
         public void OnExit()
         {
             NotifyIcon.Visible = false;
-            Program.ToggleCacheScanner(false);
+            FileWatcher.ToggleCacheScanner(false);
         }
 
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -84,7 +84,7 @@ namespace SteamFriendsPatcher.Forms
             NotifyIcon.Visible = Settings.Default.showTrayIconHidden;
 
             if (!Settings.Default.showNotificationsInTray) return;
-            NotifyIcon.BalloonTipText = Program.scannerExists
+            NotifyIcon.BalloonTipText = FileWatcher.scannerExists
                 ? "Scanning in background..."
                 : "Minimized to tray, scanner not running.";
             NotifyIcon.ShowBalloonTip((int) TimeSpan.FromSeconds(10).TotalMilliseconds);
@@ -153,7 +153,7 @@ namespace SteamFriendsPatcher.Forms
 
         private async void ToggleScanButton_Click(object sender, RoutedEventArgs e)
         {
-            await Task.Run(() => Program.ToggleCacheScanner(!Program.scannerExists));
+            await Task.Run(() => FileWatcher.ToggleCacheScanner(!FileWatcher.scannerExists));
         }
 
         private async void ForceCheckButton_Click(object sender, RoutedEventArgs e)
@@ -177,7 +177,7 @@ namespace SteamFriendsPatcher.Forms
                             button.IsEnabled = status;
                             button.Visibility = status ? Visibility.Visible : Visibility.Hidden;
                             if (button.Name == "ToggleScanButton")
-                                button.Content = Program.scannerExists ? "Stop Scanning" : "Start Scanning";
+                                button.Content = FileWatcher.scannerExists ? "Stop Scanning" : "Start Scanning";
                         }
             });
         }

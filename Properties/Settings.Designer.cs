@@ -286,5 +286,17 @@ namespace SteamFriendsPatcher.Properties {
                 this["steamLocaleArgs"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string steamLocale {
+            get {
+                return ((string)(this["steamLocale"]));
+            }
+            set {
+                this["steamLocale"] = value;
+            }
+        }
     }
 }

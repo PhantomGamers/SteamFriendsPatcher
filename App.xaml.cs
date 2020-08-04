@@ -89,7 +89,7 @@ namespace SteamFriendsPatcher
 
             if (Settings.Default.forceScanOnStartup) Program.FindCacheFile();
 
-            if (Settings.Default.autoScanOnStartup) Program.ToggleCacheScanner(true);
+            if (Settings.Default.autoScanOnStartup) FileWatcher.ToggleCacheScanner(true);
 
             if (Settings.Default.runSteamOnStartup && Process.GetProcessesByName("Steam").FirstOrDefault() == null)
                 Process.Start(Program.steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
@@ -140,10 +140,10 @@ namespace SteamFriendsPatcher
             Settings.Default.Upgrade();
 
             if (Settings.Default.upgradeVer == 0)
-                if (File.Exists(Program.StartupLinkOld))
+                if (File.Exists(Utilities.StartupLinkOld))
                 {
-                    File.Delete(Program.StartupLinkOld);
-                    Program.CreateStartUpShortcut();
+                    File.Delete(Utilities.StartupLinkOld);
+                    Utilities.CreateStartUpShortcut();
                 }
 
             Settings.Default.upgradeVer = 1;

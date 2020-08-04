@@ -40,7 +40,7 @@ namespace SteamFriendsPatcher.Forms
         private void LoadCheckBoxStates()
         {
             Settings.Default.Reload();
-            Settings.Default.startWithWindows = File.Exists(Program.StartupLink);
+            Settings.Default.startWithWindows = File.Exists(SteamFriendsPatcher.Utilities.StartupLink);
             foreach (var item in LogicalTreeHelper.GetChildren(SettingsGrid))
                 switch (item)
                 {
@@ -49,6 +49,24 @@ namespace SteamFriendsPatcher.Forms
                         break;
                     case TextBox txtCast:
                         txtCast.Text = Settings.Default[txtCast.Name].ToString();
+                        break;
+                    case ComboBox cmbxCast:
+                        if(cmbxCast.Name == "steamLocale")
+                        {
+                            switch (Settings.Default[cmbxCast.Name].ToString())
+                            {
+                                case "":
+                                    cmbxCast.SelectedIndex = 0;
+                                    break;
+                                case "cn":
+                                    cmbxCast.SelectedIndex = 1;
+                                    break;
+                                default:
+                                    cmbxCast.SelectedIndex = 2;
+                                    break;
+                                    
+                            }
+                        }
                         break;
                 }
         }
@@ -66,16 +84,30 @@ namespace SteamFriendsPatcher.Forms
                     case TextBox txtCast:
                         Settings.Default[txtCast.Name] = txtCast.Text;
                         break;
+                    case ComboBox cmbxCast:
+                        if(cmbxCast.Name == "steamLocale")
+                        {
+                            switch(cmbxCast.SelectedIndex)
+                            {
+                                case 0:
+                                    Settings.Default[cmbxCast.Name] = String.Empty;
+                                    break;
+                                case 1:
+                                    Settings.Default[cmbxCast.Name] = "cn";
+                                    break;
+                            }
+                        }
+                        break;
                 }
 
             Settings.Default.steamLocaleArgs = Settings.Default.steamLocaleArgs;
 
             Settings.Default.Save();
 
-            if (Settings.Default.startWithWindows && !File.Exists(Program.StartupLink))
-                Program.CreateStartUpShortcut();
-            else if (!Settings.Default.startWithWindows && File.Exists(Program.StartupLink))
-                File.Delete(Program.StartupLink);
+            if (Settings.Default.startWithWindows && !File.Exists(SteamFriendsPatcher.Utilities.StartupLink))
+                SteamFriendsPatcher.Utilities.CreateStartUpShortcut();
+            else if (!Settings.Default.startWithWindows && File.Exists(SteamFriendsPatcher.Utilities.StartupLink))
+                File.Delete(SteamFriendsPatcher.Utilities.StartupLink);
 
             if (!checkForUpdatesSetting && Settings.Default.checkForUpdates)
             {

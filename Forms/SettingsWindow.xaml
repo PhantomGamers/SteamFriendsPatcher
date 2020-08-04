@@ -292,5 +292,11 @@
                     Click="OpenConfigPath_Click" Margin="0,10,10,0" FontSize="14" BorderBrush="{x:Null}"
                     Padding="10" TextOptions.TextHintingMode="Fixed" />
         </Grid>
+        <ComboBox x:Name="steamLocale" Grid.Column="1" HorizontalAlignment="Center" Margin="106,6,38,9" VerticalAlignment="Center" Width="120" Grid.RowSpan="2" SelectedIndex="0">
+            <ComboBoxItem Content="ROW"/>
+            <ComboBoxItem Content="China"/>
+            <ComboBoxItem Content="Custom" IsEnabled="False"/>
+        </ComboBox>
+        <Label x:Name="label" Content="Region" Grid.Column="1" HorizontalAlignment="Center" Margin="42,4,151,7" VerticalAlignment="Center" RenderTransformOrigin="-0.816,-1.4" Foreground="White" Grid.RowSpan="2"/>
     </Grid>
 </Window>
