@@ -425,7 +425,7 @@ namespace SteamFriendsPatcher
                         wc.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
                         Regex r =
                             new Regex(@"(?<=<link href="")(.+friends.css.+)(?="" rel)");
-                        var friendscssurl = !String.IsNullOrEmpty(steamChat) ? r.Match(steamChat).Value : String.Empty;
+                        var friendscssurl = !String.IsNullOrEmpty(steamChat) ? r.Match(steamChat).Value.Replace("&amp;", "&") : String.Empty;
                         r = new Regex(@"(?<=\?v=)(.*)(?=&)");
                         _etag = !String.IsNullOrEmpty(friendscssurl) ? r.Match(friendscssurl).Value : String.Empty;
 
