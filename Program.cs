@@ -198,10 +198,8 @@ namespace SteamFriendsPatcher
                 goto ResetButtons;
             }
 
-            //Print("SteamCacheDir: " + SteamCacheDir);
-
             var validFiles = new DirectoryInfo(SteamCacheDir).EnumerateFiles("f_*", SearchOption.TopDirectoryOnly)
-                .Where(f => f.Length == friendscss.Length)
+                .Where(f => f.Length == friendscss.Length || f.Length == friendscsspatched.Length)
                 .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => f.FullName)
                 .ToList();
