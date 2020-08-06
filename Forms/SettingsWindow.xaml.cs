@@ -58,7 +58,7 @@ namespace SteamFriendsPatcher.Forms
                                 case "":
                                     cmbxCast.SelectedIndex = 0;
                                     break;
-                                case "cn":
+                                case "CN":
                                     cmbxCast.SelectedIndex = 1;
                                     break;
                                 default:
@@ -93,7 +93,7 @@ namespace SteamFriendsPatcher.Forms
                                     Settings.Default[cmbxCast.Name] = String.Empty;
                                     break;
                                 case 1:
-                                    Settings.Default[cmbxCast.Name] = "cn";
+                                    Settings.Default[cmbxCast.Name] = "CN";
                                     break;
                             }
                         }
