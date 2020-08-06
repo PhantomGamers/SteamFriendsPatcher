@@ -1,4 +1,11 @@
-﻿using System;
+﻿using Microsoft.Win32;
+
+using Semver;
+
+using SteamFriendsPatcher.Forms;
+using SteamFriendsPatcher.Properties;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -9,18 +16,13 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Automation;
 using System.Windows.Documents;
 using System.Windows.Media;
-using IWshRuntimeLibrary;
-using Microsoft.Win32;
-using Semver;
-using SteamFriendsPatcher.Forms;
-using SteamFriendsPatcher.Properties;
+
 using static SteamFriendsPatcher.Utilities;
+
 using File = System.IO.File;
 
 namespace SteamFriendsPatcher
@@ -40,7 +42,7 @@ namespace SteamFriendsPatcher
 
         // location of Steam's CEF Cache
         private static readonly string SteamCacheDir =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) ?? throw new InvalidOperationException(),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Steam\\htmlcache\\Cache\\");
 
         // location of Library UI files
@@ -80,43 +82,44 @@ namespace SteamFriendsPatcher
                 Print("Checking for updates...");
                 try
                 {
-                    var wc = new WebClient();
-                    ServicePointManager.SecurityProtocol =
-                        SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-                    wc.Headers.Add("user-agent", Assembly.GetExecutingAssembly().FullName);
-                    var latestver =
-                        wc.DownloadString(
-                            "https://api.github.com/repos/phantomgamers/steamfriendspatcher/releases/latest");
-                    const string verregex = "(?<=\"tag_name\":\")(.*?)(?=\")";
-                    var latestvervalue = Regex.Match(latestver, verregex).Value;
-                    if (!string.IsNullOrEmpty(latestvervalue))
+                    using (var wc = new WebClient())
                     {
-                        var assemblyVer = ThisAssembly.AssemblyInformationalVersion;
-                        assemblyVer = assemblyVer.Substring(0,
-                            assemblyVer.IndexOf('+') > -1 ? assemblyVer.IndexOf('+') : assemblyVer.Length);
-                        if (!SemVersion.TryParse(assemblyVer, out var localVer) ||
-                            !SemVersion.TryParse(latestvervalue, out var remoteVer))
+                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                        wc.Headers.Add("user-agent", Assembly.GetExecutingAssembly().FullName);
+                        var latestver =
+                            wc.DownloadString(
+                                "https://api.github.com/repos/phantomgamers/steamfriendspatcher/releases/latest");
+                        const string verregex = "(?<=\"tag_name\":\")(.*?)(?=\")";
+                        var latestvervalue = Regex.Match(latestver, verregex).Value;
+                        if (!string.IsNullOrEmpty(latestvervalue))
                         {
-                            Print("Update check failed, failed to parse version string.", LogLevel.Error);
+                            var assemblyVer = ThisAssembly.AssemblyInformationalVersion;
+                            assemblyVer = assemblyVer.Substring(0,
+                                assemblyVer.IndexOf('+') > -1 ? assemblyVer.IndexOf('+') : assemblyVer.Length);
+                            if (!SemVersion.TryParse(assemblyVer, out var localVer) ||
+                                !SemVersion.TryParse(latestvervalue, out var remoteVer))
+                            {
+                                Print("Update check failed, failed to parse version string.", LogLevel.Error);
+                                return false;
+                            }
+
+                            if (remoteVer > localVer)
+                            {
+                                if (MessageBox.Show("Update available. Download now?",
+                                        "Steam Friends Patcher - Update Available", MessageBoxButton.YesNo) ==
+                                    MessageBoxResult.Yes)
+                                    Process.Start("https://github.com/PhantomGamers/SteamFriendsPatcher/releases/latest");
+
+                                return true;
+                            }
+
+                            Print("No updates found.");
                             return false;
                         }
 
-                        if (remoteVer > localVer)
-                        {
-                            if (MessageBox.Show("Update available. Download now?",
-                                    "Steam Friends Patcher - Update Available", MessageBoxButton.YesNo) ==
-                                MessageBoxResult.Yes)
-                                Process.Start("https://github.com/PhantomGamers/SteamFriendsPatcher/releases/latest");
-
-                            return true;
-                        }
-
-                        Print("No updates found.");
+                        Print("Failed to check for updates.", LogLevel.Error);
                         return false;
                     }
-
-                    Print("Failed to check for updates.", LogLevel.Error);
-                    return false;
                 }
                 catch (WebException we)
                 {
@@ -152,7 +155,7 @@ namespace SteamFriendsPatcher
             Print("Done! Put your custom css in " + steamDir + "\\clientui\\friends.custom.css");
             Print("Close and reopen your Steam friends window to see changes.");
 
-            if(Settings.Default.restartSteamOnPatch)
+            if (Settings.Default.restartSteamOnPatch)
             {
                 ShutdownSteam();
                 RestartSteam();
@@ -163,7 +166,7 @@ namespace SteamFriendsPatcher
                 if (Main.IsVisible || !Settings.Default.showNotificationsInTray) return;
                 Main.NotifyIcon.BalloonTipTitle = @"Steam Friends Patcher";
                 Main.NotifyIcon.BalloonTipText = @"Successfully patched friends!";
-                Main.NotifyIcon.ShowBalloonTip((int) TimeSpan.FromSeconds(10).TotalMilliseconds);
+                Main.NotifyIcon.ShowBalloonTip((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
             });
         }
 
@@ -175,6 +178,7 @@ namespace SteamFriendsPatcher
             Main.ToggleButtons(false);
 
             Print("Force scan started.");
+
             GetLatestFriendsCss(forceUpdate);
 
             while (updatePending) Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
@@ -197,7 +201,7 @@ namespace SteamFriendsPatcher
             //Print("SteamCacheDir: " + SteamCacheDir);
 
             var validFiles = new DirectoryInfo(SteamCacheDir).EnumerateFiles("f_*", SearchOption.TopDirectoryOnly)
-                .Where(f => f.Length == friendscsspatched.Length || f.Length == friendscss.Length)
+                .Where(f => f.Length == friendscss.Length)
                 .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => f.FullName)
                 .ToList();
@@ -301,14 +305,14 @@ namespace SteamFriendsPatcher
 
         public static void PatchLibrary()
         {
-            if(Settings.Default.patchLibraryBeta)
+            if (Settings.Default.patchLibraryBeta)
             {
-                if(!Directory.Exists(Path.Combine(LibraryUIDir, "css")))
+                if (!Directory.Exists(Path.Combine(LibraryUIDir, "css")))
                 {
                     Print("Library UI directory not found.");
                     return;
                 }
-                if(!File.Exists(LibraryCSS))
+                if (!File.Exists(LibraryCSS))
                 {
                     Print("Library CSS not found.");
                     return;
@@ -316,20 +320,22 @@ namespace SteamFriendsPatcher
                 Print("Patching Library [BETA]...");
                 string librarycss;
                 string patchedText = "/*patched*/";
-                try {
-                librarycss = File.ReadAllText(LibraryCSS);
-                } catch(Exception e)
+                try
+                {
+                    librarycss = File.ReadAllText(LibraryCSS);
+                }
+                catch (Exception e)
                 {
                     Print(e.ToString(), LogLevel.Error);
                     Print("File could not be read, aborting...", LogLevel.Error);
                     return;
                 }
-                if(librarycss.StartsWith(patchedText))
+                if (librarycss.StartsWith(patchedText, StringComparison.InvariantCulture))
                 {
                     Print("Library already patched.");
                     return;
                 }
-                if(File.Exists(Path.Combine(LibraryUIDir, "libraryroot.original.css"))) 
+                if (File.Exists(Path.Combine(LibraryUIDir, "libraryroot.original.css")))
                 {
                     File.Delete(Path.Combine(LibraryUIDir, "libraryroot.original.css"));
                 }
@@ -338,7 +344,7 @@ namespace SteamFriendsPatcher
                 librarycss = patchedText + "\n@import url(\"https://steamloopback.host/libraryroot.original.css\");\n@import url(\"https://steamloopback.host/libraryroot.custom.css\");\n";
                 var fillerText = new string('\t', originalLibCSSLength - librarycss.Length);
                 librarycss += fillerText;
-                if(!File.Exists(Path.Combine(LibraryUIDir, "libraryroot.custom.css")))
+                if (!File.Exists(Path.Combine(LibraryUIDir, "libraryroot.custom.css")))
                 {
                     File.Create(Path.Combine(LibraryUIDir, "libraryroot.custom.css")).Dispose();
                 }
@@ -346,18 +352,18 @@ namespace SteamFriendsPatcher
 
                 string maincss = File.ReadAllText(Path.Combine(LibraryUIDir, "css", "main.css"));
                 bool maincsspatched = false;
-                if(maincss.StartsWith(patchedText))
+                if (maincss.StartsWith(patchedText, StringComparison.InvariantCulture))
                 {
                     Print("Library main.css already patched.", LogLevel.Debug);
                     maincsspatched = true;
                 }
-                if(!maincsspatched)
+                if (!maincsspatched)
                 {
-                    if(File.Exists(Path.Combine(LibraryUIDir, "main.original.css")))
+                    if (File.Exists(Path.Combine(LibraryUIDir, "main.original.css")))
                     {
                         File.Delete(Path.Combine(LibraryUIDir, "main.original.css"));
                     }
-                    if(!File.Exists(Path.Combine(LibraryUIDir, "main.custom.css")))
+                    if (!File.Exists(Path.Combine(LibraryUIDir, "main.custom.css")))
                     {
                         File.Create(Path.Combine(LibraryUIDir, "main.custom.css")).Dispose();
                     }
@@ -367,31 +373,31 @@ namespace SteamFriendsPatcher
                     maincss += new string('\t', originalmaincsslength - maincss.Length);
                     File.WriteAllText(Path.Combine(LibraryUIDir, "css", "main.css"), maincss);
                 }
-                
-            string ofriendscss = File.ReadAllText(steamDir + "\\clientui\\css\\friends.css");
-            bool ofriendscsspatched = false;
-            if(ofriendscss.StartsWith(patchedText))
-            {
-               Print("Offline friends.css already patched.", LogLevel.Debug);
-               ofriendscsspatched = true;
-            }
-            if(!ofriendscsspatched)
-            {
-                if(File.Exists(steamDir + "\\clientui\\ofriends.original.css"))
+
+                string ofriendscss = File.ReadAllText(steamDir + "\\clientui\\css\\friends.css");
+                bool ofriendscsspatched = false;
+                if (ofriendscss.StartsWith(patchedText, StringComparison.InvariantCulture))
                 {
-                    File.Delete(steamDir + "\\clientui\\ofriends.original.css");
+                    Print("Offline friends.css already patched.", LogLevel.Debug);
+                    ofriendscsspatched = true;
                 }
-                if(!File.Exists(steamDir + "\\clientui\\ofriends.custom.css"))
+                if (!ofriendscsspatched)
                 {
-                    File.Create(steamDir + "\\clientui\\ofriends.custom.css").Dispose();
+                    if (File.Exists(steamDir + "\\clientui\\ofriends.original.css"))
+                    {
+                        File.Delete(steamDir + "\\clientui\\ofriends.original.css");
+                    }
+                    if (!File.Exists(steamDir + "\\clientui\\ofriends.custom.css"))
+                    {
+                        File.Create(steamDir + "\\clientui\\ofriends.custom.css").Dispose();
+                    }
+                    File.Copy(steamDir + "\\clientui\\css\\friends.css", steamDir + "\\clientui\\ofriends.original.css");
+                    int originalofriendscsslength = ofriendscss.Length;
+                    ofriendscss = patchedText + "\n@import url(\"https://steamloopback.host/ofriends.original.css\");\n@import url(\"https://steamloopback.host/ofriends.custom.css\");\n";
+                    ofriendscss += new string('\t', originalofriendscsslength - ofriendscss.Length);
+                    File.WriteAllText(steamDir + "\\clientui\\css\\friends.css", ofriendscss);
                 }
-                File.Copy(steamDir + "\\clientui\\css\\friends.css", steamDir + "\\clientui\\ofriends.original.css");
-                int originalofriendscsslength = ofriendscss.Length;
-                ofriendscss = patchedText + "\n@import url(\"https://steamloopback.host/ofriends.original.css\");\n@import url(\"https://steamloopback.host/ofriends.custom.css\");\n";
-                ofriendscss += new string('\t', originalofriendscsslength - ofriendscss.Length);
-                File.WriteAllText(steamDir + "\\clientui\\css\\friends.css", ofriendscss);
-            }
-                
+
                 Print("Library patched! [BETA]");
                 Print("Put custom library css in " + Path.Combine(LibraryUIDir, "libraryroot.custom.css"));
 
@@ -409,8 +415,7 @@ namespace SteamFriendsPatcher
                 {
                     try
                     {
-                        ServicePointManager.SecurityProtocol =
-                            SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                         wc.Encoding = Encoding.UTF8;
                         wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows; U; Windows NT 10.0; en-US; Valve Steam Client/default/1596241936; ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36");
 
@@ -418,7 +423,6 @@ namespace SteamFriendsPatcher
                         var steamChat = wc.DownloadString("https://steam-chat.com/chat/clientui/?l=&cc=" + Settings.Default.steamLocale + "&build=");
 
                         wc.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
-                        //File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "steam-chat.txt"), steamChat);
                         Regex r =
                             new Regex(@"(?<=<link href="")(.+friends.css.+)(?="" rel)");
                         var friendscssurl = !String.IsNullOrEmpty(steamChat) ? r.Match(steamChat).Value : String.Empty;
@@ -457,7 +461,7 @@ namespace SteamFriendsPatcher
                                 friendscss = fc;
                                 var tmp = PrependFile(Decompress(fc));
 
-                                using (var file = new MemoryStream())
+                                using(var file = new MemoryStream())
                                 {
                                     using (var gzip = new GZipStream(file, CompressionLevel.Optimal, false))
                                     {
@@ -470,7 +474,6 @@ namespace SteamFriendsPatcher
                                 friendscssage = DateTime.Now;
                                 friendscssetag = _etag;
                                 Print("Successfully downloaded latest friends.css");
-                                //File.WriteAllBytes(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "friendscsstest"), friendscss);
                                 updatePending = false;
                                 return true;
                             }
@@ -519,37 +522,37 @@ namespace SteamFriendsPatcher
 
         private static bool FindFriendsWindow()
         {
-            return (int) NativeMethods.FindWindowByClass("SDL_app") != 0;
+            return (int)NativeMethods.FindWindowByClass("SDL_app") != 0;
         }
 
         private static void ShutdownSteam()
         {
-                var steamp = Process.GetProcessesByName("Steam").FirstOrDefault();
-                Print("Shutting down Steam...");
-                Process.Start(steamDir + "\\Steam.exe", "-shutdown");
-                if (steamp != null && !steamp.WaitForExit((int) TimeSpan.FromSeconds(30).TotalMilliseconds))
-                {
-                    Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.",
-                        LogLevel.Error);
-                    Main.ToggleButtons(true);
-                    return;
-                }
+            var steamp = Process.GetProcessesByName("Steam").FirstOrDefault();
+            Print("Shutting down Steam...");
+            Process.Start(steamDir + "\\Steam.exe", "-shutdown");
+            if (steamp != null && !steamp.WaitForExit((int)TimeSpan.FromSeconds(30).TotalMilliseconds))
+            {
+                Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.",
+                    LogLevel.Error);
+                Main.ToggleButtons(true);
+                return;
+            }
         }
 
         private static void RestartSteam()
         {
             Print("Restarting Steam...");
-                Process.Start(steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
-                for (var i = 0; i < 10; i++)
+            Process.Start(steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
+            for (var i = 0; i < 10; i++)
+            {
+                if (Process.GetProcessesByName("Steam").FirstOrDefault() != null)
                 {
-                    if (Process.GetProcessesByName("Steam").FirstOrDefault() != null)
-                    {
-                        Print("Steam started.");
-                        break;
-                    }
-
-                    if (i == 9) Print("Failed to start Steam.", LogLevel.Error);
+                    Print("Steam started.");
+                    break;
                 }
+
+                if (i == 9) Print("Failed to start Steam.", LogLevel.Error);
+            }
         }
 
         public static void ClearSteamCache()
@@ -566,7 +569,7 @@ namespace SteamFriendsPatcher
             {
                 if (MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?",
                         "Steam Friends Patcher", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
-                
+
             }
 
             ShutdownSteam();
@@ -589,7 +592,7 @@ namespace SteamFriendsPatcher
                 Print("Cache files deleted.");
             }
 
-            if(File.Exists(LibraryCSS))
+            if (File.Exists(LibraryCSS))
             {
                 Print("Deleting patched library file...");
                 File.Delete(LibraryCSS);
@@ -604,7 +607,7 @@ namespace SteamFriendsPatcher
             Main.ToggleButtons(true);
         }
 
-        
+
 
         public static void Print(string message = null, LogLevel logLevel = LogLevel.Info, bool newline = true)
         {
@@ -639,7 +642,7 @@ namespace SteamFriendsPatcher
                         Text = $"[{dateTime}] "
                     };
                     tr.ApplyPropertyValue(TextElement.ForegroundProperty,
-                        (SolidColorBrush) new BrushConverter().ConvertFromString("#76608a") ??
+                        (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a") ??
                         throw new InvalidOperationException());
                     tr.Select(Main.Output.Document.ContentEnd, Main.Output.Document.ContentEnd);
                     tr.Text += $"[{logLevel}] ";
@@ -649,19 +652,19 @@ namespace SteamFriendsPatcher
                     {
                         case LogLevel.Error:
                             tr.ApplyPropertyValue(TextElement.ForegroundProperty,
-                                (SolidColorBrush) new BrushConverter().ConvertFromString("#e51400") ??
+                                (SolidColorBrush)new BrushConverter().ConvertFromString("#e51400") ??
                                 throw new InvalidOperationException());
                             break;
 
                         case LogLevel.Warning:
                             tr.ApplyPropertyValue(TextElement.ForegroundProperty,
-                                (SolidColorBrush) new BrushConverter().ConvertFromString("#f0a30a") ??
+                                (SolidColorBrush)new BrushConverter().ConvertFromString("#f0a30a") ??
                                 throw new InvalidOperationException());
                             break;
 
                         default:
                             tr.ApplyPropertyValue(TextElement.ForegroundProperty,
-                                (SolidColorBrush) new BrushConverter().ConvertFromString("#76608a") ??
+                                (SolidColorBrush)new BrushConverter().ConvertFromString("#76608a") ??
                                 throw new InvalidOperationException());
                             break;
                     }
@@ -670,7 +673,7 @@ namespace SteamFriendsPatcher
                     tr.Select(Main.Output.Document.ContentEnd, Main.Output.Document.ContentEnd);
                     tr.Text += message + (newline ? "\n" : string.Empty);
                     tr.ApplyPropertyValue(TextElement.ForegroundProperty,
-                        (SolidColorBrush) new BrushConverter().ConvertFromString("White") ??
+                        (SolidColorBrush)new BrushConverter().ConvertFromString("White") ??
                         throw new InvalidOperationException());
                 });
             }

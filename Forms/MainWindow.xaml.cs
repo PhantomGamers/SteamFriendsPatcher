@@ -1,11 +1,13 @@
-﻿using System;
+﻿using SteamFriendsPatcher.Properties;
+
+using System;
 using System.ComponentModel;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
-using SteamFriendsPatcher.Properties;
+
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 using ContextMenu = System.Windows.Forms.ContextMenu;
@@ -51,10 +53,11 @@ namespace SteamFriendsPatcher.Forms
             {
                 Application.Current.Shutdown();
                 return;
-            } else if(!IsShuttingDown)
+            }
+            else if (!IsShuttingDown)
             {
-            e.Cancel = true;
-            GoToTray();
+                e.Cancel = true;
+                GoToTray();
             }
         }
 
@@ -87,7 +90,7 @@ namespace SteamFriendsPatcher.Forms
             NotifyIcon.BalloonTipText = FileWatcher.scannerExists
                 ? "Scanning in background..."
                 : "Minimized to tray, scanner not running.";
-            NotifyIcon.ShowBalloonTip((int) TimeSpan.FromSeconds(10).TotalMilliseconds);
+            NotifyIcon.ShowBalloonTip((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -122,7 +125,7 @@ namespace SteamFriendsPatcher.Forms
                 ContextMenu = contextMenu
             };
 
-            contextMenu.MenuItems.AddRange(new[] {showButton, exitButton});
+            contextMenu.MenuItems.AddRange(new[] { showButton, exitButton });
 
             // show button
             showButton.Index = 0;
@@ -153,17 +156,17 @@ namespace SteamFriendsPatcher.Forms
 
         private async void ToggleScanButton_Click(object sender, RoutedEventArgs e)
         {
-            await Task.Run(() => FileWatcher.ToggleCacheScanner(!FileWatcher.scannerExists));
+            await Task.Run(() => FileWatcher.ToggleCacheScanner(!FileWatcher.scannerExists)).ConfigureAwait(false);
         }
 
         private async void ForceCheckButton_Click(object sender, RoutedEventArgs e)
         {
-            await Task.Run(() => Program.FindCacheFile(true));
+            await Task.Run(() => Program.FindCacheFile(true)).ConfigureAwait(false);
         }
 
         private async void ClearCacheButton_Click(object sender, RoutedEventArgs e)
         {
-            await Task.Run(Program.ClearSteamCache);
+            await Task.Run(Program.ClearSteamCache).ConfigureAwait(false);
         }
 
         public void ToggleButtons(bool status)

@@ -26,7 +26,7 @@ With these options configured, the program should be as easy as setup and forget
 * Currently breaks Big Picture Mode chat due to Big Picture not utilizing steamloopback.host
 
 # Dependencies
-* [.NET Framework 4.6.1](https://www.microsoft.com/en-us/download/details.aspx?id=49981)
+* [.NET Framework 4.8](https://dotnet.microsoft.com/download/dotnet-framework/net48)
 
 # Credits
 * Darth from the Steam community forums for the method.

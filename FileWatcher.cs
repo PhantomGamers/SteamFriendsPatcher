@@ -1,17 +1,17 @@
 ﻿using SteamFriendsPatcher.Forms;
+using SteamFriendsPatcher.Properties;
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
-using SteamFriendsPatcher.Properties;
+
 using static SteamFriendsPatcher.Program;
 using static SteamFriendsPatcher.Utilities;
-using System.Threading;
 
 namespace SteamFriendsPatcher
 {
@@ -36,7 +36,7 @@ namespace SteamFriendsPatcher
 
         // location of Steam's CEF Cache
         private static readonly string SteamCacheDir =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) ?? throw new InvalidOperationException(),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Steam\\htmlcache\\Cache\\");
 
         public static void ToggleCacheScanner(bool isEnabled)

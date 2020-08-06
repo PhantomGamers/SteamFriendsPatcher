@@ -1,11 +1,12 @@
-﻿using System;
+﻿using SteamFriendsPatcher.Properties;
+
+using System;
+using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using SteamFriendsPatcher.Properties;
-using System.Diagnostics;
-using System.Configuration;
 
 namespace SteamFriendsPatcher.Forms
 {
@@ -51,7 +52,7 @@ namespace SteamFriendsPatcher.Forms
                         txtCast.Text = Settings.Default[txtCast.Name].ToString();
                         break;
                     case ComboBox cmbxCast:
-                        if(cmbxCast.Name == "steamLocale")
+                        if (cmbxCast.Name == "steamLocale")
                         {
                             switch (Settings.Default[cmbxCast.Name].ToString())
                             {
@@ -64,7 +65,7 @@ namespace SteamFriendsPatcher.Forms
                                 default:
                                     cmbxCast.SelectedIndex = 2;
                                     break;
-                                    
+
                             }
                         }
                         break;
@@ -85,9 +86,9 @@ namespace SteamFriendsPatcher.Forms
                         Settings.Default[txtCast.Name] = txtCast.Text;
                         break;
                     case ComboBox cmbxCast:
-                        if(cmbxCast.Name == "steamLocale")
+                        if (cmbxCast.Name == "steamLocale")
                         {
-                            switch(cmbxCast.SelectedIndex)
+                            switch (cmbxCast.SelectedIndex)
                             {
                                 case 0:
                                     Settings.Default[cmbxCast.Name] = String.Empty;

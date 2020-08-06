@@ -1,4 +1,7 @@
-﻿using System;
+﻿using SteamFriendsPatcher.Forms;
+using SteamFriendsPatcher.Properties;
+
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -7,8 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
-using SteamFriendsPatcher.Forms;
-using SteamFriendsPatcher.Properties;
+
 using Timer = System.Timers.Timer;
 
 namespace SteamFriendsPatcher
@@ -66,7 +68,7 @@ namespace SteamFriendsPatcher
             else
             {
                 NativeMethods.PostMessage(
-                    (IntPtr) NativeMethods.HwndBroadcast,
+                    (IntPtr)NativeMethods.HwndBroadcast,
                     NativeMethods.WmShowme,
                     IntPtr.Zero,
                     IntPtr.Zero);
