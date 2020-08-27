@@ -76,9 +76,8 @@ namespace SteamFriendsPatcher
                     Program.Print("Could not read file " + filePath, Program.LogLevel.Debug);
                     return false;
                 }
-                if (!(reader.BaseStream.Length < 4))
+                if (!(reader.BaseStream.Length < 150)) // We can probably raise this number, what is the smallest we can expect a proper friends.css to be?
                 {
-                    Program.Print(filePath + "is tiny.", Program.LogLevel.Debug);
                     return false;
                 }
                 reader.BaseStream.Seek(-4, SeekOrigin.End);
