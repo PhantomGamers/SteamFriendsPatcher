@@ -71,7 +71,7 @@ namespace SteamFriendsPatcher
 
             using (BinaryReader reader = new BinaryReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
-                if (!(reader.BaseStream.Length >= Program.friendscss.Length / 2 || reader.BaseStream.Length <= Program.friendscss.Length * 2))
+                if (!(reader.BaseStream.Length >= bArr.Length / 2 || reader.BaseStream.Length <= bArr.Length * 2))
                 {
                     return false;
                 }
