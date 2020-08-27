@@ -18,6 +18,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 
@@ -640,6 +641,9 @@ namespace SteamFriendsPatcher
                     tr.ApplyPropertyValue(TextElement.ForegroundProperty,
                         (SolidColorBrush)new BrushConverter().ConvertFromString("White") ??
                         throw new InvalidOperationException());
+
+                    var outputScrollView = Main.Output.Template.FindName("PART_ContentHost", Main.Output) as ScrollViewer;
+                    outputScrollView.ScrollToBottom();
                 });
             }
         }

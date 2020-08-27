@@ -12,7 +12,7 @@
                                   TextOptions.TextHintingMode="Fixed" Padding="0" Block.LineHeight="1.0"
                                   TextOptions.TextFormattingMode="Display" VerticalScrollBarVisibility="Auto"
                                   ForceCursor="True" Cursor="Arrow">
-            <FlowDocument Background="#FF3D3D3E" Foreground="White" FontFamily="Segoe UI" FontSize="12" />
+            <FlowDocument Background="#FF3D3D3E" Foreground="White" FontFamily="Segoe UI" FontSize="12"/>
         </FlowDocumentScrollViewer>
         <Button x:Name="ToggleScanButton" Content="Start Scanning" Margin="10,0,0,10" Background="#FF3D3D3E"
                 Foreground="White" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Bottom"
