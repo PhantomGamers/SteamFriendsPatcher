@@ -199,7 +199,7 @@ namespace SteamFriendsPatcher
             }
 
             var validFiles = new DirectoryInfo(SteamCacheDir).EnumerateFiles("f_*", SearchOption.TopDirectoryOnly)
-                .Where(f => f.Length == friendscss.Length || f.Length == friendscsspatched.Length)
+                .Where(f => f.Length >= friendscss.Length / 2 || f.Length <= friendscss.Length * 2)
                 .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => f.FullName)
                 .ToList();
@@ -220,57 +220,39 @@ namespace SteamFriendsPatcher
             Print("Checking cache files for match...");
             Parallel.ForEach(validFiles, (s, state) =>
             {
-                byte[] cachefile;
-
-                try
+                if(CompareCRC(s, friendscss))
                 {
-                    using (var f = new FileStream(s, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    byte[] cachefile;
+
+                    try
                     {
-                        cachefile = new byte[f.Length];
-                        f.Read(cachefile, 0, cachefile.Length);
+                        using (var f = new FileStream(s, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        {
+                            cachefile = new byte[f.Length];
+                            f.Read(cachefile, 0, cachefile.Length);
+                        }
                     }
-                }
-                catch
-                {
-                    Print($"Error, {s} could not be opened.", LogLevel.Debug);
-                    return;
-                }
+                    catch
+                    {
+                        Print($"Error, {s} could not be opened.", LogLevel.Debug);
+                        return;
+                    }
 
-                if (!IsGZipHeader(cachefile)) return;
-                if (cachefile.Length == friendscss.Length && ByteArrayCompare(cachefile, friendscss))
-                {
                     state.Stop();
                     friendscachefile = s;
                     PatchCacheFile(s, Decompress(cachefile));
+                    return;
                 }
-                else if (cachefile.Length == friendscsspatched.Length && ByteArrayCompare(cachefile, friendscsspatched))
+                else
                 {
-                    patchedFileFound = true;
+                    patchedFileFound = CompareCRC(s, friendscsspatched) || patchedFileFound;
                 }
-
-                /*
-                    if (useDecompressionMethod)
-                    {
-                        byte[] decompressedcachefile = Decompress(cachefile);
-                        if (decompressedcachefile.Length == friendscss.Length && ByteArrayCompare(decompressedcachefile, friendscss))
-                        {
-                            state.Stop();
-                            friendscachefile = s;
-                            PatchCacheFile(s, decompressedcachefile);
-                            return;
-                        }
-                        else if (decompressedcachefile.Length == friendscsspatched.Length && ByteArrayCompare(decompressedcachefile, friendscsspatched))
-                        {
-                            patchedFileFound = true;
-                        }
-                    }
-                    */
             });
 
             if (string.IsNullOrEmpty(friendscachefile))
             {
                 if (!patchedFileFound)
-                    Print("Cache file does not exist or is outdated.", LogLevel.Warning);
+                    Print("Cache file does not exist, is outdated, or is different from expected.", LogLevel.Warning);
                 else
                     Print("Cache file is already patched.");
             }
@@ -476,21 +458,6 @@ namespace SteamFriendsPatcher
                                 return true;
                             }
                         }
-
-                        /*
-                        else
-                        {
-                            fc = wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css");
-                            if (fc.Length > 0)
-                            {
-                                friendscss = Decompress(fc);
-                                friendscsspatched = PrependFile(friendscss);
-                                friendscssage = DateTime.Now;
-                                Print("Successfully downloaded latest friends.css.");
-                                return true;
-                            }
-                        }
-                        */
                         Print("Failed to download friends.css", LogLevel.Error);
                         updatePending = false;
                         return false;
@@ -613,7 +580,7 @@ namespace SteamFriendsPatcher
 #if DEBUG
             Debug.Write($"[{dateTime}][{logLevel}] {message}" + (newline ? Environment.NewLine : string.Empty));
 #endif
-            /*
+            /* We should output the console output to a log file  as well
             if (SteamFriendsPatcher.Properties.Settings.Default.outputToLog)
             {
                 lock (LogPrintLock)

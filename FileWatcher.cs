@@ -281,52 +281,40 @@ namespace SteamFriendsPatcher
                 return;
             }
 
-            byte[] cachefile;
-            try
+            if (CompareCRC(e.FullPath, friendscss))
             {
-                using (var f = new FileStream(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                byte[] cachefile;
+                try
                 {
-                    cachefile = new byte[f.Length];
-                    f.Read(cachefile, 0, cachefile.Length);
-                }
-            }
-            catch
-            {
-                Task.Delay(TimeSpan.FromSeconds(2)).Wait();
-                if (!File.Exists(e.FullPath)) return;
-                Print($"Error opening file {e.Name}, retrying.", LogLevel.Debug);
-                PendingCacheFiles.Remove(e.Name);
-                if (PendingCacheFiles.Contains(e.Name))
-                {
-                    Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
-                    do
+                    using (var f = new FileStream(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
-                        PendingCacheFiles.Remove(e.Name);
-                    } while (PendingCacheFiles.Contains(e.Name));
+                        cachefile = new byte[f.Length];
+                        f.Read(cachefile, 0, cachefile.Length);
+                    }
                 }
-
-                ProcessCacheFileEvent(e);
-                return;
-            }
-
-            if (!IsGZipHeader(cachefile))
-            {
-                Print($"{e.Name} not a gzip file.", LogLevel.Debug);
-                PendingCacheFiles.Remove(e.Name);
-                if (!PendingCacheFiles.Contains(e.Name)) return;
-                Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
-                do
+                catch
                 {
+                    Task.Delay(TimeSpan.FromSeconds(2)).Wait();
+                    if (!File.Exists(e.FullPath)) return;
+                    Print($"Error opening file {e.Name}, retrying.", LogLevel.Debug);
                     PendingCacheFiles.Remove(e.Name);
-                } while (PendingCacheFiles.Contains(e.Name));
+                    if (PendingCacheFiles.Contains(e.Name))
+                    {
+                        Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
+                        do
+                        {
+                            PendingCacheFiles.Remove(e.Name);
+                        } while (PendingCacheFiles.Contains(e.Name));
+                    }
 
-                return;
-            }
-
-            if (friendscss.Length == cachefile.Length && ByteArrayCompare(friendscss, cachefile))
+                    ProcessCacheFileEvent(e);
+                    return;
+                }
                 PatchCacheFile(e.FullPath, Decompress(cachefile));
-            else
+            } else
+            {
                 Print($"{e.Name} did not match.", LogLevel.Debug);
+            }
             PendingCacheFiles.Remove(e.Name);
             if (!PendingCacheFiles.Contains(e.Name)) return;
             Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
@@ -334,30 +322,6 @@ namespace SteamFriendsPatcher
             {
                 PendingCacheFiles.Remove(e.Name);
             } while (PendingCacheFiles.Contains(e.Name));
-
-            /*
-                decompressedcachefile = Decompress(cachefile);
-
-                if (decompressedcachefile.Length == friendscss.Length &&
-                    ByteArrayCompare(decompressedcachefile, friendscss))
-                {
-                    PatchCacheFile(e.FullPath, decompressedcachefile);
-                }
-                else
-                {
-                    Print($"{e.Name} did not match.", LogLevel.Debug);
-                }
-                pendingCacheFiles.Remove(e.Name);
-                if(pendingCacheFiles.Contains(e.Name))
-                {
-                    Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
-                    do
-                    {
-                        pendingCacheFiles.Remove(e.Name);
-                    } while (pendingCacheFiles.Contains(e.Name));
-                }
-                return;
-                */
         }
 
         private static bool IsFileReady(string filename)

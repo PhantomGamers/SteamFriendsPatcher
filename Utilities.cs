@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 
 namespace SteamFriendsPatcher
@@ -42,8 +43,6 @@ namespace SteamFriendsPatcher
             }
         }
 
-
-
         public static bool ByteArrayCompare(byte[] b1, byte[] b2)
         {
             // Validate buffers are the same length.
@@ -66,6 +65,28 @@ namespace SteamFriendsPatcher
             shortcut.Save();
         }
 
+        public static bool CompareCRC(string filePath, byte[] bArr)
+        {
+            byte[] crc = new byte[4];
+
+            using (BinaryReader reader = new BinaryReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            {
+                if (!reader.BaseStream.CanSeek)
+                {
+                    Program.Print("Could not read file " + filePath, Program.LogLevel.Debug);
+                    return false;
+                }
+                if (!(reader.BaseStream.Length < 4))
+                {
+                    Program.Print(filePath + "is tiny.", Program.LogLevel.Debug);
+                    return false;
+                }
+                reader.BaseStream.Seek(-4, SeekOrigin.End);
+                reader.Read(crc, 0, 4);
+            }
+
+            return ByteArrayCompare(crc, bArr.Skip(bArr.Length - 4).Take(4).ToArray());
+        }
 
         // Link to startup file
         public static readonly string StartupLink = Path.Combine(
