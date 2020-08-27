@@ -71,13 +71,13 @@ namespace SteamFriendsPatcher
 
             using (BinaryReader reader = new BinaryReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
+                if (!(reader.BaseStream.Length >= Program.friendscss.Length / 2 || reader.BaseStream.Length <= Program.friendscss.Length * 2))
+                {
+                    return false;
+                }
                 if (!reader.BaseStream.CanSeek)
                 {
                     Program.Print("Could not read file " + filePath, Program.LogLevel.Debug);
-                    return false;
-                }
-                if (!(reader.BaseStream.Length < 150)) // We can probably raise this number, what is the smallest we can expect a proper friends.css to be?
-                {
                     return false;
                 }
                 reader.BaseStream.Seek(-4, SeekOrigin.End);
