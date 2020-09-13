@@ -173,8 +173,6 @@ namespace SteamFriendsPatcher
 
         public static void FindCacheFile(bool forceUpdate = false)
         {
-            if(!CheckDependencies())
-                return;
             Settings.Default.Reload();
             var preScannerStatus = FileWatcher.scannerExists;
             FileWatcher.ToggleCacheScanner(false);

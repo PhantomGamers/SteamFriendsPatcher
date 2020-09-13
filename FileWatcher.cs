@@ -41,8 +41,6 @@ namespace SteamFriendsPatcher
 
         public static void ToggleCacheScanner(bool isEnabled)
         {
-            if (!CheckDependencies())
-                return;
             lock (ScannerLock)
             {
                 Main.ToggleButtons(false);
