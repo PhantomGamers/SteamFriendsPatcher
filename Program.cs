@@ -173,6 +173,8 @@ namespace SteamFriendsPatcher
 
         public static void FindCacheFile(bool forceUpdate = false)
         {
+            if(!CheckDependencies())
+                return;
             Settings.Default.Reload();
             var preScannerStatus = FileWatcher.scannerExists;
             FileWatcher.ToggleCacheScanner(false);
@@ -239,7 +241,6 @@ namespace SteamFriendsPatcher
                         return;
                     }
 
-                    state.Stop();
                     friendscachefile = s;
                     PatchCacheFile(s, Decompress(cachefile));
                     return;
@@ -444,7 +445,7 @@ namespace SteamFriendsPatcher
 
                                 using(var file = new MemoryStream())
                                 {
-                                    using (var gzip = new GZipStream(file, CompressionLevel.Optimal, false))
+                                    using (var gzip = new Ionic.Zlib.GZipStream(file, Ionic.Zlib.CompressionMode.Compress, Ionic.Zlib.CompressionLevel.Default, false))
                                     {
                                         gzip.Write(tmp, 0, tmp.Length);
                                     }

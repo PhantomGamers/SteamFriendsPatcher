@@ -89,12 +89,12 @@ namespace SteamFriendsPatcher
                 ToggleUpdateTimer();
             }
 
-            if (Settings.Default.forceScanOnStartup) Program.FindCacheFile();
-
             if (Settings.Default.autoScanOnStartup) FileWatcher.ToggleCacheScanner(true);
 
             if (Settings.Default.runSteamOnStartup && Process.GetProcessesByName("Steam").FirstOrDefault() == null)
                 Process.Start(Program.steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
+
+            if (Settings.Default.forceScanOnStartup) Program.FindCacheFile();
         }
 
         public static void ShowMain()

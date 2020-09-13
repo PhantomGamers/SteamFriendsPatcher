@@ -73,6 +73,9 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ionic.Zlib.CF">
+      <HintPath>dependencies\Ionic.Zlib.CF.dll</HintPath>
+    </Reference>
     <Reference Include="Semver, Version=2.0.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\Semver.2.0.6\lib\net452\Semver.dll</HintPath>
       <Private>False</Private>

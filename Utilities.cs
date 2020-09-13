@@ -1,11 +1,14 @@
 ﻿using IWshRuntimeLibrary;
 
+using SteamFriendsPatcher.Forms;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace SteamFriendsPatcher
 {
@@ -23,9 +26,9 @@ namespace SteamFriendsPatcher
         {
             // Create a GZIP stream with decompression mode.
             // ... Then create a buffer and write into while reading from the GZIP stream.
-            using (var stream = new GZipStream(
+            using (var stream = new Ionic.Zlib.GZipStream(
                 new MemoryStream(gzip),
-                CompressionMode.Decompress))
+                Ionic.Zlib.CompressionMode.Decompress, false))
             {
                 const int size = 4096;
                 var buffer = new byte[size];
@@ -71,7 +74,7 @@ namespace SteamFriendsPatcher
 
             using (BinaryReader reader = new BinaryReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
-                if (!(reader.BaseStream.Length >= bArr.Length / 2 || reader.BaseStream.Length <= bArr.Length * 2))
+                if (reader.BaseStream.Length < bArr.Length / 2 || reader.BaseStream.Length > bArr.Length * 2)
                 {
                     return false;
                 }
@@ -97,5 +100,22 @@ namespace SteamFriendsPatcher
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             @"Microsoft\Windows\Start Menu\Programs\Startup",
             Assembly.GetExecutingAssembly().GetName().Name + ".url");
+       
+        public static bool CheckDependencies()
+        {
+            var zlib = "Ionic.Zlib.CF.dll";
+            if (!System.IO.File.Exists(zlib))
+            {
+                Program.Print(zlib + " is missing. Ensure it was extracted to the same folder as " + AppDomain.CurrentDomain.FriendlyName, Program.LogLevel.Error);
+                App.MainWindowRef.ToggleButtons(false);
+
+                App.MainWindowRef.NotifyIcon.BalloonTipText = "Program not operational";
+                App.MainWindowRef.NotifyIcon.ShowBalloonTip((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
+
+                return false;
+            }
+
+            return true;
+        }
     }
 }
