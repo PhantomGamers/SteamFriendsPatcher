@@ -32,7 +32,7 @@ namespace SteamFriendsPatcher.Forms
 
         public NotifyIcon NotifyIcon { get; private set; }
 
-        private static bool IsShuttingDown { get; set; } = false;
+        private static bool IsShuttingDown { get; set; }
 
         private void MainWindow_SourceInitialized(object sender, EventArgs e)
         {

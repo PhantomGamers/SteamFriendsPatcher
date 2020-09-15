@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -50,16 +49,17 @@ namespace SteamFriendsPatcher
         public static readonly string LibraryUIDir = Path.Combine(steamDir, "steamui");
         private static readonly string LibraryCSS = Path.Combine(LibraryUIDir, "css\\libraryroot.css");
 
-        // friends.css etag
-        private static string _etag;
+        public static readonly List<string> friendsCssUrls = new List<string>()
+                                                            {"https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css",
+                                                             "https://community.cloudflare.steamstatic.com/public/css/webui/friends.css"};
 
         // original friends.css
-        public static byte[] friendscss;
+        public static byte[][] friendsCssCrcs = new byte[friendsCssUrls.Count][];
 
         // patched friends.css
-        public static byte[] friendscsspatched;
+        public static byte[][] friendsCssesPatched = new byte[friendsCssUrls.Count][];
 
-        public static string friendscssetag;
+        public static string[] friendsCssEtags = new string[friendsCssUrls.Count];
 
         // original friends.css age
         public static DateTime friendscssage;
@@ -132,14 +132,14 @@ namespace SteamFriendsPatcher
             }
         }
 
-        public static void PatchCacheFile(string friendscachefile, IEnumerable<byte> decompressedcachefile)
+        public static void PatchCacheFile(string friendscachefile, IEnumerable<byte> decompressedcachefile, int patchedIndex)
         {
             Print($"Successfully found matching friends.css at {friendscachefile}.");
             File.WriteAllBytes(steamDir + "\\clientui\\friends.original.css",
-                Encoding.ASCII.GetBytes("/*" + _etag + "*/\n").Concat(decompressedcachefile).ToArray());
+                Encoding.ASCII.GetBytes("/*" + friendsCssEtags[patchedIndex] + "*/\n").Concat(decompressedcachefile).ToArray());
 
             Print("Overwriting with patched version...");
-            File.WriteAllBytes(friendscachefile, friendscsspatched);
+            File.WriteAllBytes(friendscachefile, friendsCssesPatched[patchedIndex]);
 
             if (!File.Exists(steamDir + "\\clientui\\friends.custom.css"))
                 File.Create(steamDir + "\\clientui\\friends.custom.css").Dispose();
@@ -184,7 +184,7 @@ namespace SteamFriendsPatcher
 
             while (updatePending) Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
 
-            if (friendscss == null || friendscsspatched == null)
+            if (friendsCssCrcs[0] == null && friendsCssCrcs[1] == null)
             {
                 Print("Friends.css could not be obtained, ending force check...");
                 goto ResetButtons;
@@ -200,7 +200,7 @@ namespace SteamFriendsPatcher
             }
 
             var validFiles = new DirectoryInfo(SteamCacheDir).EnumerateFiles("f_*", SearchOption.TopDirectoryOnly)
-                .Where(f => f.Length >= friendscss.Length / 2 || f.Length <= friendscss.Length * 2)
+                .Where(f => f.Length >= friendsCssesPatched[0].Length / 2 || f.Length <= friendsCssesPatched[0].Length * 2)
                 .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => f.FullName)
                 .ToList();
@@ -221,31 +221,34 @@ namespace SteamFriendsPatcher
             Print("Checking cache files for match...");
             Parallel.ForEach(validFiles, (s, state) =>
             {
-                if(CompareCRC(s, friendscss))
+                for (int i = 0; i < friendsCssUrls.Count; i++)
                 {
-                    byte[] cachefile;
+                    if (CompareCRC(s, friendsCssCrcs[i]))
+                    {
+                        byte[] cachefile;
 
-                    try
-                    {
-                        using (var f = new FileStream(s, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        try
                         {
-                            cachefile = new byte[f.Length];
-                            f.Read(cachefile, 0, cachefile.Length);
+                            using (var f = new FileStream(s, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                            {
+                                cachefile = new byte[f.Length];
+                                f.Read(cachefile, 0, cachefile.Length);
+                            }
                         }
-                    }
-                    catch
-                    {
-                        Print($"Error, {s} could not be opened.", LogLevel.Debug);
+                        catch
+                        {
+                            Print($"Error, {s} could not be opened.", LogLevel.Debug);
+                            return;
+                        }
+
+                        friendscachefile = s;
+                        PatchCacheFile(s, Decompress(cachefile), i);
                         return;
                     }
-
-                    friendscachefile = s;
-                    PatchCacheFile(s, Decompress(cachefile));
-                    return;
-                }
-                else
-                {
-                    patchedFileFound = CompareCRC(s, friendscsspatched) || patchedFileFound;
+                    else
+                    {
+                        patchedFileFound = CompareCRC(s, friendsCssesPatched[i]) || patchedFileFound;
+                    }
                 }
             });
 
@@ -391,85 +394,47 @@ namespace SteamFriendsPatcher
             {
                 updatePending = true;
                 Print("Checking for latest friends.css...");
-                using (var wc = new WebClient())
+                var failCount = 0;
+                for (int i = 0; i < friendsCssUrls.Count; i++)
                 {
-                    try
+                    using (var wc = new WebClient())
                     {
-                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                        wc.Encoding = Encoding.UTF8;
-                        wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows; U; Windows NT 10.0; en-US; Valve Steam Client/default/1596241936; ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36");
-
-                        Settings.Default.Reload();
-                        var steamChat = wc.DownloadString("https://steam-chat.com/chat/clientui/?l=&cc=" + Settings.Default.steamLocale + "&build=");
-
-                        wc.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
-                        Regex r =
-                            new Regex(@"(?<=<link href="")(.+friends.css.+)(?="" rel)");
-                        var friendscssurl = !String.IsNullOrEmpty(steamChat) ? r.Match(steamChat).Value.Replace("&amp;", "&") : String.Empty;
-                        r = new Regex(@"(?<=\?v=)(.*)(?=&)");
-                        _etag = !String.IsNullOrEmpty(friendscssurl) ? r.Match(friendscssurl).Value : String.Empty;
-
-
-
-                        if (!string.IsNullOrEmpty(_etag) && !string.IsNullOrEmpty(friendscssetag) &&
-                            _etag == friendscssetag)
+                        try
                         {
-                            Print("friends.css is already up to date.");
-                            updatePending = false;
-                            return true;
-                        }
+                            Settings.Default.Reload();
 
-                        if (string.IsNullOrEmpty(_etag))
-                        {
-                            Print("Could not find etag, using latest.", LogLevel.Debug);
-                            wc.DownloadData("https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css");
+                            wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows; U; Windows NT 10.0; en-US; Valve Steam Client/default/1596241936; ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36");
+                            wc.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
+
+                            var friendsCss = wc.DownloadData(friendsCssUrls.ElementAt(i) + (Settings.Default.steamLocale == "CN" ? "&_cdn=china_pinyuncloud" : string.Empty));
+                            friendsCssCrcs[i] = friendsCss.Skip(friendsCss.Length - 4).Take(4).ToArray();
+                            friendsCssesPatched[i] = Compress(PrependFile(Decompress(friendsCss)));
+
                             var count = wc.ResponseHeaders.Count;
-                            for (var i = 0; i < count; i++)
+                            for (var j = 0; j < count; j++)
                             {
-                                if (wc.ResponseHeaders.GetKey(i) != "ETag") continue;
-                                _etag = wc.ResponseHeaders.Get(i);
+                                if (wc.ResponseHeaders.GetKey(j) != "ETag") continue;
+                                friendsCssEtags[i] = wc.ResponseHeaders.Get(j);
                                 break;
                             }
-                        }
 
-                        if (!string.IsNullOrEmpty(_etag))
+                            friendscssage = DateTime.Now;
+                            Print($"Downloaded friends.css with etag: {friendsCssEtags[i]}");
+                        }
+                        catch (WebException we)
                         {
-                            Print("etag: " + _etag, LogLevel.Debug);
-                            var fc = wc.DownloadData(friendscssurl);
-                            if (fc.Length > 0)
-                            {
-                                friendscss = fc;
-                                var tmp = PrependFile(Decompress(fc));
-
-                                using(var file = new MemoryStream())
-                                {
-                                    using (var gzip = new Ionic.Zlib.GZipStream(file, Ionic.Zlib.CompressionMode.Compress, Ionic.Zlib.CompressionLevel.Default, false))
-                                    {
-                                        gzip.Write(tmp, 0, tmp.Length);
-                                    }
-
-                                    friendscsspatched = file.ToArray();
-                                }
-
-                                friendscssage = DateTime.Now;
-                                friendscssetag = _etag;
-                                Print("Successfully downloaded latest friends.css");
-                                updatePending = false;
-                                return true;
-                            }
+                            Print($"Failed to download friends.css from {friendsCssUrls.ElementAt(i)}.", LogLevel.Error);
+                            Print(we.ToString(), LogLevel.Error);
+                            failCount++;
                         }
-                        Print("Failed to download friends.css", LogLevel.Error);
-                        updatePending = false;
-                        return false;
-                    }
-                    catch (WebException we)
-                    {
-                        Print("Failed to download friends.css.", LogLevel.Error);
-                        Print(we.ToString(), LogLevel.Error);
-                        updatePending = false;
-                        return false;
                     }
                 }
+                if (failCount > 0)
+                    Print("One or more friends.css files failed to download.", LogLevel.Warning);
+                else
+                    Print("Successfully downloaded friends.css files.");
+                updatePending = false;
+                return failCount > 0;
             }
         }
 

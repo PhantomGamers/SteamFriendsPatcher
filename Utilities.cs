@@ -1,14 +1,10 @@
 ﻿using IWshRuntimeLibrary;
 
-using SteamFriendsPatcher.Forms;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace SteamFriendsPatcher
 {
@@ -22,10 +18,8 @@ namespace SteamFriendsPatcher
                    arr[1] == 139;
         }
 
-        public static IEnumerable<byte> Decompress(byte[] gzip)
+        public static byte[] Decompress(byte[] gzip)
         {
-            // Create a GZIP stream with decompression mode.
-            // ... Then create a buffer and write into while reading from the GZIP stream.
             using (var stream = new Ionic.Zlib.GZipStream(
                 new MemoryStream(gzip),
                 Ionic.Zlib.CompressionMode.Decompress, false))
@@ -43,6 +37,19 @@ namespace SteamFriendsPatcher
 
                     return memory.ToArray();
                 }
+            }
+        }
+
+        public static byte[] Compress(byte[] raw)
+        {
+            using (MemoryStream memory = new MemoryStream())
+            {
+                using (Ionic.Zlib.GZipStream gzip = new Ionic.Zlib.GZipStream(memory,
+                    Ionic.Zlib.CompressionMode.Compress, true))
+                {
+                    gzip.Write(raw, 0, raw.Length);
+                }
+                return memory.ToArray();
             }
         }
 
@@ -68,26 +75,23 @@ namespace SteamFriendsPatcher
             shortcut.Save();
         }
 
-        public static bool CompareCRC(string filePath, byte[] bArr)
+        public static byte[] GetCRC(string gzipFilePath)
         {
             byte[] crc = new byte[4];
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            using (BinaryReader reader = new BinaryReader(new FileStream(gzipFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
-                if (reader.BaseStream.Length < bArr.Length / 2 || reader.BaseStream.Length > bArr.Length * 2)
-                {
-                    return false;
-                }
-                if (!reader.BaseStream.CanSeek)
-                {
-                    Program.Print("Could not read file " + filePath, Program.LogLevel.Debug);
-                    return false;
-                }
                 reader.BaseStream.Seek(-4, SeekOrigin.End);
                 reader.Read(crc, 0, 4);
             }
 
-            return ByteArrayCompare(crc, bArr.Skip(bArr.Length - 4).Take(4).ToArray());
+            return crc;
+        }
+
+        public static bool CompareCRC(string filePath, byte[] bArr)
+        {
+
+            return ByteArrayCompare(GetCRC(filePath), bArr.Skip(bArr.Length - 4).Take(4).ToArray());
         }
 
         // Link to startup file

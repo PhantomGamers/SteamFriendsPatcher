@@ -237,7 +237,7 @@ namespace SteamFriendsPatcher
         private static void CacheWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             if (PendingCacheFiles.Contains(e.Name) || !updatePending &&
-                (friendscss == null || new FileInfo(e.FullPath).Length != friendscss.Length))
+                (friendsCssCrcs[0] == null && friendsCssCrcs[1] == null))
                 return;
             PendingCacheFiles.Add(e.Name);
             var t = new Thread(ProcessCacheFileEvent);
@@ -281,21 +281,29 @@ namespace SteamFriendsPatcher
                 return;
             }
 
-            if (CompareCRC(e.FullPath, friendscss))
+            for (int i = 0; i < friendsCssUrls.Count; i++)
             {
-                byte[] cachefile;
                 try
                 {
-                    using (var f = new FileStream(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    if (CompareCRC(e.FullPath, friendsCssCrcs.ElementAt(i)))
                     {
-                        cachefile = new byte[f.Length];
-                        f.Read(cachefile, 0, cachefile.Length);
+                        byte[] cachefile;
+                        using (var f = new FileStream(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        {
+                            cachefile = new byte[f.Length];
+                            f.Read(cachefile, 0, cachefile.Length);
+                        }
+                        PatchCacheFile(e.FullPath, Decompress(cachefile), i);
+                    }
+                    else
+                    {
+                        Print($"{e.Name} did not match.", LogLevel.Debug);
                     }
                 }
                 catch
                 {
                     Task.Delay(TimeSpan.FromSeconds(2)).Wait();
-                    if (!File.Exists(e.FullPath)) return;
+                    if (!File.Exists(e.FullPath)) continue;
                     Print($"Error opening file {e.Name}, retrying.", LogLevel.Debug);
                     PendingCacheFiles.Remove(e.Name);
                     if (PendingCacheFiles.Contains(e.Name))
@@ -308,14 +316,10 @@ namespace SteamFriendsPatcher
                     }
 
                     ProcessCacheFileEvent(e);
-                    return;
+                    continue;
                 }
-                PatchCacheFile(e.FullPath, Decompress(cachefile));
-            } else
-            {
-                Print($"{e.Name} did not match.", LogLevel.Debug);
             }
-            PendingCacheFiles.Remove(e.Name);
+        PendingCacheFiles.Remove(e.Name);
             if (!PendingCacheFiles.Contains(e.Name)) return;
             Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
             do
@@ -324,21 +328,21 @@ namespace SteamFriendsPatcher
             } while (PendingCacheFiles.Contains(e.Name));
         }
 
-        private static bool IsFileReady(string filename)
+private static bool IsFileReady(string filename)
+{
+    // If the file can be opened for exclusive access it means that the file
+    // is no longer locked by another process.
+    try
+    {
+        using (var inputStream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.None))
         {
-            // If the file can be opened for exclusive access it means that the file
-            // is no longer locked by another process.
-            try
-            {
-                using (var inputStream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.None))
-                {
-                    return inputStream.Length > 0;
-                }
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return inputStream.Length > 0;
         }
+    }
+    catch (Exception)
+    {
+        return false;
+    }
+}
     }
 }
