@@ -134,7 +134,7 @@ namespace SteamFriendsPatcher
 
         public static void PatchCacheFile(string friendscachefile, IEnumerable<byte> decompressedcachefile, int patchedIndex)
         {
-            Print($"Successfully found matching friends.css at {friendscachefile}.");
+            Print($"Successfully found matching friends.css for {friendsCssEtags[patchedIndex]} at {friendscachefile}.");
             File.WriteAllBytes(steamDir + "\\clientui\\friends.original.css",
                 Encoding.ASCII.GetBytes("/*" + friendsCssEtags[patchedIndex] + "*/\n").Concat(decompressedcachefile).ToArray());
 
