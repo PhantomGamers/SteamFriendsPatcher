@@ -406,7 +406,7 @@ namespace SteamFriendsPatcher
                             wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows; U; Windows NT 10.0; en-US; Valve Steam Client/default/1596241936; ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36");
                             wc.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
 
-                            var friendsCss = wc.DownloadData(friendsCssUrls.ElementAt(i) + (Settings.Default.steamLocale == "CN" ? "&_cdn=china_pinyuncloud" : string.Empty));
+                            var friendsCss = wc.DownloadData(friendsCssUrls.ElementAt(i) + (Settings.Default.steamLocale == "CN" ? "?_cdn=china_pinyuncloud" : string.Empty));
                             friendsCssCrcs[i] = friendsCss.Skip(friendsCss.Length - 4).Take(4).ToArray();
                             friendsCssesPatched[i] = Compress(PrependFile(Decompress(friendsCss)));
 
