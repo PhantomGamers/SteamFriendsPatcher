@@ -1,4 +1,4 @@
 {
   "$schema": "https://raw.githubusercontent.com/AArnott/Nerdbank.GitVersioning/master/src/NerdBank.GitVersioning/version.schema.json",
-  "version": "0.1.32-beta"
+  "version": "0.1.33-beta"
 }
