@@ -159,7 +159,7 @@ namespace SteamFriendsPatcher
             if (Settings.Default.restartSteamOnPatch)
             {
                 ShutdownSteam();
-                RestartSteam();
+                StartSteam();
             }
 
             Main.Dispatcher.Invoke(() =>
@@ -438,15 +438,19 @@ namespace SteamFriendsPatcher
             }
         }
 
-        private static string FindSteamDir()
-        {
-            using (var registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Valve\\Steam"))
-            {
-                string filePath = null;
-                var regFilePath = registryKey?.GetValue("SteamPath");
-                if (regFilePath != null) filePath = regFilePath.ToString().Replace(@"/", @"\");
+        private static string FindSteamDir() { return GetRegistryData(@"SOFTWARE\Valve\Steam", "SteamPath").ToString().Replace(@"/", @"\"); }
+        private static int GetRunningGameID() {  return (int)GetRegistryData(@"SOFTWARE\Valve\Steam", "RunningAppID"); }
+        private static string GetRunningGameName() { return GetRegistryData(@"SOFTWARE\Valve\Steam\Apps\" + GetRunningGameID(), "Name").ToString(); }
 
-                return filePath;
+        private static object GetRegistryData(string aKey, string aValueName)
+        {
+            using (var registryKey = Registry.CurrentUser.OpenSubKey(aKey))
+            {
+                object value = null;
+                var regValue = registryKey?.GetValue(aValueName);
+                if (regValue != null) value = regValue;
+
+                return value;
             }
         }
 
@@ -455,8 +459,19 @@ namespace SteamFriendsPatcher
             return (int)NativeMethods.FindWindowByClass("SDL_app") != 0;
         }
 
-        private static void ShutdownSteam()
+        private static bool GameRunningCheck()
         {
+            if(GetRunningGameID() != 0)
+            {
+                Print($"{GetRunningGameName()} is running, aborting Steam shutdown.", LogLevel.Warning);
+                return true;
+            }
+            return false;
+        }
+
+        private static bool ShutdownSteam()
+        {
+            if(GameRunningCheck()) return false;
             var steamp = Process.GetProcessesByName("Steam").FirstOrDefault();
             Print("Shutting down Steam...");
             Process.Start(steamDir + "\\Steam.exe", "-shutdown");
@@ -465,13 +480,15 @@ namespace SteamFriendsPatcher
                 Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.",
                     LogLevel.Error);
                 Main.ToggleButtons(true);
-                return;
+                return false;
             }
+            return true;
         }
 
-        private static void RestartSteam()
+        private static void StartSteam()
         {
-            Print("Restarting Steam...");
+            if (Process.GetProcessesByName("Steam").FirstOrDefault() != null) return;
+            Print("Starting Steam...");
             Process.Start(steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
             for (var i = 0; i < 10; i++)
             {
@@ -502,7 +519,7 @@ namespace SteamFriendsPatcher
 
             }
 
-            ShutdownSteam();
+            if(!ShutdownSteam()) return;
 
             FileWatcher.ToggleCacheScanner(false);
             Main.ToggleButtons(false);
@@ -531,7 +548,7 @@ namespace SteamFriendsPatcher
             FileWatcher.ToggleCacheScanner(preScannerStatus);
             if (preSteamStatus)
             {
-                RestartSteam();
+                StartSteam();
             }
 
             Main.ToggleButtons(true);
