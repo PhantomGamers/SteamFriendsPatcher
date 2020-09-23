@@ -529,7 +529,7 @@ namespace SteamFriendsPatcher
 
             if(hackyThreadingFix == 1) { Main.ToggleButtons(true); return; }
 
-            if (!ShutdownSteam()) return;
+            if (!ShutdownSteam()) { Main.ToggleButtons(true); return; }
 
             FileWatcher.ToggleCacheScanner(false);
 
