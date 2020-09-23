@@ -156,16 +156,19 @@ namespace SteamFriendsPatcher.Forms
 
         private async void ToggleScanButton_Click(object sender, RoutedEventArgs e)
         {
+            ToggleButtons(false);
             await Task.Run(() => FileWatcher.ToggleCacheScanner(!FileWatcher.scannerExists)).ConfigureAwait(false);
         }
 
         private async void ForceCheckButton_Click(object sender, RoutedEventArgs e)
         {
+            ToggleButtons(false);
             await Task.Run(() => Program.FindCacheFile(true)).ConfigureAwait(false);
         }
 
         private async void ClearCacheButton_Click(object sender, RoutedEventArgs e)
         {
+            ToggleButtons(false);
             await Task.Run(Program.ClearSteamCache).ConfigureAwait(false);
         }
 

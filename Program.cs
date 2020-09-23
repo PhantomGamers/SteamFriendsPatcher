@@ -20,6 +20,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 using static SteamFriendsPatcher.Utilities;
 
@@ -75,6 +76,8 @@ namespace SteamFriendsPatcher
         // private static readonly object LogPrintLock = new object();
 
         private static readonly MainWindow Main = App.MainWindowRef;
+
+        private static int hackyThreadingFix = 2;
 
         public static bool UpdateChecker()
         {
@@ -439,7 +442,7 @@ namespace SteamFriendsPatcher
         }
 
         private static string FindSteamDir() { return GetRegistryData(@"SOFTWARE\Valve\Steam", "SteamPath").ToString().Replace(@"/", @"\"); }
-        private static int GetRunningGameID() {  return (int)GetRegistryData(@"SOFTWARE\Valve\Steam", "RunningAppID"); }
+        private static int GetRunningGameID() { return (int)GetRegistryData(@"SOFTWARE\Valve\Steam", "RunningAppID"); }
         private static string GetRunningGameName() { return GetRegistryData(@"SOFTWARE\Valve\Steam\Apps\" + GetRunningGameID(), "Name").ToString(); }
 
         private static object GetRegistryData(string aKey, string aValueName)
@@ -461,7 +464,7 @@ namespace SteamFriendsPatcher
 
         private static bool GameRunningCheck()
         {
-            if(GetRunningGameID() != 0)
+            if (GetRunningGameID() != 0)
             {
                 Print($"{GetRunningGameName()} is running, aborting Steam shutdown.", LogLevel.Warning);
                 return true;
@@ -471,7 +474,7 @@ namespace SteamFriendsPatcher
 
         private static bool ShutdownSteam()
         {
-            if(GameRunningCheck()) return false;
+            if (GameRunningCheck()) return false;
             var steamp = Process.GetProcessesByName("Steam").FirstOrDefault();
             Print("Shutting down Steam...");
             Process.Start(steamDir + "\\Steam.exe", "-shutdown");
@@ -514,15 +517,21 @@ namespace SteamFriendsPatcher
             var preSteamStatus = Process.GetProcessesByName("Steam").FirstOrDefault() != null;
             if (preSteamStatus)
             {
-                if (MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?",
-                        "Steam Friends Patcher", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
-
+                hackyThreadingFix = 2;
+                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
+                {
+                    hackyThreadingFix = MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?",
+                         "Steam Friends Patcher", MessageBoxButton.YesNo) == MessageBoxResult.Yes ? 0 : 1;
+                }));
             }
 
-            if(!ShutdownSteam()) return;
+            while (preSteamStatus && hackyThreadingFix == 2) Task.Delay(TimeSpan.FromMilliseconds(100));
+
+            if(hackyThreadingFix == 1) { Main.ToggleButtons(true); return; }
+
+            if (!ShutdownSteam()) return;
 
             FileWatcher.ToggleCacheScanner(false);
-            Main.ToggleButtons(false);
 
             Print("Deleting cache files...");
             try
