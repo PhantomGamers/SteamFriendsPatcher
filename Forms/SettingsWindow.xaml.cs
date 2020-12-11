@@ -102,6 +102,7 @@ namespace SteamFriendsPatcher.Forms
                 }
 
             Settings.Default.steamLocaleArgs = Settings.Default.steamLocaleArgs;
+            Settings.Default.libraryRootCss = Settings.Default.libraryRootCss;
 
             Settings.Default.Save();
 
@@ -118,6 +119,10 @@ namespace SteamFriendsPatcher.Forms
 
             if (checkForUpdatesSetting && !Settings.Default.checkForUpdates)
                 App.ToggleUpdateTimer(false);
+
+            FileWatcher.libraryRootCss = Settings.Default.steamBeta ? "5.css" : "libraryroot.css";
+
+            if (Settings.Default.libraryRootCss.Length >= 5) FileWatcher.libraryRootCss = Settings.Default.libraryRootCss;
 
             App.MainWindowRef.NotifyIcon.Visible = Settings.Default.showTrayIconWindow;
 

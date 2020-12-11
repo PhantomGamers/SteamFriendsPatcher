@@ -89,6 +89,10 @@ namespace SteamFriendsPatcher
                 ToggleUpdateTimer();
             }
 
+            if(Settings.Default.steamBeta) FileWatcher.libraryRootCss = "5.css";
+
+            if(Settings.Default.libraryRootCss.Length >= 5) FileWatcher.libraryRootCss = Settings.Default.libraryRootCss;
+
             if (Settings.Default.autoScanOnStartup) FileWatcher.ToggleCacheScanner(true);
 
             if (Settings.Default.runSteamOnStartup && Process.GetProcessesByName("Steam").FirstOrDefault() == null)

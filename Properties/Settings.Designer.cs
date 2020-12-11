@@ -277,7 +277,7 @@ namespace SteamFriendsPatcher.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("\"\"")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string steamLocaleArgs {
             get {
                 return ((string)(this["steamLocaleArgs"]));
@@ -296,6 +296,30 @@ namespace SteamFriendsPatcher.Properties {
             }
             set {
                 this["steamLocale"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool steamBeta {
+            get {
+                return ((bool)(this["steamBeta"]));
+            }
+            set {
+                this["steamBeta"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string libraryRootCss {
+            get {
+                return ((string)(this["libraryRootCss"]));
+            }
+            set {
+                this["libraryRootCss"] = value;
             }
         }
     }

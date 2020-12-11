@@ -26,6 +26,8 @@ namespace SteamFriendsPatcher
         public static bool scannerExists;
         public static bool friendslistWatcherExists;
 
+        public static string libraryRootCss = "libraryroot.css";
+
 
         private static readonly object ScannerLock = new object();
 
@@ -191,7 +193,7 @@ namespace SteamFriendsPatcher
                 NotifyFilter = NotifyFilters.LastAccess
                                | NotifyFilters.LastWrite
                                | NotifyFilters.FileName,
-                Filter = "libraryroot.css"
+                Filter = libraryRootCss
             };
             libraryWatcher.Created += LibraryWatcher_Event;
             libraryWatcher.Changed += LibraryWatcher_Event;

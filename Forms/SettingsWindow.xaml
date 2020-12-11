@@ -147,6 +147,7 @@
             <RowDefinition />
             <RowDefinition />
             <RowDefinition />
+            <RowDefinition />
         </Grid.RowDefinitions>
         <!-- ReSharper disable InconsistentNaming -->
         <CheckBox x:Name="startWithWindows" Content="Start With Windows" Foreground="White" FontSize="14"
@@ -195,10 +196,13 @@
         <CheckBox x:Name="restartSteamOnPatch" Content="Restart Steam After Patching" Foreground="White" Grid.Row="14"
                   Grid.Column="0" FontSize="14"
                   TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <Label x:Name="steamLaunchArgText" Content="Steam Launch Arguments:" Grid.Row="15"
+        <CheckBox x:Name="steamBeta" Content="Steam Beta" Foreground="White" Grid.Row="15"
+                  Grid.Column="0" FontSize="14"
+                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
+        <Label x:Name="steamLaunchArgText" Content="Steam Launch Arguments:" Grid.Row="16"
                Grid.Column="0" Foreground="White" FontSize="14"
                TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Margin="0" />
-        <TextBox x:Name="steamLaunchArgs" Margin="0" Grid.Row="15" Background="#FF3D3D3E" Foreground="White"
+        <TextBox x:Name="steamLaunchArgs" Margin="0" Grid.Row="16" Background="#FF3D3D3E" Foreground="White"
                  Tag="Steam launch args (e.g. -dev)" Style="{DynamicResource TextBoxWatermarkNoFocus}"
                  BorderBrush="{x:Null}" FontSize="14" VerticalContentAlignment="Center" MaxLines="1" Grid.Column="1"
                  TextOptions.TextFormattingMode="Display" TextOptions.TextHintingMode="Fixed" Width="187" Height="29">
@@ -266,7 +270,7 @@
                 </Style>
             </TextBox.Resources>
         </TextBox>
-        <Grid Grid.Row="16" Grid.ColumnSpan="2" Grid.Column="0"
+        <Grid Grid.Row="17" Grid.ColumnSpan="2" Grid.Column="0"
               d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />

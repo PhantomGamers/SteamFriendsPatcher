@@ -66,9 +66,15 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="steamLocaleArgs" Type="System.String" Scope="User">
-      <Value Profile="(Default)">""</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="steamLocale" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="steamBeta" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="libraryRootCss" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

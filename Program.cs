@@ -48,7 +48,6 @@ namespace SteamFriendsPatcher
 
         // location of Library UI files
         public static readonly string LibraryUIDir = Path.Combine(steamDir, "steamui");
-        private static readonly string LibraryCSS = Path.Combine(LibraryUIDir, "css\\libraryroot.css");
 
         public static readonly List<string> friendsCssUrls = new List<string>()
                                                             {"https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css",
@@ -293,6 +292,7 @@ namespace SteamFriendsPatcher
         {
             if (Settings.Default.patchLibraryBeta)
             {
+                var LibraryCSS = Path.Combine(LibraryUIDir, "css", FileWatcher.libraryRootCss);
                 if (!Directory.Exists(Path.Combine(LibraryUIDir, "css")))
                 {
                     Print("Library UI directory not found.");
@@ -507,7 +507,9 @@ namespace SteamFriendsPatcher
 
         public static void ClearSteamCache()
         {
-            if (!Directory.Exists(SteamCacheDir))
+
+            var LibraryCSSDir = Path.Combine(LibraryUIDir, "css");
+            if (!Directory.Exists(SteamCacheDir) && !Directory.Exists(LibraryCSSDir))
             {
                 Print("Cache folder does not exist.", LogLevel.Warning);
                 return;
@@ -525,6 +527,8 @@ namespace SteamFriendsPatcher
                 }));
             }
 
+
+
             while (preSteamStatus && hackyThreadingFix == 2) Task.Delay(TimeSpan.FromMilliseconds(100));
 
             if(hackyThreadingFix == 1) { Main.ToggleButtons(true); return; }
@@ -532,6 +536,12 @@ namespace SteamFriendsPatcher
             if (!ShutdownSteam()) { Main.ToggleButtons(true); return; }
 
             FileWatcher.ToggleCacheScanner(false);
+
+
+            if (!Directory.Exists(SteamCacheDir))
+            {
+                goto librarycss;
+            }
 
             Print("Deleting cache files...");
             try
@@ -548,10 +558,12 @@ namespace SteamFriendsPatcher
                 Print("Cache files deleted.");
             }
 
-            if (File.Exists(LibraryCSS))
+            librarycss:
+
+            if (Directory.Exists(LibraryCSSDir))
             {
                 Print("Deleting patched library file...");
-                File.Delete(LibraryCSS);
+                Directory.Delete(LibraryCSSDir, true);
             }
 
             FileWatcher.ToggleCacheScanner(preScannerStatus);
