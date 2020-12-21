@@ -18,6 +18,7 @@ With the scanner option, whenever a new version of the friends.css is pushed it 
 * Check For Updates  
 * Auto Scan On Startup  
 * Run Steam On Startup  
+* **Steam beta should be ticked, even on stable version as of 2020-12-21**
 
 With these options configured, the program should be as easy as setup and forget!
 
