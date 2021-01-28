@@ -133,19 +133,7 @@ namespace SteamFriendsPatcher.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool upgradeRequired {
-            get {
-                return ((bool)(this["upgradeRequired"]));
-            }
-            set {
-                this["upgradeRequired"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public int upgradeVer {
             get {
                 return ((int)(this["upgradeVer"]));
@@ -301,7 +289,7 @@ namespace SteamFriendsPatcher.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool steamBeta {
             get {
                 return ((bool)(this["steamBeta"]));

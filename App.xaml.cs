@@ -142,7 +142,7 @@ namespace SteamFriendsPatcher
 
         private static void PerformUpgrade()
         {
-            if (!Settings.Default.upgradeRequired) return;
+            if (Settings.Default.upgradeVer == 2) return;
             Settings.Default.Upgrade();
 
             if (Settings.Default.upgradeVer == 0)
@@ -152,8 +152,10 @@ namespace SteamFriendsPatcher
                     Utilities.CreateStartUpShortcut();
                 }
 
-            Settings.Default.upgradeVer = 1;
-            Settings.Default.upgradeRequired = false;
+            if (Settings.Default.upgradeVer < 2)
+                Settings.Default.steamBeta = true;
+
+            Settings.Default.upgradeVer = 2;
             Settings.Default.Save();
         }
     }
