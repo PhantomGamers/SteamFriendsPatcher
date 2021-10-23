@@ -138,8 +138,9 @@ namespace SteamFriendsPatcher
 
                 StartCrashScanner();
 
-                if (Settings.Default.patchLibraryBeta && Directory.Exists(Path.Combine(LibraryUIDir, "css")))
+                if (Settings.Default.patchLibraryBeta)
                 {
+                    Directory.CreateDirectory(Path.Combine(LibraryUIDir, "css"));
                     StartLibraryScanner();
                 }
 
@@ -233,7 +234,7 @@ namespace SteamFriendsPatcher
                 NotifyFilter = NotifyFilters.LastAccess
                                | NotifyFilters.LastWrite
                                | NotifyFilters.FileName,
-                Filter = libraryRootCss
+                Filter = "*.css"
             };
             libraryWatcher.Created += LibraryWatcher_Event;
             libraryWatcher.Changed += LibraryWatcher_Event;
@@ -245,12 +246,19 @@ namespace SteamFriendsPatcher
 
         private static void LibraryWatcher_Event(object sender, FileSystemEventArgs e)
         {
+            Print($"New library file found: {e.Name}", LogLevel.Debug);
+            if (e.Name != Settings.Default.libraryRootCss && e.Name != libraryRootCss)
+            {
+                return;
+            }
+
             switch (e.ChangeType)
             {
                 case WatcherChangeTypes.Changed:
                 case WatcherChangeTypes.Created:
                     {
                         Print("Library change detected.", LogLevel.Debug);
+                        Thread.Sleep((int)TimeSpan.FromSeconds(1).TotalMilliseconds);
                         PatchLibrary();
                         break;
                     }
@@ -289,8 +297,8 @@ namespace SteamFriendsPatcher
 
         private static void CacheWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            if (PendingCacheFiles.Contains(e.Name) || !updatePending &&
-                friendsCssCrcs[0] == null && friendsCssCrcs[1] == null)
+            if (PendingCacheFiles.Contains(e.Name) || (!updatePending &&
+                friendsCssCrcs[0] == null && friendsCssCrcs[1] == null))
             {
                 return;
             }
