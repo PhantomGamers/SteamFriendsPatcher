@@ -89,18 +89,18 @@ namespace SteamFriendsPatcher
                     {
                         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                         wc.Headers.Add("user-agent", Assembly.GetExecutingAssembly().FullName);
-                        var latestver =
+                        string latestver =
                             wc.DownloadString(
                                 "https://api.github.com/repos/phantomgamers/steamfriendspatcher/releases/latest");
                         const string verregex = "(?<=\"tag_name\":\")(.*?)(?=\")";
-                        var latestvervalue = Regex.Match(latestver, verregex).Value;
+                        string latestvervalue = Regex.Match(latestver, verregex).Value;
                         if (!string.IsNullOrEmpty(latestvervalue))
                         {
-                            var assemblyVer = ThisAssembly.AssemblyInformationalVersion;
+                            string assemblyVer = ThisAssembly.AssemblyInformationalVersion;
                             assemblyVer = assemblyVer.Substring(0,
                                 assemblyVer.IndexOf('+') > -1 ? assemblyVer.IndexOf('+') : assemblyVer.Length);
-                            if (!SemVersion.TryParse(assemblyVer, out var localVer) ||
-                                !SemVersion.TryParse(latestvervalue, out var remoteVer))
+                            if (!SemVersion.TryParse(assemblyVer, out SemVersion localVer) ||
+                                !SemVersion.TryParse(latestvervalue, out SemVersion remoteVer))
                             {
                                 Print("Update check failed, failed to parse version string.", LogLevel.Error);
                                 return false;
@@ -111,7 +111,9 @@ namespace SteamFriendsPatcher
                                 if (MessageBox.Show("Update available. Download now?",
                                         "Steam Friends Patcher - Update Available", MessageBoxButton.YesNo) ==
                                     MessageBoxResult.Yes)
-                                    Process.Start("https://github.com/PhantomGamers/SteamFriendsPatcher/releases/latest");
+                                {
+                                    _ = Process.Start("https://github.com/PhantomGamers/SteamFriendsPatcher/releases/latest");
+                                }
 
                                 return true;
                             }
@@ -144,7 +146,9 @@ namespace SteamFriendsPatcher
             File.WriteAllBytes(friendscachefile, friendsCssesPatched[patchedIndex]);
 
             if (!File.Exists(steamDir + "\\clientui\\friends.custom.css"))
+            {
                 File.Create(steamDir + "\\clientui\\friends.custom.css").Dispose();
+            }
 
             if (Process.GetProcessesByName("Steam").FirstOrDefault() != null &&
                 File.Exists(steamDir + "\\clientui\\friends.custom.css") && FindFriendsWindow())
@@ -160,13 +164,17 @@ namespace SteamFriendsPatcher
 
             if (Settings.Default.restartSteamOnPatch)
             {
-                ShutdownSteam();
+                _ = ShutdownSteam();
                 StartSteam();
             }
 
             Main.Dispatcher.Invoke(() =>
             {
-                if (Main.IsVisible || !Settings.Default.showNotificationsInTray) return;
+                if (Main.IsVisible || !Settings.Default.showNotificationsInTray)
+                {
+                    return;
+                }
+
                 Main.NotifyIcon.BalloonTipTitle = @"Steam Friends Patcher";
                 Main.NotifyIcon.BalloonTipText = @"Successfully patched friends!";
                 Main.NotifyIcon.ShowBalloonTip((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
@@ -176,7 +184,7 @@ namespace SteamFriendsPatcher
         public static void FindCacheFile(bool forceUpdate = false)
         {
             Settings.Default.Reload();
-            var preScannerStatus = FileWatcher.scannerExists;
+            bool preScannerStatus = FileWatcher.scannerExists;
             FileWatcher.ToggleCacheScanner(false);
             Main.ToggleButtons(false);
 
@@ -184,7 +192,10 @@ namespace SteamFriendsPatcher
 
             GetLatestFriendsCss(forceUpdate);
 
-            while (updatePending) Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
+            while (updatePending)
+            {
+                Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
+            }
 
             if (friendsCssCrcs[0] == null && friendsCssCrcs[1] == null)
             {
@@ -206,7 +217,7 @@ namespace SteamFriendsPatcher
                 .OrderByDescending(f => f.LastWriteTime)
                 .Select(f => f.FullName)
                 .ToList();
-            var count = validFiles.Count;
+            int count = validFiles.Count;
             if (count == 0)
             {
                 Print("No matching cache files found.", LogLevel.Error);
@@ -218,7 +229,7 @@ namespace SteamFriendsPatcher
             Print($"Found {count} possible cache files.");
 
             string friendscachefile = null;
-            var patchedFileFound = false;
+            bool patchedFileFound = false;
 
             Print("Checking cache files for match...");
             Parallel.ForEach(validFiles, (s, state) =>
@@ -257,15 +268,22 @@ namespace SteamFriendsPatcher
             if (string.IsNullOrEmpty(friendscachefile))
             {
                 if (!patchedFileFound)
+                {
                     Print("Cache file does not exist, is outdated, or is different from expected.", LogLevel.Warning);
+                }
                 else
+                {
                     Print("Cache file is already patched.");
+                }
             }
 
         ResetButtons:
             PatchLibrary();
             Main.ToggleButtons(true);
-            if (preScannerStatus) FileWatcher.ToggleCacheScanner(true);
+            if (preScannerStatus)
+            {
+                FileWatcher.ToggleCacheScanner(true);
+            }
         }
 
         private static byte[] PrependFile(IEnumerable<byte> file)
@@ -282,9 +300,9 @@ namespace SteamFriendsPatcher
 
             // load original from Steam CDN, not recommended because of infinite matching
             // string appendText = "@import url(\"https://steamcommunity-a.akamaihd.net/public/css/webui/friends.css\");\n@import url(\"https://steamloopback.host/friends.custom.css\");\n";
-            var append = Encoding.ASCII.GetBytes(appendText);
+            byte[] append = Encoding.ASCII.GetBytes(appendText);
 
-            var output = append.Concat(file).Concat(Encoding.ASCII.GetBytes("}")).ToArray();
+            byte[] output = append.Concat(file).Concat(Encoding.ASCII.GetBytes("}")).ToArray();
             return output;
         }
 
@@ -292,7 +310,7 @@ namespace SteamFriendsPatcher
         {
             if (Settings.Default.patchLibraryBeta)
             {
-                var LibraryCSS = Path.Combine(LibraryUIDir, "css", FileWatcher.libraryRootCss);
+                string LibraryCSS = Path.Combine(LibraryUIDir, "css", FileWatcher.libraryRootCss);
                 if (!Directory.Exists(Path.Combine(LibraryUIDir, "css")))
                 {
                     Print("Library UI directory not found.");
@@ -328,7 +346,7 @@ namespace SteamFriendsPatcher
                 File.Copy(LibraryCSS, Path.Combine(LibraryUIDir, "libraryroot.original.css"));
                 int originalLibCSSLength = librarycss.Length;
                 librarycss = patchedText + "\n@import url(\"https://steamloopback.host/libraryroot.original.css\");\n@import url(\"https://steamloopback.host/libraryroot.custom.css\");\n";
-                var fillerText = new string('\t', originalLibCSSLength - librarycss.Length);
+                string fillerText = new string('\t', originalLibCSSLength - librarycss.Length);
                 librarycss += fillerText;
                 if (!File.Exists(Path.Combine(LibraryUIDir, "libraryroot.custom.css")))
                 {
@@ -392,12 +410,16 @@ namespace SteamFriendsPatcher
 
         public static bool GetLatestFriendsCss(bool force = false)
         {
-            if (DateTime.Now.Subtract(friendscssage).TotalMinutes < 1 && !force || updatePending) return true;
+            if (DateTime.Now.Subtract(friendscssage).TotalMinutes < 1 && !force || updatePending)
+            {
+                return true;
+            }
+
             lock (GetFriendsCssLock)
             {
                 updatePending = true;
                 Print("Checking for latest friends.css...");
-                var failCount = 0;
+                int failCount = 0;
                 for (int i = 0; i < friendsCssUrls.Count; i++)
                 {
                     using (var wc = new WebClient())
@@ -409,14 +431,18 @@ namespace SteamFriendsPatcher
                             wc.Headers.Add("user-agent", "Mozilla/5.0 (Windows; U; Windows NT 10.0; en-US; Valve Steam Client/default/1596241936; ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36");
                             wc.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
 
-                            var friendsCss = wc.DownloadData(friendsCssUrls.ElementAt(i) + (Settings.Default.steamLocale == "CN" ? "?_cdn=china_pinyuncloud" : string.Empty));
+                            byte[] friendsCss = wc.DownloadData(friendsCssUrls.ElementAt(i) + (Settings.Default.steamLocale == "CN" ? "?_cdn=china_pinyuncloud" : string.Empty));
                             friendsCssCrcs[i] = friendsCss.Skip(friendsCss.Length - 4).Take(4).ToArray();
                             friendsCssesPatched[i] = Compress(PrependFile(Decompress(friendsCss)));
 
-                            var count = wc.ResponseHeaders.Count;
-                            for (var j = 0; j < count; j++)
+                            int count = wc.ResponseHeaders.Count;
+                            for (int j = 0; j < count; j++)
                             {
-                                if (wc.ResponseHeaders.GetKey(j) != "ETag") continue;
+                                if (wc.ResponseHeaders.GetKey(j) != "ETag")
+                                {
+                                    continue;
+                                }
+
                                 friendsCssEtags[i] = wc.ResponseHeaders.Get(j);
                                 break;
                             }
@@ -433,9 +459,14 @@ namespace SteamFriendsPatcher
                     }
                 }
                 if (failCount > 0)
+                {
                     Print("One or more friends.css files failed to download.", LogLevel.Warning);
+                }
                 else
+                {
                     Print("Successfully downloaded friends.css files.");
+                }
+
                 updatePending = false;
                 return failCount > 0;
             }
@@ -447,11 +478,14 @@ namespace SteamFriendsPatcher
 
         private static object GetRegistryData(string aKey, string aValueName)
         {
-            using (var registryKey = Registry.CurrentUser.OpenSubKey(aKey))
+            using (RegistryKey registryKey = Registry.CurrentUser.OpenSubKey(aKey))
             {
                 object value = null;
-                var regValue = registryKey?.GetValue(aValueName);
-                if (regValue != null) value = regValue;
+                object regValue = registryKey?.GetValue(aValueName);
+                if (regValue != null)
+                {
+                    value = regValue;
+                }
 
                 return value;
             }
@@ -474,10 +508,14 @@ namespace SteamFriendsPatcher
 
         private static bool ShutdownSteam()
         {
-            if (GameRunningCheck()) return false;
-            var steamp = Process.GetProcessesByName("Steam").FirstOrDefault();
+            if (GameRunningCheck())
+            {
+                return false;
+            }
+
+            Process steamp = Process.GetProcessesByName("Steam").FirstOrDefault();
             Print("Shutting down Steam...");
-            Process.Start(steamDir + "\\Steam.exe", "-shutdown");
+            _ = Process.Start(steamDir + "\\Steam.exe", "-shutdown");
             if (steamp != null && !steamp.WaitForExit((int)TimeSpan.FromSeconds(30).TotalMilliseconds))
             {
                 Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.",
@@ -490,10 +528,14 @@ namespace SteamFriendsPatcher
 
         private static void StartSteam()
         {
-            if (Process.GetProcessesByName("Steam").FirstOrDefault() != null) return;
+            if (Process.GetProcessesByName("Steam").FirstOrDefault() != null)
+            {
+                return;
+            }
+
             Print("Starting Steam...");
-            Process.Start(steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
-            for (var i = 0; i < 10; i++)
+            _ = Process.Start(steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
+            for (int i = 0; i < 10; i++)
             {
                 if (Process.GetProcessesByName("Steam").FirstOrDefault() != null)
                 {
@@ -501,37 +543,43 @@ namespace SteamFriendsPatcher
                     break;
                 }
 
-                if (i == 9) Print("Failed to start Steam.", LogLevel.Error);
+                if (i == 9)
+                {
+                    Print("Failed to start Steam.", LogLevel.Error);
+                }
             }
         }
 
         public static void ClearSteamCache()
         {
 
-            var LibraryCSSDir = Path.Combine(LibraryUIDir, "css");
+            string LibraryCSSDir = Path.Combine(LibraryUIDir, "css");
             if (!Directory.Exists(SteamCacheDir) && !Directory.Exists(LibraryCSSDir))
             {
                 Print("Cache folder does not exist.", LogLevel.Warning);
                 return;
             }
 
-            var preScannerStatus = FileWatcher.scannerExists;
-            var preSteamStatus = Process.GetProcessesByName("Steam").FirstOrDefault() != null;
+            bool preScannerStatus = FileWatcher.scannerExists;
+            bool preSteamStatus = Process.GetProcessesByName("Steam").FirstOrDefault() != null;
             if (preSteamStatus)
             {
                 hackyThreadingFix = 2;
-                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-                {
-                    hackyThreadingFix = MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?",
-                         "Steam Friends Patcher", MessageBoxButton.YesNo) == MessageBoxResult.Yes ? 0 : 1;
-                }));
+                _ = Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
+                  {
+                      hackyThreadingFix = MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?",
+                           "Steam Friends Patcher", MessageBoxButton.YesNo) == MessageBoxResult.Yes ? 0 : 1;
+                  }));
             }
 
 
 
-            while (preSteamStatus && hackyThreadingFix == 2) Task.Delay(TimeSpan.FromMilliseconds(100));
+            while (preSteamStatus && hackyThreadingFix == 2)
+            {
+                _ = Task.Delay(TimeSpan.FromMilliseconds(100));
+            }
 
-            if(hackyThreadingFix == 1) { Main.ToggleButtons(true); return; }
+            if (hackyThreadingFix == 1) { Main.ToggleButtons(true); return; }
 
             if (!ShutdownSteam()) { Main.ToggleButtons(true); return; }
 
@@ -558,7 +606,7 @@ namespace SteamFriendsPatcher
                 Print("Cache files deleted.");
             }
 
-            librarycss:
+        librarycss:
 
             if (Directory.Exists(LibraryCSSDir))
             {
@@ -579,7 +627,7 @@ namespace SteamFriendsPatcher
 
         public static void Print(string message = null, LogLevel logLevel = LogLevel.Info, bool newline = true)
         {
-            var dateTime = DateTime.Now.ToString("G", CultureInfo.CurrentCulture);
+            string dateTime = DateTime.Now.ToString("G", CultureInfo.CurrentCulture);
 #if DEBUG
             Debug.Write($"[{dateTime}][{logLevel}] {message}" + (newline ? Environment.NewLine : string.Empty));
 #endif
@@ -596,13 +644,19 @@ namespace SteamFriendsPatcher
             }
             */
 
-            if (logLevel == LogLevel.Debug && !Settings.Default.showDebugMessages) return;
+            if (logLevel == LogLevel.Debug && !Settings.Default.showDebugMessages)
+            {
+                return;
+            }
 
             lock (MessageLock)
             {
                 Main.Output.Dispatcher.Invoke(() =>
                 {
-                    if (Main.Output.Document == null) Main.Output.Document = new FlowDocument();
+                    if (Main.Output.Document == null)
+                    {
+                        Main.Output.Document = new FlowDocument();
+                    }
 
                     // Date & Time
                     var tr = new TextRange(Main.Output.Document.ContentEnd, Main.Output.Document.ContentEnd)

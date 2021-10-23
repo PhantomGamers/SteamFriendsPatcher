@@ -15,7 +15,7 @@ using static SteamFriendsPatcher.Utilities;
 
 namespace SteamFriendsPatcher
 {
-    class FileWatcher
+    internal class FileWatcher
     {
         // FileSystemWatchers
         public static FileSystemWatcher cacheWatcher;
@@ -26,7 +26,21 @@ namespace SteamFriendsPatcher
         public static bool scannerExists;
         public static bool friendslistWatcherExists;
 
-        public static string libraryRootCss = "libraryroot.css";
+        public static string libraryRootCss
+        {
+            get
+            {
+                string cssdir = Path.Combine(LibraryUIDir, "css");
+                if (!File.Exists(Path.Combine(cssdir, Settings.Default.libraryRootCss)))
+                {
+                    string css_5 = "5.css";
+                    string css_6 = "6.css";
+                    Settings.Default.libraryRootCss = File.Exists(Path.Combine(cssdir, css_6)) ? css_6 : css_5;
+                }
+                return Settings.Default.libraryRootCss;
+            }
+            set => Settings.Default.libraryRootCss = value;
+        }
 
 
         private static readonly object ScannerLock = new object();
@@ -59,27 +73,44 @@ namespace SteamFriendsPatcher
 
                 if (scannerExists)
                 {
-                    if (cacheWatcher != null) cacheWatcher.EnableRaisingEvents = isEnabled;
-                    if (crashWatcher != null) crashWatcher.EnableRaisingEvents = isEnabled;
-                    if (libraryWatcher != null) libraryWatcher.EnableRaisingEvents = isEnabled;
+                    if (cacheWatcher != null)
+                    {
+                        cacheWatcher.EnableRaisingEvents = isEnabled;
+                    }
+
+                    if (crashWatcher != null)
+                    {
+                        crashWatcher.EnableRaisingEvents = isEnabled;
+                    }
+
+                    if (libraryWatcher != null)
+                    {
+                        libraryWatcher.EnableRaisingEvents = isEnabled;
+                    }
+
                     scannerExists = isEnabled;
                     if (!isEnabled)
                     {
                         cacheLock.Dispose();
                         if (File.Exists(Path.Combine(SteamCacheDir, "tmp.lock")))
+                        {
                             File.Delete(Path.Combine(SteamCacheDir, "tmp.lock"));
+                        }
                     }
 
                     Automation.RemoveAllEventHandlers();
                     friendslistWatcherExists = false;
-                    Program.Print("Cache Watcher " + (isEnabled ? "Started" : "Stopped") + ".");
+                    Print("Cache Watcher " + (isEnabled ? "Started" : "Stopped") + ".");
                     Main.ToggleButtons(true);
                     return;
                 }
 
-                if (!isEnabled) return;
+                if (!isEnabled)
+                {
+                    return;
+                }
 
-                for (var i = 0; i < 10; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     try
                     {
@@ -88,8 +119,8 @@ namespace SteamFriendsPatcher
                     }
                     catch
                     {
-                        Program.Print("Windows is dumb.", Program.LogLevel.Debug);
-                        Program.Print("Does cache directory exist: " + cacheDir.Exists, Program.LogLevel.Debug);
+                        Print("Windows is dumb.", LogLevel.Debug);
+                        Print("Does cache directory exist: " + cacheDir.Exists, LogLevel.Debug);
                         Task.Delay(TimeSpan.FromSeconds(1)).Wait();
                         continue;
                     }
@@ -99,7 +130,7 @@ namespace SteamFriendsPatcher
 
                 if (!File.Exists(Path.Combine(SteamCacheDir, "tmp.lock")))
                 {
-                    Program.Print("Could not lock Cache. Scanner can not be started.", Program.LogLevel.Error);
+                    Print("Could not lock Cache. Scanner can not be started.", LogLevel.Error);
                     return;
                 }
 
@@ -107,7 +138,7 @@ namespace SteamFriendsPatcher
 
                 StartCrashScanner();
 
-                if (Settings.Default.patchLibraryBeta && Directory.Exists(Path.Combine(Program.LibraryUIDir, "css")))
+                if (Settings.Default.patchLibraryBeta && Directory.Exists(Path.Combine(LibraryUIDir, "css")))
                 {
                     StartLibraryScanner();
                 }
@@ -123,10 +154,10 @@ namespace SteamFriendsPatcher
                 };
                 cacheWatcher.Created += CacheWatcher_Changed;
                 cacheWatcher.Changed += CacheWatcher_Changed;
-                Program.GetLatestFriendsCss();
+                _ = GetLatestFriendsCss();
                 cacheWatcher.EnableRaisingEvents = true;
                 scannerExists = true;
-                Program.Print("Cache Watcher Started.");
+                Print("Cache Watcher Started.");
 
                 Main.ToggleButtons(true);
             }
@@ -134,15 +165,15 @@ namespace SteamFriendsPatcher
 
         private static void StartCrashScanner()
         {
-            if (!Directory.Exists(Program.steamDir))
+            if (!Directory.Exists(steamDir))
             {
-                Program.Print("Steam directory not found.", Program.LogLevel.Warning);
+                Print("Steam directory not found.", LogLevel.Warning);
                 return;
             }
 
             crashWatcher = new FileSystemWatcher
             {
-                Path = Program.steamDir,
+                Path = steamDir,
                 NotifyFilter = NotifyFilters.LastAccess
                                | NotifyFilters.LastWrite
                                | NotifyFilters.FileName,
@@ -154,7 +185,7 @@ namespace SteamFriendsPatcher
 
             crashWatcher.EnableRaisingEvents = true;
 
-            Program.Print("Crash scanner started.", Program.LogLevel.Debug);
+            Print("Crash scanner started.", LogLevel.Debug);
         }
 
         private static void CrashWatcher_Event(object sender, FileSystemEventArgs e)
@@ -164,32 +195,41 @@ namespace SteamFriendsPatcher
                 case WatcherChangeTypes.Changed:
                 case WatcherChangeTypes.Created:
                     {
-                        Program.Print("Steam start detected.", Program.LogLevel.Debug);
-                        Program.GetLatestFriendsCss();
-                        if (scannerExists) StartFriendsListWatcher();
+                        Print("Steam start detected.", LogLevel.Debug);
+                        GetLatestFriendsCss();
+                        if (scannerExists)
+                        {
+                            StartFriendsListWatcher();
+                        }
 
                         break;
                     }
 
                 case WatcherChangeTypes.Deleted:
-                    Program.Print("Steam graceful shutdown detected.", Program.LogLevel.Debug);
+                    Print("Steam graceful shutdown detected.", LogLevel.Debug);
                     friendslistWatcherExists = false;
                     Automation.RemoveAllEventHandlers();
+                    break;
+                case WatcherChangeTypes.Renamed:
+                    break;
+                case WatcherChangeTypes.All:
+                    break;
+                default:
                     break;
             }
         }
 
         private static void StartLibraryScanner()
         {
-            if (!Directory.Exists(Program.steamDir))
+            if (!Directory.Exists(steamDir))
             {
-                Program.Print("Steam directory not found.", Program.LogLevel.Warning);
+                Print("Steam directory not found.", LogLevel.Warning);
                 return;
             }
 
             libraryWatcher = new FileSystemWatcher
             {
-                Path = Path.Combine(Program.LibraryUIDir, "css"),
+                Path = Path.Combine(LibraryUIDir, "css"),
                 NotifyFilter = NotifyFilters.LastAccess
                                | NotifyFilters.LastWrite
                                | NotifyFilters.FileName,
@@ -200,7 +240,7 @@ namespace SteamFriendsPatcher
 
             libraryWatcher.EnableRaisingEvents = true;
 
-            Program.Print("Library scanner started.", Program.LogLevel.Debug);
+            Print("Library scanner started.", LogLevel.Debug);
         }
 
         private static void LibraryWatcher_Event(object sender, FileSystemEventArgs e)
@@ -210,8 +250,8 @@ namespace SteamFriendsPatcher
                 case WatcherChangeTypes.Changed:
                 case WatcherChangeTypes.Created:
                     {
-                        Program.Print("Library change detected.", Program.LogLevel.Debug);
-                        Program.PatchLibrary();
+                        Print("Library change detected.", LogLevel.Debug);
+                        PatchLibrary();
                         break;
                     }
             }
@@ -219,15 +259,26 @@ namespace SteamFriendsPatcher
 
         private static void StartFriendsListWatcher()
         {
-            if (friendslistWatcherExists || Process.GetProcessesByName("Steam").FirstOrDefault() == null) return;
+            if (friendslistWatcherExists || Process.GetProcessesByName("Steam").FirstOrDefault() == null)
+            {
+                return;
+            }
+
             friendslistWatcherExists = true;
             Automation.AddAutomationEventHandler(WindowPattern.WindowOpenedEvent, AutomationElement.RootElement,
                 TreeScope.Children, (sender, e) =>
                 {
-                    if (!(sender is AutomationElement element)) return;
+                    if (!(sender is AutomationElement element))
+                    {
+                        return;
+                    }
+
                     try
                     {
-                        if (element.Current.ClassName == "SDL_app") Program.GetLatestFriendsCss();
+                        if (element.Current.ClassName == "SDL_app")
+                        {
+                            GetLatestFriendsCss();
+                        }
                     }
                     catch (ElementNotAvailableException)
                     {
@@ -239,8 +290,11 @@ namespace SteamFriendsPatcher
         private static void CacheWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             if (PendingCacheFiles.Contains(e.Name) || !updatePending &&
-                (friendsCssCrcs[0] == null && friendsCssCrcs[1] == null))
+                friendsCssCrcs[0] == null && friendsCssCrcs[1] == null)
+            {
                 return;
+            }
+
             PendingCacheFiles.Add(e.Name);
             var t = new Thread(ProcessCacheFileEvent);
             t.Start(e);
@@ -248,9 +302,16 @@ namespace SteamFriendsPatcher
 
         private static void ProcessCacheFileEvent(object obj)
         {
-            while (updatePending) Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
+            while (updatePending)
+            {
+                Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
+            }
 
-            if (!(obj is FileSystemEventArgs e)) return;
+            if (!(obj is FileSystemEventArgs e))
+            {
+                return;
+            }
+
             Print($"New file found: {e.Name}", LogLevel.Debug);
             DateTime lastAccess, lastWrite;
             long size;
@@ -275,7 +336,10 @@ namespace SteamFriendsPatcher
 
             timer.Restart();
             while (!IsFileReady(e.FullPath) && timer.Elapsed < TimeSpan.FromSeconds(15))
+            {
                 Task.Delay(TimeSpan.FromMilliseconds(20)).Wait();
+            }
+
             timer.Stop();
             if (timer.Elapsed > TimeSpan.FromSeconds(15))
             {
@@ -293,7 +357,7 @@ namespace SteamFriendsPatcher
                         using (var f = new FileStream(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                         {
                             cachefile = new byte[f.Length];
-                            f.Read(cachefile, 0, cachefile.Length);
+                            _ = f.Read(cachefile, 0, cachefile.Length);
                         }
                         PatchCacheFile(e.FullPath, Decompress(cachefile), i);
                     }
@@ -305,9 +369,13 @@ namespace SteamFriendsPatcher
                 catch
                 {
                     Task.Delay(TimeSpan.FromSeconds(2)).Wait();
-                    if (!File.Exists(e.FullPath)) continue;
+                    if (!File.Exists(e.FullPath))
+                    {
+                        continue;
+                    }
+
                     Print($"Error opening file {e.Name}, retrying.", LogLevel.Debug);
-                    PendingCacheFiles.Remove(e.Name);
+                    _ = PendingCacheFiles.Remove(e.Name);
                     if (PendingCacheFiles.Contains(e.Name))
                     {
                         Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
@@ -321,30 +389,34 @@ namespace SteamFriendsPatcher
                     continue;
                 }
             }
-        PendingCacheFiles.Remove(e.Name);
-            if (!PendingCacheFiles.Contains(e.Name)) return;
+            _ = PendingCacheFiles.Remove(e.Name);
+            if (!PendingCacheFiles.Contains(e.Name))
+            {
+                return;
+            }
+
             Print($"Multiple occurrences of {e.Name} found in list, removing all...", LogLevel.Debug);
             do
             {
-                PendingCacheFiles.Remove(e.Name);
+                _ = PendingCacheFiles.Remove(e.Name);
             } while (PendingCacheFiles.Contains(e.Name));
         }
 
-private static bool IsFileReady(string filename)
-{
-    // If the file can be opened for exclusive access it means that the file
-    // is no longer locked by another process.
-    try
-    {
-        using (var inputStream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.None))
+        private static bool IsFileReady(string filename)
         {
-            return inputStream.Length > 0;
+            // If the file can be opened for exclusive access it means that the file
+            // is no longer locked by another process.
+            try
+            {
+                using (FileStream inputStream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    return inputStream.Length > 0;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
-    }
-    catch (Exception)
-    {
-        return false;
-    }
-}
     }
 }

@@ -25,14 +25,17 @@ namespace SteamFriendsPatcher
                 Ionic.Zlib.CompressionMode.Decompress, false))
             {
                 const int size = 4096;
-                var buffer = new byte[size];
+                byte[] buffer = new byte[size];
                 using (var memory = new MemoryStream())
                 {
                     int count;
                     do
                     {
                         count = stream.Read(buffer, 0, size);
-                        if (count > 0) memory.Write(buffer, 0, count);
+                        if (count > 0)
+                        {
+                            memory.Write(buffer, 0, count);
+                        }
                     } while (count > 0);
 
                     return memory.ToArray();
@@ -42,9 +45,9 @@ namespace SteamFriendsPatcher
 
         public static byte[] Compress(byte[] raw)
         {
-            using (MemoryStream memory = new MemoryStream())
+            using (var memory = new MemoryStream())
             {
-                using (Ionic.Zlib.GZipStream gzip = new Ionic.Zlib.GZipStream(memory,
+                using (var gzip = new Ionic.Zlib.GZipStream(memory,
                     Ionic.Zlib.CompressionMode.Compress, true))
                 {
                     gzip.Write(raw, 0, raw.Length);
@@ -79,7 +82,7 @@ namespace SteamFriendsPatcher
         {
             byte[] crc = new byte[4];
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(gzipFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            using (var reader = new BinaryReader(new FileStream(gzipFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
                 reader.BaseStream.Seek(-4, SeekOrigin.End);
                 reader.Read(crc, 0, 4);

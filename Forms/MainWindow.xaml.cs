@@ -42,7 +42,10 @@ namespace SteamFriendsPatcher.Forms
 
         private static IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            if (msg == NativeMethods.WmShowme) App.ShowMain();
+            if (msg == NativeMethods.WmShowme)
+            {
+                App.ShowMain();
+            }
 
             return IntPtr.Zero;
         }
@@ -69,7 +72,11 @@ namespace SteamFriendsPatcher.Forms
 
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (!Settings.Default.saveLastWindowSize) return;
+            if (!Settings.Default.saveLastWindowSize)
+            {
+                return;
+            }
+
             Settings.Default.windowWidth = Width;
             Settings.Default.windowHeight = Height;
             Settings.Default.Save();
@@ -77,7 +84,11 @@ namespace SteamFriendsPatcher.Forms
 
         private void MainWindow_StateChanged(object sender, EventArgs e)
         {
-            if (!Settings.Default.minimizeToTray || WindowState != WindowState.Minimized) return;
+            if (!Settings.Default.minimizeToTray || WindowState != WindowState.Minimized)
+            {
+                return;
+            }
+
             GoToTray();
         }
 
@@ -86,7 +97,11 @@ namespace SteamFriendsPatcher.Forms
             Hide();
             NotifyIcon.Visible = Settings.Default.showTrayIconHidden;
 
-            if (!Settings.Default.showNotificationsInTray) return;
+            if (!Settings.Default.showNotificationsInTray)
+            {
+                return;
+            }
+
             NotifyIcon.BalloonTipText = FileWatcher.scannerExists
                 ? "Scanning in background..."
                 : "Minimized to tray, scanner not running.";
@@ -176,15 +191,21 @@ namespace SteamFriendsPatcher.Forms
         {
             Dispatcher.Invoke(() =>
             {
-                foreach (var item in LogicalTreeHelper.GetChildren(MainGrid))
+                foreach (object item in LogicalTreeHelper.GetChildren(MainGrid))
+                {
                     if (item is Button button)
+                    {
                         if (button.Name != "AboutButton" && button.Name != "SettingsButton")
                         {
                             button.IsEnabled = status;
                             button.Visibility = status ? Visibility.Visible : Visibility.Hidden;
                             if (button.Name == "ToggleScanButton")
+                            {
                                 button.Content = FileWatcher.scannerExists ? "Stop Scanning" : "Start Scanning";
+                            }
                         }
+                    }
+                }
             });
         }
     }

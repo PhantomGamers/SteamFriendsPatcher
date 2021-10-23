@@ -68,11 +68,8 @@
     <Setting Name="steamLocale" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="steamBeta" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
     <Setting Name="libraryRootCss" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">5.css</Value>
     </Setting>
   </Settings>
 </SettingsFile>

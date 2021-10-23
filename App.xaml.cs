@@ -45,7 +45,7 @@ namespace SteamFriendsPatcher
                 }
 
                 MainWindowRef.WindowState = WindowState.Minimized;
-                var workingArea = SystemParameters.WorkArea;
+                Rect workingArea = SystemParameters.WorkArea;
                 MainWindowRef.Left = (workingArea.Width - Settings.Default.windowWidth) / 2 + workingArea.Left;
                 MainWindowRef.Top = (workingArea.Height - Settings.Default.windowHeight) / 2 + workingArea.Top;
 
@@ -61,7 +61,10 @@ namespace SteamFriendsPatcher
                     MainWindowRef.NotifyIcon.Visible = Settings.Default.showTrayIconWindow;
                 }
 
-                if (!Settings.Default.startMinimized) MainWindowRef.WindowState = WindowState.Normal;
+                if (!Settings.Default.startMinimized)
+                {
+                    MainWindowRef.WindowState = WindowState.Normal;
+                }
 
                 SingleInstance.ReleaseMutex();
             }
@@ -89,34 +92,55 @@ namespace SteamFriendsPatcher
                 ToggleUpdateTimer();
             }
 
-            if(Settings.Default.steamBeta) FileWatcher.libraryRootCss = "5.css";
+            /*if (Settings.Default.steamBeta)
+            {
+                FileWatcher.libraryRootCss = "5.css";
+            }*/
 
-            if(Settings.Default.libraryRootCss.Length >= 5) FileWatcher.libraryRootCss = Settings.Default.libraryRootCss;
+            if (Settings.Default.libraryRootCss.Length >= 5)
+            {
+                FileWatcher.libraryRootCss = Settings.Default.libraryRootCss;
+            }
 
-            if (Settings.Default.autoScanOnStartup) FileWatcher.ToggleCacheScanner(true);
+            if (Settings.Default.autoScanOnStartup)
+            {
+                FileWatcher.ToggleCacheScanner(true);
+            }
 
             if (Settings.Default.runSteamOnStartup && Process.GetProcessesByName("Steam").FirstOrDefault() == null)
+            {
                 Process.Start(Program.steamDir + "\\Steam.exe", Settings.Default.steamLaunchArgs);
+            }
 
-            if (Settings.Default.forceScanOnStartup) Program.FindCacheFile();
+            if (Settings.Default.forceScanOnStartup)
+            {
+                Program.FindCacheFile();
+            }
         }
 
         public static void ShowMain()
         {
             if (!MainWindowRef.IsVisible)
+            {
                 MainWindowRef.Show();
+            }
 
             MainWindowRef.NotifyIcon.Visible = Settings.Default.showTrayIconWindow;
 
             if (MainWindowRef.WindowState == WindowState.Minimized)
+            {
                 MainWindowRef.WindowState = WindowState.Normal;
+            }
+
             MainWindowRef.Activate();
         }
 
         public static void ToggleUpdateTimer(bool status = true)
         {
             if (!UpdateTimerActive && !status)
+            {
                 return;
+            }
 
             if (!status)
             {
@@ -142,18 +166,21 @@ namespace SteamFriendsPatcher
 
         private static void PerformUpgrade()
         {
-            if (Settings.Default.upgradeVer == 2) return;
+            if (Settings.Default.upgradeVer == 2)
+            {
+                return;
+            }
+
             Settings.Default.Upgrade();
 
             if (Settings.Default.upgradeVer == 0)
+            {
                 if (File.Exists(Utilities.StartupLinkOld))
                 {
                     File.Delete(Utilities.StartupLinkOld);
                     Utilities.CreateStartUpShortcut();
                 }
-
-            if (Settings.Default.upgradeVer < 2)
-                Settings.Default.steamBeta = true;
+            }
 
             Settings.Default.upgradeVer = 2;
             Settings.Default.Save();
