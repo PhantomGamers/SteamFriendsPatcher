@@ -258,7 +258,7 @@ namespace SteamFriendsPatcher
                 case WatcherChangeTypes.Created:
                     {
                         Print("Library change detected.", LogLevel.Debug);
-                        Thread.Sleep((int)TimeSpan.FromSeconds(1).TotalMilliseconds);
+                        Task.Delay(TimeSpan.FromSeconds(5)).Wait();
                         PatchLibrary();
                         break;
                     }
