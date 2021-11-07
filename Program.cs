@@ -344,7 +344,7 @@ namespace SteamFriendsPatcher
                     File.Delete(Path.Combine(LibraryUIDir, "libraryroot.original.css"));
                 }
                 File.Copy(LibraryCSS, Path.Combine(LibraryUIDir, "libraryroot.original.css"));
-                int originalLibCSSLength = librarycss.Length;
+                int originalLibCSSLength = (int)new FileInfo(Path.Combine(LibraryUIDir, "libraryroot.original.css")).Length;
                 librarycss = patchedText + "\n@import url(\"https://steamloopback.host/libraryroot.original.css\");\n@import url(\"https://steamloopback.host/libraryroot.custom.css\");\n";
                 string fillerText = new string('\t', originalLibCSSLength - librarycss.Length);
                 librarycss += fillerText;
@@ -374,7 +374,7 @@ namespace SteamFriendsPatcher
                             File.Create(Path.Combine(LibraryUIDir, "main.custom.css")).Dispose();
                         }
                         File.Copy(Path.Combine(LibraryUIDir, "css", "main.css"), Path.Combine(LibraryUIDir, "main.original.css"));
-                        int originalmaincsslength = maincss.Length;
+                        int originalmaincsslength = (int)new FileInfo(Path.Combine(LibraryUIDir, "main.original.css")).Length;
                         maincss = patchedText + "\n@import url(\"https://steamloopback.host/main.original.css\");\n@import url(\"https://steamloopback.host/main.custom.css\");\n";
                         maincss += new string('\t', originalmaincsslength - maincss.Length);
                         File.WriteAllText(Path.Combine(LibraryUIDir, "css", "main.css"), maincss);
