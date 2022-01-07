@@ -521,7 +521,7 @@ namespace SteamFriendsPatcher
             _ = Process.Start(steamDir + "\\Steam.exe", "-shutdown");
             if (steamp != null && !steamp.WaitForExit((int)TimeSpan.FromSeconds(30).TotalMilliseconds))
             {
-                Print("Could not successfully shutdown Steam, please manually shutdown Steam and try again.",
+                Print("Could not successfully shut down Steam, please manually shut down Steam and try again.",
                     LogLevel.Error);
                 Main.ToggleButtons(true);
                 return false;
@@ -570,7 +570,7 @@ namespace SteamFriendsPatcher
                 hackyThreadingFix = 2;
                 _ = Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
                   {
-                      hackyThreadingFix = MessageBox.Show("Steam will need to be shutdown to clear cache. Restart automatically?",
+                      hackyThreadingFix = MessageBox.Show("Steam will need to be shut down to clear cache. Restart automatically?",
                            "Steam Friends Patcher", MessageBoxButton.YesNo) == MessageBoxResult.Yes ? 0 : 1;
                   }));
             }
