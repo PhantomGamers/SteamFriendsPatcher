@@ -1,6 +1,10 @@
 # Steam Friends Patcher
 This utility is designed to allow you to apply themes to the new Steam friends UI.  
 
+# NOTICE
+**THIS PROGRAM IS NO LONGER BEING UPDATED. IT IS BEING SUCCEEDED BY SFP (https://github.com/PhantomGamers/SFP#sfp-formerly-steamfriendspatcher).**
+**IF YOU HAVE ALREADY USED THIS ONE, MAKE SURE TO RUN THE RESET STEAM OPTION ON SFP THE FIRST TIME YOU RUN IT**
+
 # Instructions
 Download & extract the latest zip file under Releases and run SteamFriendsPatcher.exe!  
 Make sure the .config file included in the zip is in the same folder as the executable.  
